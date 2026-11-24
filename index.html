@@ -366,6 +366,7 @@
     @media(max-width:560px){.wf-stats>div{padding:.65rem}.wf-stats strong{font-size:1.25rem}}
 
 #wfDictionary{padding:1rem;border:1px solid var(--border);border-radius:14px;background:var(--card-bg);margin-top:.75rem}#wfDictionary p{margin:.5rem 0;font-size:.85rem;line-height:1.5}#wfDictionary h3{margin:.7rem 0}#wfDictionary input{margin-right:.4rem;max-width:100%}
+#wfPractice{padding:1rem;border:1px solid var(--border);border-radius:14px;background:var(--card-bg);margin-top:.75rem;display:grid;gap:.75rem}#wfPractice h2{font-size:1.15rem;overflow-wrap:anywhere}#wfPractice p{font-size:.85rem;color:var(--ink-soft)}#wfPractice input{max-width:100%}
 </style>
 </head>
 <body>
@@ -902,6 +903,72 @@
     document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();$wf('wfSearch').focus();}});
     document.querySelector('.dark-toggle').tabIndex=0;
     document.querySelector('.dark-toggle').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();darkModeToggle.click();}});
+
+
+    const practiceButton=document.createElement('button');practiceButton.textContent='Practice';
+    document.querySelector('.wf-tools').append(practiceButton);
+    const practice=document.createElement('section');practice.id='wfPractice';practice.hidden=true;workspace.append(practice);
+    const shuffle=items=>{const a=[...items];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+    const make=(tag,content)=>{const el=document.createElement(tag);el.textContent=content;return el;};
+    const normalizeAnswer=s=>normalized(s).replace(/[يى]/g,'ی').replace(/ك/g,'ک').replace(/[\u064b-\u065f]/g,'').replace(/\s+/g,' ');
+    let practiceQueue=[],practiceMode='choice',practiceTotal=0,practiceRight=0,practiceDone=0;
+    function practiceHome(){
+      practice.replaceChildren(make('h2','Practice your vocabulary'));
+      if(!wordPairs.length){practice.append(make('p','Add a word first.'));return;}
+      const description=make('p','Choose an exercise. Each session uses up to 10 of your saved words.');
+      const actions=document.createElement('div');actions.className='wf-ratings';
+      for(const [mode,label] of [['choice','Multiple choice'],['typing','English spelling'],['listen','Listening & dictation'],['cloze','Fill in the blank']]){
+        const b=make('button',label);b.onclick=()=>{
+          practiceMode=mode;let pool=wordPairs.filter(w=>w.en.trim()&&w.fa.trim());
+          if(mode==='cloze')pool=pool.filter(w=>w.example&&normalized(w.example).includes(normalized(w.en)));
+          if(mode==='choice'&&new Set(pool.map(w=>normalizeAnswer(w.fa))).size<2){notice('Add at least two different meanings first.');return;}
+          if(mode==='listen'&&!window.speechSynthesis){notice('Speech playback is unavailable in this browser.');return;}
+          if(!pool.length){notice('Add example sentences containing the English word to use this mode.');return;}
+          practiceQueue=shuffle(pool).slice(0,10);practiceTotal=practiceQueue.length;practiceRight=0;practiceDone=0;practiceNext();
+        };actions.append(b);
+      }
+      practice.append(description,actions);
+      const close=make('button','Close');close.onclick=()=>{practice.hidden=true;};practice.append(close);
+    }
+    function practiceNext(){
+      practice.replaceChildren();
+      if(!practiceQueue.length){
+        practice.append(make('h2','Session complete'),make('p',practiceRight+' / '+practiceTotal+' correct'));
+        const again=make('button','Choose another exercise');again.onclick=practiceHome;practice.append(again);return;
+      }
+      const w=practiceQueue.shift(),expected=practiceMode==='choice'?w.fa:w.en;
+      practice.append(make('small',(practiceDone+1)+' / '+practiceTotal+' · '+practiceRight+' correct'));
+      let question=practiceMode==='choice'?w.en:w.fa;
+      if(practiceMode==='cloze'){const pos=normalized(w.example).indexOf(normalized(w.en));question=w.example.slice(0,pos)+' _____ '+w.example.slice(pos+w.en.length);}
+      if(practiceMode==='listen')question='Listen and type the English word';
+      const title=make('h2',question);title.dir='auto';practice.append(title);
+      const answers=document.createElement('div');answers.className='wf-ratings';
+      const feedback=make('p','');feedback.setAttribute('role','status');let answered=false;
+      const submit=value=>{
+        if(answered||!String(value).trim())return;answered=true;practiceDone++;
+        const ok=normalizeAnswer(value)===normalizeAnswer(expected);if(ok)practiceRight++;
+        feedback.textContent=ok?'Correct!':'Correct answer: '+expected;
+        answers.querySelectorAll('button,input').forEach(el=>el.disabled=true);
+        const next=make('button','Continue');next.onclick=practiceNext;practice.append(next);next.focus();
+      };
+      if(practiceMode==='choice'){
+        const alternatives=shuffle([...new Set(wordPairs.map(x=>x.fa))].filter(x=>normalizeAnswer(x)!==normalizeAnswer(expected))).slice(0,3);
+        for(const option of shuffle([expected,...alternatives])){const b=make('button',option);b.dir='auto';b.onclick=()=>submit(option);answers.append(b);}
+      }else{
+        if(practiceMode==='listen'){const play=make('button','Play pronunciation');play.onclick=()=>speakEnglish(w.en);answers.append(play);}
+        const input=document.createElement('input');input.placeholder='Type the English answer';input.setAttribute('aria-label','Practice answer');input.autocomplete='off';
+        const check=make('button','Check');check.onclick=()=>submit(input.value);input.onkeydown=e=>{if(e.key==='Enter')check.click();};answers.append(input,check);
+      }
+      const exit=make('button','End session');exit.onclick=practiceHome;practice.append(answers,feedback,exit);
+    }
+    practiceButton.onclick=()=>{practice.hidden=!practice.hidden;if(!practice.hidden)practiceHome();};
+    const batchButton=make('button','Quick import');document.querySelector('.wf-tools').append(batchButton);
+    batchButton.onclick=()=>{
+      const text=prompt('Paste one English | Persian / Dari pair per line. Example: apple | سیب');if(!text)return;
+      let added=0,skipped=0;
+      for(const line of text.split(/\r?\n/)){if(!line.trim())continue;const parts=line.split('|');if(parts.length!==2||!parts.every(x=>x.trim())){skipped++;continue;}const [en,fa]=parts.map(x=>x.trim());if(wordPairs.some(w=>normalized(w.en)===normalized(en)&&normalized(w.fa)===normalized(fa))){skipped++;continue;}wordPairs.push({en,fa,kept:false,timestamp:Date.now()});added++;}
+      persistAndRender();notice(added+' added · '+skipped+' skipped');
+    };
 
     const dictionaryButton=document.createElement('button');
     dictionaryButton.textContent='Dictionary';
