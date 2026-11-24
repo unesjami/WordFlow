@@ -410,6 +410,11 @@
     @media(max-width:760px){.wf-nav-btn.selected{box-shadow:inset 0 -2px var(--accent)}.wf-header-actions .primary span{display:none}.wf-header-actions .primary{padding:9px}.wf-search-wrap{flex-basis:100%}.wf-search-wrap kbd{display:none}}
     @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
+
+    .wf-dialog{position:fixed;inset:0;margin:auto;width:min(480px,calc(100% - 32px));max-height:calc(100dvh - 32px);overflow:auto;background:var(--card-bg);color:var(--ink);border:1px solid var(--border);border-radius:20px;padding:0;box-shadow:0 24px 80px #0003}
+    .wf-dialog::backdrop{background:#101c1b77;backdrop-filter:blur(4px)}
+    .wf-dialog[open]{animation:wf-modal-in .18s ease-out}@keyframes wf-modal-in{from{opacity:0;transform:translateY(9px) scale(.98)}to{opacity:1;transform:none}}
+    .wf-modal-form{display:grid;gap:16px;padding:24px}.wf-modal-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.wf-modal-head h2{font-size:1.25rem;letter-spacing:-.025em}.wf-modal-form p{color:var(--ink-soft);font-size:.88rem;line-height:1.6}.wf-modal-form label{display:grid;gap:7px;font-size:.82rem;font-weight:600}.wf-modal-form input,.wf-modal-form textarea{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-family:Inter,Vazirmatn,sans-serif;resize:vertical}.wf-modal-form input:focus,.wf-modal-form textarea:focus{outline:2px solid var(--accent);outline-offset:1px}.wf-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:6px}.wf-modal-form button{border:1px solid var(--border);border-radius:10px;background:var(--card-bg);color:var(--ink);padding:10px 15px;font:600 .83rem Inter,sans-serif;cursor:pointer}.wf-modal-form .primary{background:var(--accent);color:var(--bg);border-color:var(--accent)}.wf-modal-form .danger{background:#a63b34;color:white;border-color:#a63b34}.wf-modal-form .wf-modal-close{padding:4px 10px;font-size:1.4rem;border:0;background:transparent}.wf-modal-form button:hover{filter:brightness(.94)}@media(prefers-reduced-motion:reduce){.wf-dialog[open]{animation:none}}
 </style>
 </head>
 <body>
@@ -489,6 +494,30 @@
 
 <script>
   (function() {
+
+    const dialog=document.createElement('dialog');dialog.className='wf-dialog';dialog.setAttribute('aria-labelledby','wfDialogTitle');document.body.append(dialog);
+    let modalResolve=null,previousFocus=null;
+    function closeModal(value){if(!modalResolve)return;const resolve=modalResolve;modalResolve=null;dialog.close();previousFocus?.focus();resolve(value);}
+    dialog.addEventListener('cancel',e=>{e.preventDefault();closeModal(null);});
+    dialog.addEventListener('click',e=>{if(e.target===dialog){const b=dialog.getBoundingClientRect();if(e.clientX<b.left||e.clientX>b.right||e.clientY<b.top||e.clientY>b.bottom)closeModal(null);}});
+    function modalForm({title,description='',fields=[],submit='Save',danger=false}){
+      if(modalResolve)return Promise.resolve(null);
+      previousFocus=document.activeElement;dialog.replaceChildren();
+      const form=document.createElement('form');form.className='wf-modal-form';
+      const head=document.createElement('div');head.className='wf-modal-head';
+      const h=document.createElement('h2');h.id='wfDialogTitle';h.textContent=title;
+      const x=document.createElement('button');x.type='button';x.className='wf-modal-close';x.setAttribute('aria-label','Close dialog');x.textContent='×';x.onclick=()=>closeModal(null);head.append(h,x);form.append(head);
+      if(description){const p=document.createElement('p');p.textContent=description;form.append(p);}
+      const inputs={};
+      for(const field of fields){const label=document.createElement('label');label.textContent=field.label;
+        const input=document.createElement(field.multiline?'textarea':'input');input.dir='auto';input.value=field.value||'';input.placeholder=field.placeholder||'';input.required=!!field.required;input.autocomplete='off';if(field.multiline)input.rows=field.rows||4;label.append(input);form.append(label);inputs[field.key]=input;}
+      const actions=document.createElement('div');actions.className='wf-modal-actions';
+      const cancel=document.createElement('button');cancel.type='button';cancel.textContent='Cancel';cancel.onclick=()=>closeModal(null);
+      const save=document.createElement('button');save.type='submit';save.textContent=submit;save.className=danger?'danger':'primary';actions.append(cancel,save);form.append(actions);
+      form.onsubmit=e=>{e.preventDefault();closeModal(Object.fromEntries(Object.entries(inputs).map(([key,input])=>[key,input.value.trim()])));};
+      dialog.append(form);return new Promise(resolve=>{modalResolve=resolve;dialog.showModal();(Object.values(inputs)[0]||(danger?cancel:save)).focus();});
+    }
+
     let wordPairs = [];
     let cardIndex = 0;
     let cardFlipped = false;
@@ -622,30 +651,11 @@
     }
 
     async function editWord(index) {
-      const word = wordPairs[index];
-      if (!word) return;
-      const newText = prompt('Edit text (can be word, sentence, or paragraph):', word.en);
-      if (!newText || newText.trim() === '' || newText === word.en) return;
-
-      loadingIndicator.classList.add('show');
-      try {
-        const text = newText.trim();
-        const persian = isPersian(text);
-        if (persian) {
-          wordPairs[index].en = await translateWithAPI(text, 'fa', 'en');
-          wordPairs[index].fa = text;
-        } else {
-          wordPairs[index].en = text;
-          wordPairs[index].fa = await translateWithAPI(text, 'en', 'fa');
-        }
-        wordPairs[index].timestamp = Date.now();
-        persistAndRender();
-        setHighlight(index);
-      } catch (err) {
-        showError('Translation failed. Please try again.');
-      } finally {
-        loadingIndicator.classList.remove('show');
-      }
+      const word=wordPairs[index];if(!word)return;
+      const result=await modalForm({title:'Edit vocabulary',description:'Update either meaning directly. No internet connection required.',fields:[{key:'en',label:'English',value:word.en,required:true,multiline:true},{key:'fa',label:'Persian / Dari',value:word.fa,required:true,multiline:true}]});
+      if(!result||!result.en||!result.fa||!wordPairs.includes(word))return;
+      if(wordPairs.some(w=>w!==word&&normalized(w.en)===normalized(result.en)&&normalized(w.fa)===normalized(result.fa))){showToast('Already saved');return;}
+      word.en=result.en;word.fa=result.fa;word.timestamp=Date.now();persistAndRender();showToast('Changes saved');
     }
 
     function toggleKept(index) {
@@ -655,11 +665,10 @@
       }
     }
 
-    function deleteWord(index) {
-      if (index >= 0 && index < wordPairs.length && confirm('Delete this word?')) {
-        wordPairs.splice(index, 1);
-        persistAndRender();
-      }
+    async function deleteWord(index) {
+      const word=wordPairs[index];if(!word)return;
+      const result=await modalForm({title:'Delete this word?',description:'“'+word.en+'” will be removed from your vocabulary and review history.',submit:'Delete word',danger:true});
+      if(result&&wordPairs.includes(word)){wordPairs.splice(wordPairs.indexOf(word),1);persistAndRender();showToast('Word deleted');}
     }
 
     function copyWord(index) {
@@ -738,7 +747,7 @@
 
     function attachEvents() {
       document.querySelectorAll('[data-action]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
           e.stopPropagation();
           const idx = parseInt(btn.getAttribute('data-global-index'));
           const action = btn.getAttribute('data-action');
@@ -748,7 +757,7 @@
           else if (action === 'tick') toggleKept(idx);
           else if (action === 'delete') deleteWord(idx);
           else if (action === 'copy') copyWord(idx);
-          else if (action === 'details') { const w=wordPairs[idx]; if(!w)return; const tags=prompt('Tags (comma separated)',w.tags||''); if(tags===null)return; const example=prompt('Example sentence',w.example||''); if(example===null)return; w.tags=tags;w.example=example;persistAndRender(); }
+          else if (action === 'details') { const w=wordPairs[idx];if(!w)return;const result=await modalForm({title:'Word details',fields:[{key:'tags',label:'Tags',value:w.tags,placeholder:'Business, everyday'},{key:'example',label:'Example sentence',value:w.example,multiline:true}]});if(!result||!wordPairs.includes(w))return;w.tags=result.tags;w.example=result.example;persistAndRender();showToast('Details saved'); }
         });
       });
     }
@@ -893,9 +902,8 @@
     }
     $wf('wfSearch').addEventListener('input',updateWorkspace);
     $wf('wfFilter').addEventListener('change',updateWorkspace);
-    function manual(){
-      const en=prompt('English word or phrase'); if(!en?.trim())return;
-      const fa=prompt('Persian / Dari meaning'); if(!fa?.trim())return;
+    async function manual(){
+      const result=await modalForm({title:'Add vocabulary',description:'Save a word or phrase with its translation.',fields:[{key:'en',label:'English',required:true},{key:'fa',label:'Persian / Dari',required:true}]});if(!result||!result.en||!result.fa)return;const {en,fa}=result;
       if(wordPairs.some(w=>normalized(w.en)===normalized(en)&&normalized(w.fa)===normalized(fa))){notice('Already in your vocabulary.');return;}
       wordPairs.push({en:en.trim(),fa:fa.trim(),kept:false,timestamp:Date.now()});persistAndRender();
     }
@@ -1006,8 +1014,8 @@
     }
     practiceButton.onclick=()=>{practice.hidden=!practice.hidden;if(!practice.hidden)practiceHome();};
     const batchButton=make('button','Quick import');document.querySelector('.wf-tools').append(batchButton);
-    batchButton.onclick=()=>{
-      const text=prompt('Paste one English | Persian / Dari pair per line. Example: apple | سیب');if(!text)return;
+    batchButton.onclick=async()=>{
+      const result=await modalForm({title:'Bulk import',description:'Enter one English | Persian / Dari pair per line.',fields:[{key:'text',label:'Vocabulary pairs',placeholder:'apple | سیب',multiline:true,rows:8,required:true}],submit:'Import words'});const text=result?.text;if(!text)return;
       let added=0,skipped=0;
       for(const line of text.split(/\r?\n/)){if(!line.trim())continue;const parts=line.split('|');if(parts.length!==2||!parts.every(x=>x.trim())){skipped++;continue;}const [en,fa]=parts.map(x=>x.trim());if(wordPairs.some(w=>normalized(w.en)===normalized(en)&&normalized(w.fa)===normalized(fa))){skipped++;continue;}wordPairs.push({en,fa,kept:false,timestamp:Date.now()});added++;}
       persistAndRender();notice(added+' added · '+skipped+' skipped');
