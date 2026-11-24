@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" type="image/svg+xml" href="./icon.svg">
+  <link rel="icon" type="image/svg+xml" href="./icon.svg?v=4">
   <link rel="manifest" href="./manifest.webmanifest">
   <meta name="theme-color" content="#146464">
   <meta charset="UTF-8">
@@ -471,6 +471,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden}
     .wf-view input,.wf-modal-form input,.wf-modal-form textarea{appearance:none;-webkit-appearance:none}
     .wf-view button:focus-visible,.wf-modal-form button:focus-visible,.wf-dropdown-trigger:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     @media(prefers-reduced-motion:reduce){.wf-dropdown-menu{animation:none}}
+.brand-mark{display:block;object-fit:contain;background:transparent;border-radius:0;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -478,7 +479,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden}
 
   <header class="site-header">
     <div class="brand">
-      <div class="brand-mark">W</div>
+      <img class="brand-mark" src="./icon.svg" width="38" height="38" alt="" decoding="async">
       <div class="brand-text">
         <h1>WordFlow</h1>
         <p>Your personal vocabulary workspace</p>
