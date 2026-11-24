@@ -515,6 +515,89 @@ button,input,textarea{font-family:Inter,Vazirmatn,system-ui,sans-serif}
 @media(prefers-reduced-motion:reduce){.wf-complete-mark svg{stroke-dashoffset:0;animation:none!important}.wf-progress-fill{transition:none!important}.wf-dialog.wf-exit,.wf-dropdown-menu.wf-exit{animation:none!important}}
 
 .wf-glyph,.lucide{flex-shrink:0;vertical-align:middle;pointer-events:none}.wf-nav-btn .lucide{width:19px;height:19px}.wf-dropdown-trigger .lucide{width:18px;height:18px}.wf-modal-close .lucide{width:20px;height:20px}.wf-icon-action[hidden]{display:none!important}
+/* WordFlow design system — 4px base, shared layout and controls */
+:root{--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;--space-12:48px;--radius-sm:8px;--radius-md:12px;--radius-lg:16px;--radius-xl:20px;--font-ui:Inter,Vazirmatn,system-ui,sans-serif;--text-xs:.75rem;--text-sm:.875rem;--text-base:1rem;--text-lg:1.125rem;--text-xl:1.5rem;--text-title:2rem;--control:44px;--on-accent:#fff;--page-gutter:32px}
+body.dark-mode{--on-accent:#102421}
+body{font-family:var(--font-ui);line-height:1.5}
+.shell{--sidebar-width:216px;--header-height:72px}
+.site-header{left:calc(var(--chrome-left) + var(--page-gutter));width:calc(var(--chrome-width) - 2 * var(--page-gutter));min-height:var(--header-height);border-bottom:1px solid var(--border);gap:var(--space-3)}
+.wf-nav{left:calc(var(--chrome-left) + var(--page-gutter));padding:var(--space-6) var(--space-4) var(--space-6) 0;gap:var(--space-1)}
+.wf-nav-btn{font-family:var(--font-ui);font-size:var(--text-sm);font-weight:500!important;gap:var(--space-3);border-radius:var(--radius-md);padding:var(--space-3);height:48px;min-height:48px;flex-basis:48px}
+.wf-nav-btn.selected{box-shadow:none;font-weight:600!important}
+.wf-content{left:calc(var(--chrome-left) + var(--page-gutter) + var(--sidebar-width));right:calc(var(--chrome-left) + var(--page-gutter));padding:var(--space-8) clamp(24px,3vw,48px);gap:var(--space-6);align-items:stretch}
+.wf-heading,.wf-view,.wf-content>.site-footer{width:100%;max-width:960px;margin-inline:auto}
+.wf-heading{margin-block:0}
+.wf-heading h2{font-size:clamp(1.5rem,2.5vw,var(--text-title));font-weight:600;letter-spacing:-.035em;line-height:1.2}
+.wf-heading p{font-size:var(--text-sm);margin-top:var(--space-2);line-height:1.6}
+.wf-view{grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--space-4)}
+.wf-view>*{grid-column:1/-1;min-width:0}
+.wf-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-3)}
+.wf-stats>div,.wf-panel,.wf-hero,#wfPractice,#wfSession,#wfDictionary{border-radius:var(--radius-lg);padding:var(--space-6);box-shadow:none}
+.wf-stats>div{min-height:104px;gap:var(--space-2)}
+.wf-stats small{font-size:var(--text-xs);line-height:1.4}
+.wf-stats strong{font-size:var(--text-xl);letter-spacing:-.035em}
+.wf-hero{background:var(--accent-soft);gap:var(--space-3)}
+.wf-hero:after{display:none}
+.wf-hero h3{font-size:var(--text-xl);line-height:1.3}
+.wf-hero small{letter-spacing:.08em;font-size:var(--text-xs)}
+.wf-panel{gap:var(--space-3)}
+.wf-panel h3{font-size:var(--text-base);font-weight:600}
+.wf-panel p,.wf-hero p{font-size:var(--text-sm);line-height:1.6}
+.wf-action-row,.wf-library-tools,.wf-ratings{gap:var(--space-2)}
+.wf-view button:not(.icon-btn):not(.seg-btn):not(.mic-lang button):not(.translate-btn),.wf-view input:not(#wordInput),.wf-modal-form button,.wf-header-actions .primary{min-height:var(--control);border-radius:var(--radius-md);font-family:var(--font-ui);font-size:var(--text-sm);padding:var(--space-2) var(--space-3)}
+.wf-view button.primary,.wf-view #wfReview,.wf-header-actions .primary,.wf-modal-form .primary,.translate-btn{color:var(--on-accent)!important}
+.wf-view input,.wf-modal-form input,.wf-modal-form textarea,.wf-search-wrap,.small-input{border-radius:var(--radius-md)}
+.wf-search-wrap{min-height:var(--control);padding-inline:var(--space-3);min-width:0}
+.wf-search-wrap #wfSearch{box-shadow:none!important;outline:none!important}
+.wf-search-wrap:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.wf-view button:disabled{opacity:.6;box-shadow:none;transform:none!important}
+.word-flow{gap:var(--space-2)}
+.word-item{padding:var(--space-4);border-radius:var(--radius-md);box-shadow:none;gap:var(--space-3)}
+.word-item:hover{box-shadow:none}
+.word-main{min-width:0;overflow-wrap:anywhere}
+.word-meta{font-size:var(--text-xs)}
+.icon-group{gap:var(--space-1);flex-wrap:wrap}
+.wf-icon-only,.icon-btn{min-width:40px;min-height:40px}
+.wf-icon-only .wf-glyph,.icon-btn .lucide{width:18px;height:18px}
+.wf-modal-form{padding:var(--space-6);gap:var(--space-4)}
+.wf-modal-form label{gap:var(--space-2)}
+.wf-modal-form input,.wf-modal-form textarea{font-size:var(--text-base);padding:var(--space-3)}
+.wf-dialog{border-radius:var(--radius-xl)}
+.wf-dialog::backdrop{backdrop-filter:none}
+.wf-dropdown-menu{padding:var(--space-1);border-radius:var(--radius-md)}
+.wf-dropdown-option{min-height:40px;padding:var(--space-2) var(--space-3)}
+.wf-view button:focus-visible,.wf-nav-btn:focus-visible,.wf-modal-form button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.site-footer{padding-top:var(--space-8);font-size:var(--text-xs)}
+@media (min-width:761px) and (max-width:1050px){:root{--page-gutter:24px}.shell{--sidebar-width:184px}.wf-content{padding:var(--space-6)}.wf-stats>div{padding:var(--space-4)}}
+@media(max-width:760px){
+:root{--page-gutter:16px}.shell{--header-height:64px;--nav-height:68px}
+.site-header{left:var(--page-gutter);width:calc(100% - 2 * var(--page-gutter));height:var(--header-height)}
+.wf-nav{left:0;right:0;top:auto;bottom:0;width:100%;height:calc(var(--nav-height) + env(safe-area-inset-bottom,0px));padding:var(--space-1) var(--space-2) calc(var(--space-1) + env(safe-area-inset-bottom,0px));border:0;border-top:1px solid var(--border);background:var(--card-bg);gap:var(--space-1);z-index:25}
+.wf-nav-btn{height:56px;min-height:56px;gap:var(--space-1);padding:var(--space-1) 0;font-size:clamp(9px,2.4vw,11px);border-radius:var(--radius-sm);justify-content:center}
+.wf-content{top:var(--header-height);left:0;right:0;bottom:calc(var(--nav-height) + env(safe-area-inset-bottom,0px));padding:var(--space-5) var(--page-gutter);gap:var(--space-4);scrollbar-gutter:auto}
+.wf-view{gap:var(--space-3)}
+.wf-heading h2{font-size:1.5rem}
+.wf-stats{gap:var(--space-2)}
+.wf-stats>div{padding:var(--space-3);min-height:84px}
+.wf-stats strong{font-size:1.35rem}
+.wf-panel,.wf-hero,#wfPractice,#wfSession,#wfDictionary{padding:var(--space-4)}
+.wf-hero h3{font-size:1.25rem}
+.wf-library-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.wf-search-wrap{grid-column:1/-1;min-width:0;width:100%}
+.wf-library-tools>*{min-width:0;max-width:100%}
+.wf-library-tools>.wf-icon-action{white-space:normal}
+.wf-library-tools .wf-dropdown{width:100%;min-width:0}
+.wf-icon-only,.icon-btn{min-width:44px;min-height:44px}
+.word-item{padding:var(--space-3)}
+.word-item .word-main{flex-basis:100%}
+.wf-header-actions{gap:var(--space-2)}
+.wf-header-actions .primary{padding:var(--space-2);min-width:44px}
+.wf-header-actions .primary span{display:none}
+.status-line,.wf-global-notice:not(:empty){bottom:calc(var(--nav-height) + env(safe-area-inset-bottom,0px) + 12px)}
+.wf-modal-form{padding:var(--space-4)}
+}
+@media(max-width:360px){.brand-text p{display:none}.wf-stats>div{padding:var(--space-2)}.wf-nav-btn{font-size:9px}.wf-library-tools{grid-template-columns:1fr}.wf-library-tools>*{grid-column:1}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
@@ -601,7 +684,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
 
     const dialog=document.createElement('dialog');dialog.className='wf-dialog';dialog.setAttribute('aria-labelledby','wfDialogTitle');document.body.append(dialog);
     let modalResolve=null,previousFocus=null;
-    function closeModal(value){if(!modalResolve)return;const resolve=modalResolve;modalResolve=null;dialog.close();previousFocus?.focus();resolve(value);}
+    function closeModal(value){if(!modalResolve)return;const resolve=modalResolve;modalResolve=null;dialog.close();previousFocus?.focus({preventScroll:true});resolve(value);}
     dialog.addEventListener('cancel',e=>{e.preventDefault();closeModal(null);});
     dialog.addEventListener('click',e=>{if(e.target===dialog){const b=dialog.getBoundingClientRect();if(e.clientX<b.left||e.clientX>b.right||e.clientY<b.top||e.clientY>b.bottom)closeModal(null);}});
     function modalForm({title,description='',fields=[],submit='Save',danger=false}){
@@ -1229,7 +1312,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     const capture=document.querySelector('.input-panel-bottom'), status=document.querySelector('.status-line');
     const stats=$wf('wfStats'), tools=document.querySelector('.wf-tools'), footer=document.querySelector('.site-footer');
     const nav=document.createElement('nav');nav.className='wf-nav';nav.setAttribute('aria-label','Main navigation');
-    const main=document.createElement('div');main.className='wf-content';
+    const main=document.createElement('main');main.className='wf-content';main.id='wfMain';
     const heading=document.createElement('div');heading.className='wf-heading';
     const title=make('h2','Today'), subtitle=make('p','');heading.append(title,subtitle);
     const views={};
@@ -1246,7 +1329,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     const paths={today:'today',library:'library',review:'review',practice:'practice',dictionary:'dictionary',settings:'settings'};
     const buttons={};
     for(const key of Object.keys(views)){
-      const b=document.createElement('button');b.className='wf-nav-btn';b.type='button';
+      const b=document.createElement('button');b.className='wf-nav-btn';b.type='button';b.setAttribute('aria-label',labels[key][0]);
       b.innerHTML=glyph(paths[key])+'<span>'+labels[key][0]+'</span>';
       b.onclick=()=>navigate(key);buttons[key]=b;nav.append(b);
     }
