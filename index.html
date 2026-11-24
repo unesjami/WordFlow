@@ -472,6 +472,48 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden}
     .wf-view button:focus-visible,.wf-modal-form button:focus-visible,.wf-dropdown-trigger:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     @media(prefers-reduced-motion:reduce){.wf-dropdown-menu{animation:none}}
 .brand-mark{display:block;object-fit:contain;background:transparent;border-radius:0;flex-shrink:0}
+
+/* WordFlow interaction system — stable chrome, short purposeful transitions. */
+:root{--wf-ease:cubic-bezier(.2,.75,.25,1);--wf-fast:120ms;--wf-normal:180ms;--wf-radius:12px;--wf-ring:0 0 0 3px var(--accent-soft);--wf-shadow:0 2px 6px #132b2410;--wf-positive:#17684e;--wf-negative:#a63b34}
+body.dark-mode{--wf-positive:#70d6a9;--wf-negative:#f09d96;--wf-shadow:0 2px 6px #0002}
+button,input,textarea{font-family:Inter,Vazirmatn,system-ui,sans-serif}
+.wf-view button:not(.icon-btn),.wf-modal-form button,.wf-header-actions button{transition:background var(--wf-fast),color var(--wf-fast),border-color var(--wf-fast),box-shadow var(--wf-fast),transform var(--wf-fast) var(--wf-ease)}
+.wf-view button:active:not(:disabled),.wf-modal-form button:active:not(:disabled){transform:scale(.975)}
+.wf-nav-btn,.wf-nav-btn:hover,.wf-nav-btn:active,.wf-header-actions button{transform:none!important}
+.wf-nav-btn{position:relative;isolation:isolate}
+.wf-nav-btn:focus-visible,.wf-view button:focus-visible,.wf-modal-form button:focus-visible,.dark-toggle:focus-visible,.flip-card:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wf-view input:not(#wordInput),.wf-modal-form input,.wf-modal-form textarea,.small-input,.wf-search-wrap{transition:border-color var(--wf-fast),box-shadow var(--wf-fast)}
+.wf-view input:focus,.wf-modal-form input:focus,.wf-modal-form textarea:focus,.small-input:focus-within,.wf-search-wrap:focus-within{border-color:var(--accent);box-shadow:var(--wf-ring)}
+.wf-panel,.wf-stats>div,.word-item,#wfSession,#wfPractice,#wfDictionary{box-shadow:var(--wf-shadow)}
+.wf-stats>div{min-height:108px;display:flex;flex-direction:column;justify-content:center}
+.wf-stats strong{font-variant-numeric:tabular-nums;line-height:1.15}
+.wf-stat-change{animation:wf-value-in .24s var(--wf-ease)}
+@keyframes wf-value-in{from{opacity:.5;transform:translateY(3px)}to{opacity:1;transform:none}}
+.wf-progress{display:grid;gap:8px;width:100%;margin-bottom:6px}
+.wf-progress-label{display:flex;justify-content:space-between;gap:12px;font-size:.75rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.wf-progress-track{height:6px;background:var(--accent-soft);border-radius:99px;overflow:hidden}
+.wf-progress-fill{height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .28s var(--wf-ease)}
+.wf-complete{display:grid;justify-items:center;text-align:center;gap:12px;padding:20px 8px}
+.wf-complete-mark{width:54px;height:54px;display:grid;place-items:center;background:var(--accent-soft);border-radius:50%;color:var(--wf-positive)}
+.wf-complete-mark svg{width:27px;height:27px;stroke-dasharray:30;stroke-dashoffset:30;animation:wf-check .32s .04s var(--wf-ease) forwards}
+@keyframes wf-check{to{stroke-dashoffset:0}}
+.wf-feedback{border-radius:10px;padding:10px 12px;font-size:.85rem!important;line-height:1.6;overflow-wrap:anywhere}
+.wf-feedback:empty{display:none}.wf-feedback[data-state=correct]{color:var(--wf-positive)!important;background:var(--accent-soft)}.wf-feedback[data-state=incorrect]{color:var(--wf-negative)!important;border:1px solid var(--border)}
+.wf-choice-correct{border-color:var(--wf-positive)!important;color:var(--wf-positive)!important;opacity:1!important}
+.wf-choice-incorrect{border-color:var(--wf-negative)!important;color:var(--wf-negative)!important;opacity:1!important}
+.wf-modal-error{font-size:.8rem;color:var(--wf-negative);line-height:1.4}.wf-modal-error:empty{display:none}
+.wf-modal-form [aria-invalid=true]{border-color:var(--wf-negative)}
+.wf-dropdown-option:active{background:var(--accent-soft)}
+.wf-dropdown-menu.wf-exit{animation:wf-menu-out .12s var(--wf-ease) forwards;pointer-events:none}
+@keyframes wf-menu-out{to{opacity:0;transform:translateY(-3px)}}
+.wf-dialog.wf-exit{animation:wf-dialog-out .13s var(--wf-ease) forwards}
+@keyframes wf-dialog-out{to{opacity:0;transform:translateY(4px) scale(.99)}}
+.toast.show,.error-message.show{display:inline-flex;gap:9px;align-items:center;animation:wf-value-in .18s var(--wf-ease)}
+.toast.show{color:var(--wf-positive)}.error-message.show{color:var(--wf-negative)}
+.empty-message{padding:2.25rem 1rem;line-height:1.6;color:var(--ink-soft)}
+@media(max-width:760px){.wf-stats>div{min-height:86px}.wf-complete{padding:12px 4px}.wf-view button:not(.icon-btn){min-height:44px}}
+@media(prefers-reduced-motion:reduce){.wf-complete-mark svg{stroke-dashoffset:0;animation:none!important}.wf-progress-fill{transition:none!important}.wf-dialog.wf-exit,.wf-dropdown-menu.wf-exit{animation:none!important}}
+
 </style>
 </head>
 <body>
@@ -560,18 +602,18 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden}
     function modalForm({title,description='',fields=[],submit='Save',danger=false}){
       if(modalResolve)return Promise.resolve(null);
       previousFocus=document.activeElement;dialog.replaceChildren();
-      const form=document.createElement('form');form.className='wf-modal-form';
+      const form=document.createElement('form');form.className='wf-modal-form';form.noValidate=true;
       const head=document.createElement('div');head.className='wf-modal-head';
       const h=document.createElement('h2');h.id='wfDialogTitle';h.textContent=title;
       const x=document.createElement('button');x.type='button';x.className='wf-modal-close';x.setAttribute('aria-label','Close dialog');x.textContent='×';x.onclick=()=>closeModal(null);head.append(h,x);form.append(head);
       if(description){const p=document.createElement('p');p.textContent=description;form.append(p);}
-      const inputs={};
+      const inputs={};const validation=document.createElement('p');validation.className='wf-modal-error';validation.setAttribute('role','alert');
       for(const field of fields){const label=document.createElement('label');label.textContent=field.label;
-        const input=document.createElement(field.multiline?'textarea':'input');input.dir='auto';input.value=field.value||'';input.placeholder=field.placeholder||'';input.required=!!field.required;input.autocomplete='off';if(field.multiline)input.rows=field.rows||4;label.append(input);form.append(label);inputs[field.key]=input;}
+        const input=document.createElement(field.multiline?'textarea':'input');input.dir='auto';input.value=field.value||'';input.placeholder=field.placeholder||'';input.required=!!field.required;input.autocomplete='off';if(field.multiline)input.rows=field.rows||4;label.append(input);form.append(label);inputs[field.key]=input;input.addEventListener('input',()=>{input.removeAttribute('aria-invalid');validation.textContent='';});}
       const actions=document.createElement('div');actions.className='wf-modal-actions';
       const cancel=document.createElement('button');cancel.type='button';cancel.textContent='Cancel';cancel.onclick=()=>closeModal(null);
-      const save=document.createElement('button');save.type='submit';save.textContent=submit;save.className=danger?'danger':'primary';actions.append(cancel,save);form.append(actions);
-      form.onsubmit=e=>{e.preventDefault();closeModal(Object.fromEntries(Object.entries(inputs).map(([key,input])=>[key,input.value.trim()])));};
+      const save=document.createElement('button');save.type='submit';save.textContent=submit;save.className=danger?'danger':'primary';actions.append(cancel,save);form.append(validation,actions);
+      form.onsubmit=e=>{e.preventDefault();const invalid=fields.find(f=>f.required&&!inputs[f.key].value.trim());if(invalid){const el=inputs[invalid.key];el.setAttribute('aria-invalid','true');validation.textContent=invalid.label+' is required.';el.focus();return;}closeModal(Object.fromEntries(Object.entries(inputs).map(([key,input])=>[key,input.value.trim()])));};
       dialog.append(form);return new Promise(resolve=>{modalResolve=resolve;dialog.showModal();(Object.values(inputs)[0]||(danger?cancel:save)).focus();});
     }
 
@@ -623,15 +665,16 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden}
       return (persianChars.length / totalChars) > 0.3;
     }
 
+    let errorTimer,toastTimer;
     function showError(msg) {
       errorMessage.textContent = msg;
       errorMessage.classList.add('show');
-      setTimeout(() => errorMessage.classList.remove('show'), 3000);
+      clearTimeout(errorTimer);errorTimer=setTimeout(() => errorMessage.classList.remove('show'), 4500);
     }
     function showToast(msg) {
       toastMessage.textContent = msg;
       toastMessage.classList.add('show');
-      setTimeout(() => toastMessage.classList.remove('show'), 1500);
+      clearTimeout(toastTimer);toastTimer=setTimeout(() => toastMessage.classList.remove('show'), 2400);
     }
 
     function setHighlight(index) {
@@ -676,7 +719,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden}
 
     async function addFromInput() {
       const raw = inputEl.value.trim();
-      if (!raw) return;
+      if (!raw || translateBtn.disabled) return;
 
       loadingIndicator.classList.add('show');
       inputEl.disabled = true;
@@ -696,6 +739,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden}
         wordPairs.push({ en: enWord, fa: faWord, kept: false, timestamp: Date.now() });
         persistAndRender();
         inputEl.value = '';
+        showToast('Word saved');
         setHighlight(wordPairs.length - 1);
       } catch (err) {
         showError('Translation failed. Check your connection and try again.');
@@ -951,7 +995,9 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden}
       const reviewed=wordPairs.filter(w=>w.review);
       const attempts=reviewed.reduce((n,w)=>n+(w.review.count||0),0);
       const correct=reviewed.reduce((n,w)=>n+(w.review.correct||0),0);
-      $wf('wfStats').innerHTML=[['Vocabulary',wordPairs.length],['Due today',wordPairs.filter(due).length],['Accuracy',attempts?Math.round(correct/attempts*100)+'%':'—']].map(([label,value])=>'<div><small>'+label+'</small><strong>'+value+'</strong></div>').join('');
+      const statsNode=$wf('wfStats');const metrics=[['Vocabulary',wordPairs.length],['Due today',wordPairs.filter(due).length],['Recall rating',attempts?Math.round(correct/attempts*100)+'%':'—']];
+      if(!statsNode.children.length)for(const [label,value] of metrics){const card=document.createElement('div');card.append(make('small',label),make('strong',String(value)));statsNode.append(card);}
+      else metrics.forEach(([label,value],i)=>{const el=statsNode.children[i].querySelector('strong');if(el.textContent!==String(value)){el.textContent=String(value);el.classList.remove('wf-stat-change');void el.offsetWidth;el.classList.add('wf-stat-change');}});
       const filter=$wf('wfFilter');
       const options=[{label:'All tags',value:'all'},...[...new Set(wordPairs.flatMap(w=>String(w.tags||'').split(',').map(t=>t.trim()).filter(Boolean)))].sort((a,b)=>a.localeCompare(b)).map(t=>({label:t,value:'tag:'+t}))];
       if(!options.some(o=>o.value===filter.value))filter.value='all';
@@ -1024,12 +1070,15 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden}
         persistAndRender();notice('Imported '+added+' new words. Existing words preserved.');
       }catch(err){notice('Import failed: '+err.message);}finally{e.target.value='';}
     };
-    let queue=[], current=null, reversed=false;
+    let queue=[], current=null, reversed=false,reviewTotal=0,reviewDone=0;
+    function progressView(done,total,label){const box=document.createElement('div');box.className='wf-progress';const line=document.createElement('div');line.className='wf-progress-label';line.append(make('span',label),make('span',done+' / '+total));const track=document.createElement('div');track.className='wf-progress-track';track.setAttribute('role','progressbar');track.setAttribute('aria-label',label);track.setAttribute('aria-valuemin','0');track.setAttribute('aria-valuemax',String(Math.max(total,1)));track.setAttribute('aria-valuenow',String(done));const fill=document.createElement('div');fill.className='wf-progress-fill';track.append(fill);box.append(line,track);requestAnimationFrame(()=>{fill.style.width=(total?done/total*100:0)+'%';});return box;}
+    function completionView(title,description){const box=document.createElement('div');box.className='wf-complete';const mark=document.createElement('div');mark.className='wf-complete-mark';mark.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>';box.append(mark,make('h2',title),make('p',description));return box;}
     const session=$wf('wfSession');
     function nextReview(){
       current=queue.shift();
       session.replaceChildren();
-      if(!current){session.textContent='Review complete. Great work!';return;}
+      if(!current){session.append(completionView(reviewTotal?'Review complete':'All caught up',reviewTotal?reviewDone+' words reviewed.':'No words are due for review right now.'));if(reviewTotal)session.append(progressView(reviewDone,reviewTotal,'Daily review'));const finish=make('button','Back to Today');finish.onclick=()=>{session.hidden=true;navigate('today');};session.append(finish);return;}
+      session.append(progressView(reviewDone,reviewTotal,'Daily review'));
       const reverse=document.createElement('button');reverse.textContent='Switch direction';reverse.onclick=()=>{reversed=!reversed;queue.unshift(current);nextReview();};
       const question=document.createElement('h2');question.textContent=reversed?current.fa:current.en;question.dir='auto';
       const typed=document.createElement('input');typed.placeholder='Recall or type the answer';typed.setAttribute('aria-label','Your answer');
@@ -1042,12 +1091,12 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden}
         const old=current.review||{interval:0,count:0,correct:0};
         const interval=factor===0?0:Math.min(365,Math.max(1,Math.round((old.interval||1)*factor)));
         current.review={interval,due:Date.now()+(interval?interval*86400000:600000),count:old.count+1,correct:old.correct+(factor>0?1:0)};
-        persistAndRender();nextReview();
+        reviewDone++;persistAndRender();nextReview();
       };ratings.append(b);}
       const close=document.createElement('button');close.textContent='Close review';close.onclick=()=>{session.hidden=true;queue=[];current=null;};
       session.append(reverse,question,typed,reveal,answer,ratings,close);
     }
-    $wf('wfReview').onclick=()=>{queue=wordPairs.filter(due).sort((a,b)=>(a.review?.due||0)-(b.review?.due||0)).slice(0,30);session.hidden=false;nextReview();};
+    $wf('wfReview').onclick=()=>{queue=wordPairs.filter(due).sort((a,b)=>(a.review?.due||0)-(b.review?.due||0)).slice(0,30);reviewTotal=queue.length;reviewDone=0;session.hidden=false;nextReview();};
     document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();$wf('wfSearch').focus({preventScroll:true});}});
     document.querySelector('.dark-toggle').tabIndex=0;
     document.querySelector('.dark-toggle').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();darkModeToggle.click();}});
@@ -1081,21 +1130,23 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden}
     function practiceNext(){
       practice.replaceChildren();
       if(!practiceQueue.length){
-        practice.append(make('h2','Session complete'),make('p',practiceRight+' / '+practiceTotal+' correct'));
+        practice.append(completionView('Session complete',practiceRight+' of '+practiceTotal+' answers correct'),progressView(practiceDone,practiceTotal,'Practice complete'));
         const again=make('button','Choose another exercise');again.onclick=practiceHome;practice.append(again);return;
       }
       const w=practiceQueue.shift(),expected=practiceMode==='choice'?w.fa:w.en;
-      practice.append(make('small',(practiceDone+1)+' / '+practiceTotal+' · '+practiceRight+' correct'));
+      practice.append(progressView(practiceDone,practiceTotal,'Question '+(practiceDone+1)+' · '+practiceRight+' correct'));
       let question=practiceMode==='choice'?w.en:w.fa;
       if(practiceMode==='cloze'){const pos=normalized(w.example).indexOf(normalized(w.en));question=w.example.slice(0,pos)+' _____ '+w.example.slice(pos+w.en.length);}
       if(practiceMode==='listen')question='Listen and type the English word';
       const title=make('h2',question);title.dir='auto';practice.append(title);
       const answers=document.createElement('div');answers.className='wf-ratings';
-      const feedback=make('p','');feedback.setAttribute('role','status');let answered=false;
+      const feedback=make('p','');feedback.setAttribute('role','status');feedback.className='wf-feedback';let answered=false;
       const submit=value=>{
         if(answered||!String(value).trim())return;answered=true;practiceDone++;
         const ok=normalizeAnswer(value)===normalizeAnswer(expected);if(ok)practiceRight++;
-        feedback.textContent=ok?'Correct!':'Correct answer: '+expected;
+        feedback.textContent=ok?'Correct answer':'Correct answer: '+expected;feedback.dataset.state=ok?'correct':'incorrect';
+        if(practiceMode==='choice')answers.querySelectorAll('button').forEach(b=>{if(normalizeAnswer(b.textContent)===normalizeAnswer(expected))b.classList.add('wf-choice-correct');else if(normalizeAnswer(b.textContent)===normalizeAnswer(value))b.classList.add('wf-choice-incorrect');});
+        const oldProgress=practice.querySelector('.wf-progress');if(oldProgress){const fill=oldProgress.querySelector('.wf-progress-fill');fill.style.width=(practiceDone/practiceTotal*100)+'%';oldProgress.querySelector('[role=progressbar]').setAttribute('aria-valuenow',String(practiceDone));oldProgress.querySelector('.wf-progress-label span:last-child').textContent=practiceDone+' / '+practiceTotal;}
         answers.querySelectorAll('button,input').forEach(el=>el.disabled=true);
         const next=make('button','Continue');next.onclick=practiceNext;practice.append(next);next.focus();
       };
