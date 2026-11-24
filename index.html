@@ -365,6 +365,7 @@
     [hidden]{display:none!important}.word-meta{font-size:.72rem;color:var(--ink-soft);overflow-wrap:anywhere}
     @media(max-width:560px){.wf-stats>div{padding:.65rem}.wf-stats strong{font-size:1.25rem}}
 
+#wfDictionary{padding:1rem;border:1px solid var(--border);border-radius:14px;background:var(--card-bg);margin-top:.75rem}#wfDictionary p{margin:.5rem 0;font-size:.85rem;line-height:1.5}#wfDictionary h3{margin:.7rem 0}#wfDictionary input{margin-right:.4rem;max-width:100%}
 </style>
 </head>
 <body>
@@ -902,6 +903,42 @@
     document.querySelector('.dark-toggle').tabIndex=0;
     document.querySelector('.dark-toggle').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();darkModeToggle.click();}});
 
+    const dictionaryButton=document.createElement('button');
+    dictionaryButton.textContent='Dictionary';
+    document.querySelector('.wf-tools').append(dictionaryButton);
+    const dictionaryPanel=document.createElement('section');dictionaryPanel.hidden=true;dictionaryPanel.id='wfDictionary';
+    workspace.append(dictionaryPanel);
+    dictionaryButton.onclick=()=>{
+      dictionaryPanel.hidden=!dictionaryPanel.hidden;
+      if(dictionaryPanel.hidden)return;
+      dictionaryPanel.replaceChildren();
+      const field=document.createElement('input');field.placeholder='English word';field.setAttribute('aria-label','Dictionary word');
+      const lookup=document.createElement('button');lookup.textContent='Look up';
+      const output=document.createElement('div');output.setAttribute('role','status');
+      lookup.onclick=async()=>{
+        const word=field.value.trim();if(!word)return;
+        lookup.disabled=true;output.textContent='Looking up…';
+        try{
+          const response=await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/'+encodeURIComponent(word),{signal:AbortSignal.timeout(12000)});
+          if(!response.ok)throw Error('No entry found or service unavailable');
+          const entries=await response.json();output.replaceChildren();
+          for(const entry of entries.slice(0,2)){
+            const heading=document.createElement('h3');heading.textContent=entry.word+' '+(entry.phonetic||'');output.append(heading);
+            for(const meaning of (entry.meanings||[]).slice(0,5)){
+              const title=document.createElement('strong');title.textContent=meaning.partOfSpeech;output.append(title);
+              for(const def of (meaning.definitions||[]).slice(0,3)){
+                const p=document.createElement('p');p.textContent=def.definition+(def.example?' — '+def.example:'');output.append(p);
+              }
+              if(meaning.synonyms?.length){const p=document.createElement('p');p.textContent='Synonyms: '+meaning.synonyms.slice(0,8).join(', ');output.append(p);}
+              if(meaning.antonyms?.length){const p=document.createElement('p');p.textContent='Antonyms: '+meaning.antonyms.slice(0,8).join(', ');output.append(p);}
+            }
+          }
+          const add=document.createElement('button');add.textContent='Translate and save';add.onclick=()=>{inputEl.value=word;addFromInput();};output.append(add);
+        }catch(e){output.textContent='Dictionary unavailable: '+e.message;}finally{lookup.disabled=false;}
+      };
+      field.onkeydown=e=>{if(e.key==='Enter')lookup.click();};
+      dictionaryPanel.append(field,lookup,output);field.focus();
+    };
     const installButton=document.createElement('button');
     installButton.textContent='Install app';installButton.hidden=true;
     document.querySelector('.wf-tools').append(installButton);
