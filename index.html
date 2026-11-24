@@ -606,6 +606,46 @@ body{font-family:var(--font-ui);line-height:1.5}
 .wf-nav-btn:not(.selected):hover{background:var(--accent-soft);color:var(--ink)}
 .wf-nav-btn.selected{color:var(--accent);background:var(--accent-soft)}
 @media(max-width:760px){.wf-nav-btn{height:56px;min-height:56px;padding:4px 0;gap:2px;flex-direction:column;justify-content:center}.wf-nav-icon{width:24px;height:24px;flex:0 0 24px}.wf-nav-icon .lucide{width:21px;height:21px}.wf-nav-label{text-align:center}}
+
+/* Single-screen workspace; lengthy collections use explicit paging. */
+.wf-content{padding:16px clamp(16px,3vw,40px);gap:12px;overflow:hidden;scrollbar-gutter:auto}
+.wf-heading{flex:0 0 auto}.wf-heading h2{font-size:clamp(1.4rem,2.4vw,1.8rem)}.wf-heading p{margin-top:4px}
+.wf-view{flex:1 1 0;min-height:0;gap:12px;align-content:start;overflow:visible}
+.wf-content>.site-footer{display:none}
+.wf-panel,.wf-hero,#wfSession,#wfPractice,#wfDictionary{padding:16px;gap:8px}
+.wf-stats>div{min-height:72px;padding:12px;gap:4px}
+.wf-hero small{display:none}.wf-hero h3{font-size:1.25rem}
+#view-today .wf-panel .input-panel-bottom{width:100%}
+#view-library{grid-template-rows:auto auto minmax(0,1fr)}
+#view-library .word-stage{min-height:0;height:100%;overflow:hidden}
+#view-library .page.active-page{display:flex;min-height:0;gap:8px}
+#view-library .word-flow{flex:1 1 0;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:6px}
+#view-library .word-item{flex:0 0 auto;min-height:56px;padding:8px 12px;gap:8px}
+#view-library .word-main{min-width:0;flex:1;display:flex;flex-direction:column;gap:2px}
+#view-library .en-word,#view-library .fa-word,#view-library .word-meta{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+#view-library .word-meta:empty{display:none}
+.wf-pager{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:none;color:var(--ink-soft);font-size:.75rem;min-height:40px}
+.wf-pager button{min-width:40px;min-height:40px;padding:6px!important;display:grid;place-items:center}
+.wf-pager span{font-variant-numeric:tabular-nums;text-align:center}
+#view-library .card-stage{height:100%;min-height:0;display:flex;flex-direction:column;gap:8px;justify-content:center}
+#view-library .flip-card{height:clamp(100px,30dvh,250px);min-height:0}
+#wfDictionary .wf-dict-entry{display:grid;gap:6px;min-height:0}
+#wfDictionary .wf-dict-entry p{margin:0;line-height:1.5;overflow-wrap:anywhere}
+#wfDictionary .wf-dict-entry h3{margin:0}
+#wfDictionary .wf-dict-controls{display:flex;gap:8px;flex-wrap:wrap}
+#wfSession,#wfPractice{min-height:0}
+#wfSession h2,#wfPractice h2{font-size:1.1rem;line-height:1.4}
+.wf-ratings{display:flex;flex-wrap:wrap;gap:6px}
+#view-settings .wf-panel{padding:12px}
+@media(min-width:1051px){#view-today{grid-template-columns:repeat(12,minmax(0,1fr))}#view-today>.wf-hero{grid-column:1/8}#view-today>.wf-panel:nth-of-type(3){grid-column:8/-1}#view-today>.wf-panel:last-child{grid-column:1/-1}#view-settings>.wf-panel{grid-column:span 6}}
+@media(max-width:760px){.wf-content{padding:12px 16px;gap:8px}.wf-heading p{display:none}.wf-view{gap:8px}.wf-panel,.wf-hero,#wfSession,#wfPractice,#wfDictionary{padding:12px;gap:6px}.wf-stats>div{padding:8px;min-height:64px}.wf-stats small{font-size:.68rem}.wf-stats strong{font-size:1.15rem}#view-library .word-item{flex-wrap:nowrap;padding:6px 8px;min-height:68px}#view-library .word-main{flex-basis:auto}#view-library .icon-group{gap:0;max-width:132px;justify-content:flex-end}#view-library .icon-btn{min-width:44px;min-height:44px;width:44px;height:44px}#view-today .wf-hero p,#view-today .wf-panel>p{display:none}.wf-library-tools{gap:4px}.wf-library-tools button{font-size:.75rem!important}.wf-library-tools .wf-dropdown-trigger{min-height:40px}#view-library .mode-row{margin:0}.wf-pager{min-height:44px}}
+/* Accessibility fallback: small heights, enlarged text or long content remain reachable. */
+.wf-content.wf-needs-room{overflow-y:auto;overscroll-behavior:contain}
+.wf-content.wf-needs-room .wf-view{flex:0 0 auto}
+.wf-content.wf-needs-room #view-library{grid-template-rows:auto auto auto}
+.wf-content.wf-needs-room #view-library .word-stage{height:auto;min-height:180px}
+@media(max-height:540px){.wf-content{padding-block:8px}.wf-heading p{display:none}.wf-nav{overflow:auto}}
+
 </style>
 </head>
 <body>
@@ -630,7 +670,7 @@ body{font-family:var(--font-ui);line-height:1.5}
     </div>
   </div>
 
-  <main class="word-stage">
+  <div class="word-stage">
     <div class="page active-page" id="mainPage">
       <div class="word-flow" id="listInner"></div>
     </div>
@@ -660,7 +700,7 @@ body{font-family:var(--font-ui);line-height:1.5}
         </div>
       </div>
     </div>
-  </main>
+  </div>
 
   <div class="status-line">
     <div class="loading" id="loadingIndicator"><div class="spinner"></div><span>translating…</span></div>
@@ -905,15 +945,6 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
       const active = wordPairs.filter(w => !w.kept);
       const kept = wordPairs.filter(w => w.kept);
 
-      mainList.innerHTML = active.length === 0
-        ? `<div class="empty-message">Nothing here yet — type or speak a word below to begin.</div>`
-        : active.map(pair => renderItem(pair, wordPairs.indexOf(pair), false)).join('');
-
-      keptList.innerHTML = kept.length === 0
-        ? `<div class="empty-message">No kept words yet — tap ✔ on any active word to save it here.</div>`
-        : kept.map(pair => renderItem(pair, wordPairs.indexOf(pair), true)).join('');
-
-      attachEvents();
       renderCard();
       updateWorkspace();
     }
@@ -941,8 +972,8 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
       `;
     }
 
-    function attachEvents() {
-      document.querySelectorAll('[data-action]').forEach(btn => {
+    function attachEvents(root=document) {
+      root.querySelectorAll('[data-action]').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           e.stopPropagation();
           const idx = parseInt(btn.getAttribute('data-global-index'));
@@ -1098,13 +1129,34 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
       if(!options.some(o=>o.value===filter.value))filter.value='all';
       syncTagMenu(options);
       const query=normalized($wf('wfSearch').value);
-      document.querySelectorAll('.word-item').forEach(el=>{
-        const w=wordPairs[Number(el.dataset.index)];
-        if(!w)return;
-        el.hidden=(!normalized([w.en,w.fa,w.tags,w.example].join(' ')).includes(query))||(filter.value!=='all'&&!String(w.tags||'').split(',').map(t=>t.trim()).includes(filter.value.slice(4)));
-      });
+      const matches=w=>normalized([w.en,w.fa,w.tags,w.example].join(' ')).includes(query)&&(filter.value==='all'||String(w.tags||'').split(',').map(t=>t.trim()).includes(filter.value.slice(4)));
+      renderPagedWords(mainList,wordPairs.filter(w=>!w.kept&&matches(w)),false);
+      renderPagedWords(keptList,wordPairs.filter(w=>w.kept&&matches(w)),true);
     }
-    $wf('wfSearch').addEventListener('input',updateWorkspace);
+    const listPages=new Map();
+    let pageSize=3;
+    function renderPagedWords(list,items,kept){
+      let state=listPages.get(list);
+      if(!state){
+        const pager=document.createElement('div');pager.className='wf-pager';
+        const prev=make('button','Previous'),next=make('button','Next'),count=make('span','');
+        prev.type=next.type='button';prev.innerHTML=glyph('left');next.innerHTML=glyph('right');prev.setAttribute('aria-label','Previous vocabulary page');next.setAttribute('aria-label','Next vocabulary page');count.setAttribute('aria-live','polite');pager.append(prev,count,next);list.after(pager);
+        state={page:0,pager,prev,next,count,items:[],kept};listPages.set(list,state);
+        prev.onclick=()=>{state.page--;renderPagedWords(list,state.items,kept);};
+        next.onclick=()=>{state.page++;renderPagedWords(list,state.items,kept);};
+      }
+      state.items=items;
+      const pages=Math.max(1,Math.ceil(items.length/pageSize));
+      state.page=Math.min(pages-1,Math.max(0,state.page));
+      const start=state.page*pageSize;
+      list.innerHTML=items.length?items.slice(start,start+pageSize).map(w=>renderItem(w,wordPairs.indexOf(w),kept)).join(''):'<div class="empty-message">No matching words.</div>';
+      state.pager.hidden=items.length===0;
+      state.count.textContent=items.length?(start+1)+'–'+Math.min(start+pageSize,items.length)+' of '+items.length:'';
+      state.prev.disabled=state.page===0;state.next.disabled=state.page===pages-1;
+      list.querySelectorAll('[data-action]').forEach(el=>{const item=rowIcons[el.dataset.action];if(item)iconize(el,item[0],item[1],true);});
+      attachEvents(list);
+    }
+    $wf('wfSearch').addEventListener('input',()=>{for(const state of listPages.values())state.page=0;updateWorkspace();});
     const tagFilter=$wf('wfFilter'),tagTrigger=$wf('wfFilterTrigger'),tagMenu=$wf('wfFilterMenu'),tagLabel=$wf('wfFilterLabel');
     tagFilter.value='all';
     function closeTagMenu(restore=false){
@@ -1124,7 +1176,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
         const el=document.createElement('div');el.className='wf-dropdown-option';el.setAttribute('role','option');el.tabIndex=-1;el.dataset.tagValue=option.value;el.setAttribute('aria-selected',String(option.value===tagFilter.value));
         const text=document.createElement('span');text.textContent=option.label;text.dir='auto';el.append(text);
         el.insertAdjacentHTML('beforeend',glyph('check'));
-        el.addEventListener('click',()=>{tagFilter.value=option.value;closeTagMenu(true);updateWorkspace();});
+        el.addEventListener('click',()=>{tagFilter.value=option.value;for(const state of listPages.values())state.page=0;closeTagMenu(true);updateWorkspace();});
         tagMenu.append(el);
       }
       if(!tagMenu.hidden&&focused)[...tagMenu.children].find(el=>el.dataset.tagValue===focused)?.focus({preventScroll:true});
@@ -1283,18 +1335,22 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
           const response=await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/'+encodeURIComponent(word),{signal:AbortSignal.timeout(12000)});
           if(!response.ok)throw Error('No entry found or service unavailable');
           const entries=await response.json();output.replaceChildren();
-          for(const entry of entries.slice(0,2)){
-            const heading=document.createElement('h3');heading.textContent=entry.word+' '+(entry.phonetic||'');output.append(heading);
-            for(const meaning of (entry.meanings||[]).slice(0,5)){
-              const title=document.createElement('strong');title.textContent=meaning.partOfSpeech;output.append(title);
-              for(const def of (meaning.definitions||[]).slice(0,3)){
-                const p=document.createElement('p');p.textContent=def.definition+(def.example?' — '+def.example:'');output.append(p);
-              }
-              if(meaning.synonyms?.length){const p=document.createElement('p');p.textContent='Synonyms: '+meaning.synonyms.slice(0,8).join(', ');output.append(p);}
-              if(meaning.antonyms?.length){const p=document.createElement('p');p.textContent='Antonyms: '+meaning.antonyms.slice(0,8).join(', ');output.append(p);}
-            }
+          const definitions=[];
+          for(const entry of entries.slice(0,2))for(const meaning of (entry.meanings||[]).slice(0,5))for(const def of (meaning.definitions||[]).slice(0,3))definitions.push({word:entry.word,phonetic:entry.phonetic||'',part:meaning.partOfSpeech,definition:def.definition,example:def.example,synonyms:meaning.synonyms||[],antonyms:meaning.antonyms||[]});
+          let index=0;
+          function showDefinition(){
+            output.replaceChildren();const entry=definitions[index];
+            if(!entry){output.textContent='No definitions found.';return;}
+            const card=make('div','');card.className='wf-dict-entry';card.append(make('h3',entry.word+' '+entry.phonetic),make('strong',entry.part),make('p',entry.definition));
+            if(entry.example)card.append(make('p',entry.example));
+            if(entry.synonyms.length)card.append(make('p','Synonyms: '+entry.synonyms.slice(0,8).join(', ')));
+            if(entry.antonyms.length)card.append(make('p','Antonyms: '+entry.antonyms.slice(0,8).join(', ')));
+            const pager=make('div','');pager.className='wf-pager';
+            const prev=make('button','Previous'),next=make('button','Next');prev.innerHTML=glyph('left');next.innerHTML=glyph('right');prev.setAttribute('aria-label','Previous definition');next.setAttribute('aria-label','Next definition');prev.disabled=index===0;next.disabled=index===definitions.length-1;prev.onclick=()=>{index--;showDefinition();};next.onclick=()=>{index++;showDefinition();};pager.append(prev,make('span',(index+1)+' / '+definitions.length),next);
+            const add=make('button','Translate and save');add.onclick=()=>{inputEl.value=word;addFromInput();};
+            output.append(card,pager,add);scheduleFit();
           }
-          const add=document.createElement('button');add.textContent='Translate and save';add.onclick=()=>{inputEl.value=word;addFromInput();};output.append(add);
+          showDefinition();
         }catch(e){output.textContent='Dictionary unavailable: '+e.message;}finally{lookup.disabled=false;}
       };
       field.onkeydown=e=>{if(e.key==='Enter')lookup.click();};
@@ -1407,9 +1463,33 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     flipCard.tabIndex=0;flipCard.setAttribute('role','button');flipCard.setAttribute('aria-label','Reveal or hide translation');flipCard.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flipCard.click();}});
     const originalNavigate=navigate;navigate=function(key,replace=false){const before=activeView;originalNavigate(key,replace);const view=views[activeView];if(before!==activeView&&view&&view.animate&&!matchMedia('(prefers-reduced-motion: reduce)').matches)view.animate([{opacity:.65},{opacity:1}],{duration:150,easing:'ease-out'});};
 
+    let fitFrame=0;
+    function scheduleFit(){cancelAnimationFrame(fitFrame);fitFrame=requestAnimationFrame(fitWorkspace);}
+    function fitWorkspace(){
+      main.classList.remove('wf-needs-room');
+      if(activeView==='library'){
+        const list=document.querySelector('#view-library .active-page .word-flow');
+        if(list){
+          const row=list.querySelector('.word-item');
+          const rowHeight=row?row.getBoundingClientRect().height+6:96;
+          const available=list.clientHeight;
+          const nextSize=Math.max(1,Math.min(12,Math.floor((available+6)/Math.max(rowHeight,56))));
+          if(nextSize!==pageSize){pageSize=nextSize;for(const [el,state] of listPages)renderPagedWords(el,state.items,state.kept);}
+        }
+      }
+      const view=views[activeView];
+      const bottom=main.getBoundingClientRect().bottom;
+      const overflow=view&&[...view.children].some(el=>!el.hidden&&el.getBoundingClientRect().bottom>bottom-4);
+      const listOverflow=activeView==='library'&&[...document.querySelectorAll('#view-library .active-page .word-flow')].some(el=>el.scrollHeight>el.clientHeight+3);
+      if(overflow||listOverflow||main.scrollHeight>main.clientHeight+4)main.classList.add('wf-needs-room');
+    }
+    const navBeforeFit=navigate;navigate=function(key,replace=false){navBeforeFit(key,replace);scheduleFit();};
+    window.addEventListener('resize',scheduleFit,{passive:true});
+    pageSwitch.addEventListener('click',scheduleFit);
+    const fitObserver=new MutationObserver(scheduleFit);fitObserver.observe(main,{childList:true,subtree:true});
     navigate(location.hash.slice(1)||'today',true);
-
     renderAll();
+    scheduleFit();
     tagTrigger.querySelector('[data-lucide="list-filter"]')?.insertAdjacentHTML('beforebegin',glyph('filter'));tagTrigger.querySelector('[data-lucide="list-filter"]')?.remove();const arrow=tagTrigger.querySelector('[data-lucide="chevron-down"]');if(arrow){arrow.insertAdjacentHTML('beforebegin',glyph('down'));arrow.previousElementSibling.classList.add('wf-chevron');arrow.remove();}
   })();
 </script>
