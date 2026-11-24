@@ -367,6 +367,37 @@
 
 #wfDictionary{padding:1rem;border:1px solid var(--border);border-radius:14px;background:var(--card-bg);margin-top:.75rem}#wfDictionary p{margin:.5rem 0;font-size:.85rem;line-height:1.5}#wfDictionary h3{margin:.7rem 0}#wfDictionary input{margin-right:.4rem;max-width:100%}
 #wfPractice{padding:1rem;border:1px solid var(--border);border-radius:14px;background:var(--card-bg);margin-top:.75rem;display:grid;gap:.75rem}#wfPractice h2{font-size:1.15rem;overflow-wrap:anywhere}#wfPractice p{font-size:.85rem;color:var(--ink-soft)}#wfPractice input{max-width:100%}
+
+    :root{--bg:#f7f8fa;--ink:#182421;--ink-soft:#52645e;--ink-faint:#65736f;--border:#e1e7e4;--accent:#146464;--card-bg:#fff}
+    body.dark-mode{--bg:#111817;--card-bg:#192220;--border:#2c3935;--ink:#eef4f1;--ink-soft:#a6b7b1;--ink-faint:#93a59f}
+    .shell{max-width:1440px;display:grid;grid-template-columns:220px minmax(0,1fr);grid-template-rows:auto 1fr;gap:0;padding:0 2rem;min-height:100dvh}
+    .site-header{grid-column:1/-1;margin:0;padding:1.35rem 0;position:relative;gap:1rem}
+    .brand-mark{width:38px;height:38px;border-radius:12px}.brand-text h1{font-size:1.18rem}.brand-text p{font-size:.72rem}
+    .wf-nav{display:flex;flex-direction:column;gap:5px;padding:2rem 1.25rem 1rem 0;align-self:start;position:sticky;top:0}
+    .wf-nav-btn{display:flex;align-items:center;gap:12px;text-align:left;padding:13px 14px;border:0;border-radius:10px;background:transparent;color:var(--ink-soft);font:500 .875rem Inter,sans-serif;cursor:pointer;white-space:nowrap}
+    .wf-nav-btn:hover,.wf-nav-btn.selected{background:var(--accent-soft);color:var(--accent)}.wf-nav-btn.selected{font-weight:700}
+    .wf-content{min-width:0;padding:2.4rem clamp(1rem,4vw,4rem) 1rem;border-left:1px solid var(--border);display:flex;flex-direction:column;gap:1rem}
+    .wf-heading{margin-bottom:1rem}.wf-heading h2{font-size:clamp(1.7rem,3vw,2.2rem);letter-spacing:-.045em;line-height:1.15}.wf-heading p{color:var(--ink-soft);font-size:.9rem;margin-top:.5rem;line-height:1.5}
+    .wf-view{width:100%;max-width:860px;display:grid;gap:1.15rem;align-content:start}
+    .wf-stats{gap:12px;margin:0}.wf-stats>div{padding:1.3rem;border-radius:16px}.wf-stats strong{font-size:1.85rem;letter-spacing:-.05em}
+    .wf-hero{background:var(--accent-soft);border:1px solid var(--border);padding:clamp(1.35rem,3vw,2.2rem);border-radius:20px;display:grid;justify-items:start;gap:.75rem}
+    .wf-hero small{font-size:.7rem;letter-spacing:.13em;font-weight:700;color:var(--accent)}.wf-hero h3{font-size:clamp(1.4rem,3vw,2rem);letter-spacing:-.04em}.wf-hero p,.wf-panel p{color:var(--ink-soft);font-size:.87rem;line-height:1.6}
+    .wf-panel{padding:1.25rem;border:1px solid var(--border);background:var(--card-bg);border-radius:16px;display:grid;gap:.65rem}.wf-panel h3{font-size:1rem}
+    .wf-action-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}.wf-action-row .input-panel-bottom{padding:0;justify-content:flex-start}
+    .wf-view button:not(.icon-btn):not(.seg-btn):not(.mic-lang button):not(.translate-btn),.wf-view input:not(#wordInput),.wf-view select{font:500 .85rem Inter,sans-serif;color:var(--ink);background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:.7rem .9rem;min-height:42px}
+    .wf-view button:not(.icon-btn):not(.seg-btn):not(.mic-lang button):not(.translate-btn){cursor:pointer}.wf-view button:hover:not(:disabled){border-color:var(--accent)}
+    .wf-view button.primary,.wf-view #wfReview{background:var(--accent)!important;color:var(--bg)!important;border-color:var(--accent)!important}
+    .small-input{max-width:none;border-radius:10px;min-width:0;min-height:46px}.translate-btn{border-radius:10px;min-height:46px;padding:.7rem 1.2rem}
+    .mode-row{justify-content:flex-start;margin:0}.segmented{border-radius:10px}.seg-btn{font-size:.8rem;border-radius:8px;padding:.65rem 1rem}
+    .word-stage{min-height:180px}.word-flow{gap:.6rem}.word-item{border-radius:12px;padding:1rem;gap:.75rem}.icon-btn{width:34px;height:34px}
+    .fa-word{text-align:left}.word-meta{line-height:1.6}.wf-library-tools{gap:.5rem}#wfSearch{min-width:130px;width:150px}
+    #wfSession,#wfPractice,#wfDictionary{margin:0;padding:1.5rem;border-radius:16px;gap:.85rem}#wfDictionary{display:grid;gap:.75rem}#wfDictionary input{width:100%}
+    .flip-card{max-width:520px;height:270px}.flip-face{border-radius:20px}.flip-word{font-size:1.7rem}.flip-hint{font-size:.8rem;color:var(--ink-soft)}
+    .wf-global-notice{font-size:.8rem;color:var(--ink-soft);min-height:0}.wf-global-notice:empty,.status-line:not(:has(.show)){display:none}
+    .site-footer{margin-top:auto;text-align:left;padding-top:2rem;color:var(--ink-soft)}
+    @media(max-width:760px){.shell{display:flex;padding:0 1rem}.site-header{padding:1rem 0}.wf-nav{position:sticky;top:0;z-index:10;flex-direction:row;overflow-x:auto;max-width:100%;padding:.65rem 0;background:var(--bg);border-bottom:1px solid var(--border);gap:4px}.wf-nav-btn{flex-shrink:0;padding:.65rem .75rem;font-size:.75rem;gap:6px}.wf-nav-btn svg{width:16px;height:16px}.wf-content{border:0;padding:1.4rem 0;gap:.75rem}.wf-stats>div{padding:.85rem}.wf-stats strong{font-size:1.4rem}.wf-panel{padding:1rem}.word-item{flex-wrap:wrap}.icon-group{margin-left:auto}.wf-heading{margin-bottom:.6rem}}
+    @media(max-width:400px){.wf-stats{gap:6px}.wf-stats small{font-size:.65rem}.wf-stats>div{padding:.65rem}.wf-action-row .input-panel-bottom{flex-direction:column;align-items:stretch}.word-item .word-main{flex-basis:100%}}
+
 </style>
 </head>
 <body>
@@ -436,7 +467,7 @@
         <button data-lang="fa-IR" title="Voice input in Persian">FA</button>
       </div>
       <button class="icon-btn mic-btn" id="micBtn" title="Speak a word">🎤</button>
-      <input type="text" id="wordInput" placeholder="Type or speak a word — EN or FA" autofocus>
+      <input type="text" id="wordInput" placeholder="Type or speak a word — EN or FA">
     </div>
     <button class="translate-btn" id="translateBtn">Translate ↵</button>
   </div>
@@ -1018,6 +1049,76 @@
     function networkStatus(){network.textContent=navigator.onLine?'Online':'Offline · manual entry and review available';}
     window.addEventListener('online',networkStatus);window.addEventListener('offline',networkStatus);networkStatus();
     if('serviceWorker' in navigator && location.protocol!=='file:') navigator.serviceWorker.register('./sw.js').catch(()=>notice('Offline setup unavailable.'));
+
+    // Separate workspace views; existing learning and storage functions remain intact.
+    const shell=document.querySelector('.shell'), header=document.querySelector('.site-header');
+    const stage=document.querySelector('.word-stage'), modes=document.querySelector('.mode-row');
+    const capture=document.querySelector('.input-panel-bottom'), status=document.querySelector('.status-line');
+    const stats=$wf('wfStats'), tools=document.querySelector('.wf-tools'), footer=document.querySelector('.site-footer');
+    const nav=document.createElement('nav');nav.className='wf-nav';nav.setAttribute('aria-label','Main navigation');
+    const main=document.createElement('div');main.className='wf-content';
+    const heading=document.createElement('div');heading.className='wf-heading';
+    const title=make('h2','Today'), subtitle=make('p','');heading.append(title,subtitle);
+    const views={};
+    for(const key of ['today','library','review','practice','dictionary','settings']){
+      const section=document.createElement('section');section.className='wf-view';section.id='view-'+key;section.hidden=true;views[key]=section;main.append(section);
+    }
+    function group(parent,headingText,desc,children){
+      const section=document.createElement('div');section.className='wf-panel';
+      if(headingText)section.append(make('h3',headingText));
+      if(desc)section.append(make('p',desc));
+      const row=document.createElement('div');row.className='wf-action-row';row.append(...children);section.append(row);parent.append(section);return section;
+    }
+    const labels={today:['Today','A little progress, every day.'],library:['Vocabulary','Your words, meanings and personal examples.'],review:['Review','Remember more with focused daily review.'],practice:['Practice','Choose an exercise and put your knowledge to work.'],dictionary:['Dictionary','Explore meanings, pronunciation and examples.'],settings:['Settings','Manage your workspace and vocabulary data.']};
+    const paths={today:'M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z',library:'M4 19V5a2 2 0 0 1 2-2h14v18H6a2 2 0 0 1 0-4h14M8 7h8',review:'M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1',practice:'M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z',dictionary:'M3 5h7a2 2 0 0 1 2 2v14a3 3 0 0 0-3-3H3zM21 5h-7a2 2 0 0 0-2 2v14a3 3 0 0 1 3-3h6z',settings:'M4 7h16M4 12h16M4 17h16M8 5v4M16 10v4M10 15v4'};
+    const buttons={};
+    for(const key of Object.keys(views)){
+      const b=document.createElement('button');b.className='wf-nav-btn';b.type='button';
+      b.innerHTML='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+paths[key]+'"/></svg><span>'+labels[key][0]+'</span>';
+      b.onclick=()=>navigate(key);buttons[key]=b;nav.append(b);
+    }
+    function action(label,fn,primary=false){const b=make('button',label);b.className='wf-action'+(primary?' primary':'');b.onclick=fn;return b;}
+    views.today.append(stats);
+    const hero=document.createElement('div');hero.className='wf-hero';
+    hero.append(make('small','DAILY LEARNING'),make('h3','Make new words stick.'),make('p','Review your vocabulary at your own pace.'),action('Start daily review',()=>{navigate('review');$wf('wfReview').click();},true));views.today.append(hero);
+    group(views.today,'Quick capture','Add a word or phrase in English or Persian.',[capture]);
+    group(views.today,'Continue learning','',[action('Browse vocabulary',()=>navigate('library')),action('Choose a practice',()=>navigate('practice'))]);
+    const libraryTools=document.createElement('div');libraryTools.className='wf-action-row wf-library-tools';
+    libraryTools.append($wf('wfSearch'),$wf('wfFilter'),$wf('wfAdd'),batchButton);
+    views.library.append(libraryTools,modes,stage);
+    const cardTab=pageSwitch.querySelector('[data-page="cardsPage"]');cardTab.hidden=true;
+    pageSwitch.querySelector('[data-page="mainPage"]').textContent='Learning';
+    pageSwitch.querySelector('[data-page="keptPage"]').textContent='Kept';
+    group(views.review,'Smart review','Review words that are due today.',[$wf('wfReview'),action('Browse flashcards',()=>{navigate('library');cardTab.hidden=false;cardTab.click();})]);
+    views.review.append(session);
+    views.practice.append(practice);
+    views.dictionary.append(dictionaryPanel);
+    group(views.settings,'Your data','Export a backup before switching devices. Import merges new words with your existing library.',[$wf('wfBackup'),$wf('wfRestore'),$wf('wfFile')]);
+    group(views.settings,'App preferences','Install WordFlow on supported browsers. Offline review is available after setup.',[installButton,action('Toggle appearance',()=>darkModeToggle.click()),network]);
+    const globalNotice=$wf('wfNotice');globalNotice.className='wf-global-notice';
+    main.prepend(heading);main.append(status,globalNotice,footer);
+    shell.replaceChildren(header,nav,main);
+    workspace.remove();
+    let activeView='';
+    function navigate(key,replace=false){
+      if(!views[key])key='today';
+      activeView=key;
+      for(const name of Object.keys(views)){views[name].hidden=name!==key;buttons[name].classList.toggle('selected',name===key);if(name===key)buttons[name].setAttribute('aria-current','page');else buttons[name].removeAttribute('aria-current');}
+      title.textContent=labels[key][0];subtitle.textContent=labels[key][1];
+      if(key==='practice'){practice.hidden=false;practiceHome();}
+      if(key==='dictionary'&&dictionaryPanel.hidden)dictionaryButton.click();
+      if(key==='library'){cardTab.hidden=false;updateWorkspace();}
+      if(location.hash!=='#'+key){if(replace)history.replaceState(null,'','#'+key);else history.pushState(null,'','#'+key);}
+      window.scrollTo(0,0);
+    }
+    window.addEventListener('popstate',()=>navigate(location.hash.slice(1),true));
+    window.addEventListener('hashchange',()=>{if(location.hash.slice(1)!==activeView)navigate(location.hash.slice(1),true);});
+    document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){navigate('library');$wf('wfSearch').focus();}});
+    const originalPracticeHome=practiceHome;
+    practiceHome=function(){originalPracticeHome();practice.querySelectorAll('button').forEach(b=>{if(b.textContent==='Close')b.onclick=()=>navigate('today');});};
+    // The dictionary result stays on its own page; saving does not require moving the input.
+    navigate(location.hash.slice(1)||'today',true);
+
     renderAll();
   })();
 </script>
