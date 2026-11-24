@@ -349,7 +349,21 @@
       outline: 2px solid var(--accent);
       outline-offset: 2px;
     }
-  </style>
+  
+    .shell{max-width:980px}
+    .workspace{margin-bottom:1rem}
+    .wf-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.65rem;margin-bottom:.75rem}
+    .wf-stats>div,#wfSession{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:1rem}
+    .wf-stats small{display:block;color:var(--ink-soft);font-size:.75rem}.wf-stats strong{font-size:1.65rem;display:block;margin-top:.3rem}
+    .wf-tools,.wf-ratings{display:flex;gap:.45rem;flex-wrap:wrap;align-items:center}
+    .workspace button,.workspace input,.workspace select{font:inherit;color:var(--ink);background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:.55rem .7rem;font-size:.8rem}
+    .workspace button{cursor:pointer}.workspace button:hover{border-color:var(--accent)}
+    #wfSearch{flex:1;min-width:140px}#wfReview{background:var(--accent);color:var(--bg);font-weight:600}
+    #wfSession{margin-top:.75rem;display:grid;gap:.7rem}#wfSession h2{text-align:center;overflow-wrap:anywhere}#wfNotice{font-size:.75rem;color:var(--ink-soft);margin-top:.4rem}
+    [hidden]{display:none!important}.word-meta{font-size:.72rem;color:var(--ink-soft);overflow-wrap:anywhere}
+    @media(max-width:560px){.wf-stats>div{padding:.65rem}.wf-stats strong{font-size:1.25rem}}
+
+</style>
 </head>
 <body>
 <div class="shell">
@@ -359,7 +373,7 @@
       <div class="brand-mark">W</div>
       <div class="brand-text">
         <h1>WordFlow</h1>
-        <p>English ⇄ Persian vocabulary trainer</p>
+        <p>Your personal vocabulary workspace</p>
       </div>
     </div>
     <div class="dark-toggle" id="darkModeToggle" title="Toggle dark mode" role="button" aria-label="Toggle dark mode">🌙</div>
@@ -545,6 +559,7 @@
           enWord = raw;
           faWord = await translateWithAPI(raw, 'en', 'fa');
         }
+        if(wordPairs.some(w=>normalized(w.en)===normalized(enWord)&&normalized(w.fa)===normalized(faWord))){showToast("Already saved");return;}
         wordPairs.push({ en: enWord, fa: faWord, kept: false, timestamp: Date.now() });
         persistAndRender();
         inputEl.value = '';
@@ -594,7 +609,7 @@
     }
 
     function deleteWord(index) {
-      if (index >= 0 && index < wordPairs.length) {
+      if (index >= 0 && index < wordPairs.length && confirm('Delete this word?')) {
         wordPairs.splice(index, 1);
         persistAndRender();
       }
@@ -648,6 +663,7 @@
 
       attachEvents();
       renderCard();
+      updateWorkspace();
     }
 
     function renderItem(pair, globalIdx, isKeptPage) {
@@ -660,13 +676,13 @@
         <div class="word-item" data-index="${globalIdx}">
           <div class="word-main">
             <span class="${enClass}">${enEsc}</span>
-            <span class="${faClass}">${faEsc}</span>
+            <span class="${faClass}">${faEsc}</span><span class="word-meta">${escapeHtml(String(pair.tags||""))} ${escapeHtml(String(pair.example||""))}</span>
           </div>
           <div class="icon-group">
             <button class="icon-btn" data-global-index="${globalIdx}" data-action="copy" title="copy">⧉</button>
             <button class="icon-btn" data-global-index="${globalIdx}" data-action="edit" title="edit">✎</button>
             <button class="icon-btn" data-global-index="${globalIdx}" data-action="voice" title="listen">🔊</button>
-            ${tickBtn}
+            ${tickBtn}<button class="icon-btn" data-global-index="${globalIdx}" data-action="details" title="Tags and example" aria-label="Tags and example">＋</button>
             <button class="icon-btn delete-btn" data-global-index="${globalIdx}" data-action="delete" title="delete">✕</button>
           </div>
         </div>
@@ -685,12 +701,13 @@
           else if (action === 'tick') toggleKept(idx);
           else if (action === 'delete') deleteWord(idx);
           else if (action === 'copy') copyWord(idx);
+          else if (action === 'details') { const w=wordPairs[idx]; if(!w)return; const tags=prompt('Tags (comma separated)',w.tags||''); if(tags===null)return; const example=prompt('Example sentence',w.example||''); if(example===null)return; w.tags=tags;w.example=example;persistAndRender(); }
         });
       });
     }
 
     function persistAndRender() {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(wordPairs)); } catch (e) {}
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(wordPairs)); } catch (e) { showError('Storage unavailable. Export your words before closing.'); }
       renderAll();
     }
 
@@ -801,6 +818,87 @@
       micBtn.style.display = 'none';
       micLang.style.display = 'none';
     }
+
+
+    // Workspace tools — retain the original storage key and card format.
+    const workspace = document.createElement('section');
+    workspace.className='workspace';
+    workspace.innerHTML='<div class="wf-stats" id="wfStats"></div><div class="wf-tools"><input id="wfSearch" aria-label="Search vocabulary" placeholder="Search words or tags"><select id="wfFilter" aria-label="Filter words"><option value="all">All tags</option></select><button id="wfAdd">+ Manual</button><button id="wfReview">Smart review</button><button id="wfBackup">Export</button><button id="wfRestore">Import</button><input id="wfFile" type="file" accept=".json" hidden></div><div id="wfSession" hidden></div><p id="wfNotice" role="status"></p>';
+    document.querySelector('.mode-row').before(workspace);
+    const $wf=id=>document.getElementById(id);
+    const normalized=s=>String(s||'').normalize('NFKC').trim().toLowerCase();
+    const due=w=>!w.review || w.review.due<=Date.now();
+    const notice=s=>$wf('wfNotice').textContent=s;
+    function updateWorkspace(){
+      const reviewed=wordPairs.filter(w=>w.review);
+      const attempts=reviewed.reduce((n,w)=>n+(w.review.count||0),0);
+      const correct=reviewed.reduce((n,w)=>n+(w.review.correct||0),0);
+      $wf('wfStats').innerHTML=[['Vocabulary',wordPairs.length],['Due today',wordPairs.filter(due).length],['Accuracy',attempts?Math.round(correct/attempts*100)+'%':'—']].map(([label,value])=>'<div><small>'+label+'</small><strong>'+value+'</strong></div>').join('');
+      const filter=$wf('wfFilter'), selected=filter.value;
+      filter.replaceChildren(new Option('All tags','all'),...[...new Set(wordPairs.flatMap(w=>String(w.tags||'').split(',').map(t=>t.trim()).filter(Boolean)))].sort().map(t=>new Option(t,'tag:'+t)));
+      if([...filter.options].some(o=>o.value===selected))filter.value=selected;
+      const query=normalized($wf('wfSearch').value);
+      document.querySelectorAll('.word-item').forEach(el=>{
+        const w=wordPairs[Number(el.dataset.index)];
+        if(!w)return;
+        el.hidden=(!normalized([w.en,w.fa,w.tags,w.example].join(' ')).includes(query))||(filter.value!=='all'&&!String(w.tags||'').split(',').map(t=>t.trim()).includes(filter.value.slice(4)));
+      });
+    }
+    $wf('wfSearch').addEventListener('input',updateWorkspace);
+    $wf('wfFilter').addEventListener('change',updateWorkspace);
+    function manual(){
+      const en=prompt('English word or phrase'); if(!en?.trim())return;
+      const fa=prompt('Persian / Dari meaning'); if(!fa?.trim())return;
+      if(wordPairs.some(w=>normalized(w.en)===normalized(en)&&normalized(w.fa)===normalized(fa))){notice('Already in your vocabulary.');return;}
+      wordPairs.push({en:en.trim(),fa:fa.trim(),kept:false,timestamp:Date.now()});persistAndRender();
+    }
+    $wf('wfAdd').onclick=manual;
+    $wf('wfBackup').onclick=()=>{
+      const url=URL.createObjectURL(new Blob([JSON.stringify({version:2,words:wordPairs},null,2)],{type:'application/json'}));
+      const a=document.createElement('a');a.href=url;a.download='wordflow-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    };
+    $wf('wfRestore').onclick=()=>$wf('wfFile').click();
+    $wf('wfFile').onchange=async e=>{
+      try{
+        const f=e.target.files[0];if(!f)return;if(f.size>10000000)throw Error('File too large');
+        const data=JSON.parse(await f.text()), rows=Array.isArray(data)?data:data.words;
+        if(!Array.isArray(rows)||rows.some(w=>!w||typeof w.en!=='string'||typeof w.fa!=='string'))throw Error('Invalid backup');
+        let added=0;
+        for(const w of rows){if(!wordPairs.some(x=>normalized(x.en)===normalized(w.en)&&normalized(x.fa)===normalized(w.fa))){
+          const item={en:w.en,fa:w.fa,kept:w.kept===true,timestamp:Number(w.timestamp)||Date.now(),tags:String(w.tags||''),example:String(w.example||'')};
+          if(w.review&&Number.isFinite(w.review.due)&&Number.isFinite(w.review.interval)&&Number.isFinite(w.review.count)&&Number.isFinite(w.review.correct))item.review={due:w.review.due,interval:Math.max(0,w.review.interval),count:Math.max(0,w.review.count),correct:Math.max(0,Math.min(w.review.count,w.review.correct))};
+          wordPairs.push(item);added++;
+        }}
+        persistAndRender();notice('Imported '+added+' new words. Existing words preserved.');
+      }catch(err){notice('Import failed: '+err.message);}finally{e.target.value='';}
+    };
+    let queue=[], current=null, reversed=false;
+    const session=$wf('wfSession');
+    function nextReview(){
+      current=queue.shift();
+      session.replaceChildren();
+      if(!current){session.textContent='Review complete. Great work!';return;}
+      const reverse=document.createElement('button');reverse.textContent='Switch direction';reverse.onclick=()=>{reversed=!reversed;queue.unshift(current);nextReview();};
+      const question=document.createElement('h2');question.textContent=reversed?current.fa:current.en;question.dir='auto';
+      const typed=document.createElement('input');typed.placeholder='Recall or type the answer';typed.setAttribute('aria-label','Your answer');
+      const reveal=document.createElement('button');reveal.textContent='Reveal answer';
+      const answer=document.createElement('div');answer.hidden=true;answer.dir='auto';
+      const ratings=document.createElement('div');ratings.className='wf-ratings';ratings.hidden=true;
+      reveal.onclick=()=>{answer.hidden=false;ratings.hidden=false;reveal.disabled=true;const expected=reversed?current.en:current.fa;answer.textContent=expected+(typed.value.trim()?(normalized(typed.value)===normalized(expected)?' ✓':' · Compare your answer'):'');};
+      for(const [label,factor] of [['Again',0],['Hard',1.2],['Good',2],['Easy',3]]){const b=document.createElement('button');b.textContent=label;b.onclick=()=>{
+        if(!wordPairs.includes(current)){nextReview();return;}
+        const old=current.review||{interval:0,count:0,correct:0};
+        const interval=factor===0?0:Math.min(365,Math.max(1,Math.round((old.interval||1)*factor)));
+        current.review={interval,due:Date.now()+(interval?interval*86400000:600000),count:old.count+1,correct:old.correct+(factor>0?1:0)};
+        persistAndRender();nextReview();
+      };ratings.append(b);}
+      const close=document.createElement('button');close.textContent='Close review';close.onclick=()=>{session.hidden=true;queue=[];current=null;};
+      session.append(reverse,question,typed,reveal,answer,ratings,close);
+    }
+    $wf('wfReview').onclick=()=>{queue=wordPairs.filter(due).sort((a,b)=>(a.review?.due||0)-(b.review?.due||0)).slice(0,30);session.hidden=false;nextReview();};
+    document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();$wf('wfSearch').focus();}});
+    document.querySelector('.dark-toggle').tabIndex=0;
+    document.querySelector('.dark-toggle').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();darkModeToggle.click();}});
 
     renderAll();
   })();
