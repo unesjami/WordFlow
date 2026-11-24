@@ -694,6 +694,7 @@ body.dark-mode{--wf-accent-end:#36a99f;--wf-hero-end:#192522}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 
 .word-item .delete-btn{color:var(--ink-soft)}.word-item .delete-btn:hover,.word-item .delete-btn:focus-visible{color:var(--danger);background:color-mix(in srgb,var(--danger) 9%,transparent)}
+.wf-account{width:auto;white-space:nowrap;flex-shrink:0}.wf-header-actions .wf-account{min-height:40px;padding:8px 14px;border:1px solid var(--border);border-radius:10px;background:var(--card-bg);color:var(--ink)}
 </style>
 </head>
 <body>
@@ -1538,6 +1539,67 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     navigate(location.hash.slice(1)||'today',true);
     renderAll();
     scheduleFit();
+
+    // Account access is optional until email delivery and OAuth are verified.
+    const account=action('Sign in',openAccount);account.classList.add('wf-account');headerActions.prepend(account);
+    const cloudStatus=make('small','Local workspace');group(views.settings,'Account','Use your private WordFlow workspace on other devices.',[action('Manage account',openAccount),cloudStatus]);
+    let cloudClient=null,cloudUser=null,cloudBusy=false,cloudReady=false,cloudTimer=0,cloudRevision=null,cloudSnapshot='',cloudGeneration=0;
+    const redirectTo='https://unesjami.github.io/WordFlow/';
+    const guestKey=STORAGE_KEY;
+    let activeStorageKey=guestKey;
+    const localPersist=persistAndRender;
+    persistAndRender=function(){if(!cloudUser){localPersist();return;}try{localStorage.setItem(activeStorageKey,JSON.stringify(wordPairs));}catch(e){showError('Local storage unavailable.');}renderAll();if(cloudReady){clearTimeout(cloudTimer);cloudTimer=setTimeout(pushCloud,800);}};
+    function cloudLabel(s){cloudStatus.textContent=s;}
+    function readWorkspace(key){try{const v=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(v)?v.filter(w=>w&&typeof w.en==='string'&&typeof w.fa==='string'):[];}catch{return [];}}
+    async function pushCloud(){
+      if(!cloudReady||!cloudUser||cloudBusy)return;
+      const id=cloudUser.id,generation=cloudGeneration,snapshot=JSON.stringify(wordPairs);
+      if(snapshot===cloudSnapshot)return;
+      cloudBusy=true;cloudLabel('Saving…');
+      try{
+        const payload={words:JSON.parse(snapshot),preferences:{theme:themeMode},revision:(cloudRevision||0)+1,updated_at:new Date().toISOString()};
+        const q=cloudRevision===null?cloudClient.from('wordflow_workspaces').insert({...payload,user_id:id}).select('revision'):cloudClient.from('wordflow_workspaces').update(payload).eq('user_id',id).eq('revision',cloudRevision).select('revision');
+        const {data,error}=await q;if(generation!==cloudGeneration)return;if(error||!data?.length)throw Error(error?.message||'Workspace changed on another device. Reopen account to reload.');
+        cloudRevision=data[0].revision;cloudSnapshot=snapshot;cloudLabel('Synced');
+      }catch(e){if(generation===cloudGeneration)cloudLabel('Not synced: '+e.message);}finally{if(generation===cloudGeneration){cloudBusy=false;if(JSON.stringify(wordPairs)!==snapshot&&cloudSnapshot===snapshot){clearTimeout(cloudTimer);cloudTimer=setTimeout(pushCloud,300);}}}
+    }
+    async function activateAccount(user){
+      if(user?.id===cloudUser?.id)return;
+      ++cloudGeneration;const generation=cloudGeneration;clearTimeout(cloudTimer);cloudReady=false;cloudBusy=false;cloudRevision=null;cloudSnapshot='';cloudUser=user||null;
+      activeStorageKey=user?guestKey+':'+user.id:guestKey;
+      wordPairs=readWorkspace(activeStorageKey);cardIndex=0;renderAll();account.textContent=user?'Account':'Sign in';
+      if(!user){cloudLabel('Local workspace');return;}
+      cloudLabel('Loading private workspace…');
+      const {data,error}=await cloudClient.from('wordflow_workspaces').select('words,preferences,revision').eq('user_id',user.id).maybeSingle();
+      if(generation!==cloudGeneration)return;
+      if(error){cloudLabel('Cloud unavailable: '+error.message);return;}
+      const local=JSON.stringify(wordPairs);
+      if(data){
+        if(local!=='[]'&&local!==JSON.stringify(data.words)){cloudLabel('Local and cloud copies differ. Export local backup before reloading.');return;}
+        wordPairs=Array.isArray(data.words)?data.words.filter(w=>w&&typeof w.en==='string'&&typeof w.fa==='string'):[];cloudRevision=data.revision;cloudSnapshot=JSON.stringify(wordPairs);
+        try{localStorage.setItem(activeStorageKey,cloudSnapshot);}catch{}
+        renderAll();
+      }else{cloudSnapshot='';}
+      cloudReady=true;cloudLabel('Synced');if(!data)await pushCloud();
+    }
+    async function openAccount(){
+      if(!cloudClient){showToast('Account service is loading or unavailable. Try again online.');return;}
+      if(cloudUser){
+        const result=await modalForm({title:'Your account',description:'Signed in. '+cloudStatus.textContent,submit:'Sign out'});
+        if(result){await pushCloud();if(cloudBusy||!cloudReady||JSON.stringify(wordPairs)!==cloudSnapshot){showToast('Export your backup before signing out if cloud sync is unavailable.');return;}const {error}=await cloudClient.auth.signOut();if(error)showToast(error.message);}
+        return;
+      }
+      const result=await modalForm({title:'Sign in to WordFlow',description:'Continue with Google to open your private workspace. Existing guest words stay on this device.',submit:'Continue with Google'});
+      if(result){const {error}=await cloudClient.auth.signInWithOAuth({provider:'google',options:{redirectTo}});if(error)showToast(error.message);}
+    }
+    (async()=>{
+      try{
+        const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/+esm');
+        cloudClient=createClient('https://wstxoeebgvkmlkpefcot.supabase.co','sb_publishable_97JMqvFbbwJgBMPmZgXMJw_pSV6nVtU',{auth:{flowType:'pkce',detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}});
+        cloudClient.auth.onAuthStateChange((event,session)=>{setTimeout(()=>activateAccount(session?.user||null).catch(e=>cloudLabel(e.message)),0);});
+        const {data,error}=await cloudClient.auth.getSession();if(error)cloudLabel(error.message);else await activateAccount(data.session?.user||null);
+      }catch(e){cloudLabel('Account service unavailable offline');}
+    })();
     tagTrigger.querySelector('[data-lucide="list-filter"]')?.insertAdjacentHTML('beforebegin',glyph('filter'));tagTrigger.querySelector('[data-lucide="list-filter"]')?.remove();const arrow=tagTrigger.querySelector('[data-lucide="chevron-down"]');if(arrow){arrow.insertAdjacentHTML('beforebegin',glyph('down'));arrow.previousElementSibling.classList.add('wf-chevron');arrow.remove();}
   })();
 </script>
