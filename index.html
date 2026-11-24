@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" type="image/png" href="https://i.ibb.co/fV2yPb2y/logo.png">
+  <link rel="icon" type="image/svg+xml" href="./icon.svg">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="theme-color" content="#146464">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WordFlow — English ⇄ Persian Vocabulary Trainer</title>
@@ -900,6 +902,18 @@
     document.querySelector('.dark-toggle').tabIndex=0;
     document.querySelector('.dark-toggle').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();darkModeToggle.click();}});
 
+    const installButton=document.createElement('button');
+    installButton.textContent='Install app';installButton.hidden=true;
+    document.querySelector('.wf-tools').append(installButton);
+    let installEvent=null;
+    window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvent=e;installButton.hidden=false;});
+    installButton.onclick=async()=>{if(!installEvent)return;await installEvent.prompt();installEvent=null;installButton.hidden=true;};
+    window.addEventListener('appinstalled',()=>{installButton.hidden=true;notice('WordFlow installed.');});
+    const network=document.createElement('small');network.setAttribute('role','status');network.style.color='var(--ink-soft)';
+    document.querySelector('.wf-tools').append(network);
+    function networkStatus(){network.textContent=navigator.onLine?'Online':'Offline · manual entry and review available';}
+    window.addEventListener('online',networkStatus);window.addEventListener('offline',networkStatus);networkStatus();
+    if('serviceWorker' in navigator && location.protocol!=='file:') navigator.serviceWorker.register('./sw.js').catch(()=>notice('Offline setup unavailable.'));
     renderAll();
   })();
 </script>
