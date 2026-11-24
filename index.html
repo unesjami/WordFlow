@@ -695,6 +695,40 @@ body.dark-mode{--wf-accent-end:#36a99f;--wf-hero-end:#192522}
 
 .word-item .delete-btn{color:var(--ink-soft)}.word-item .delete-btn:hover,.word-item .delete-btn:focus-visible{color:var(--danger);background:color-mix(in srgb,var(--danger) 9%,transparent)}
 .wf-account{width:auto;white-space:nowrap;flex-shrink:0}.wf-header-actions .wf-account{min-height:40px;padding:8px 14px;border:1px solid var(--border);border-radius:10px;background:var(--card-bg);color:var(--ink)}
+
+/* Optional account experience: quiet, accessible, and free to continue. */
+.wf-auth-dialog{width:min(430px,calc(100% - 32px));max-height:calc(100dvh - 32px);padding:0;border:1px solid var(--border);border-radius:22px;background:var(--card-bg);color:var(--ink);box-shadow:0 24px 80px #0003;margin:auto;overflow:auto}
+.wf-auth-dialog::backdrop{background:#071a205c;backdrop-filter:blur(5px)}
+.wf-auth-body{position:relative;display:grid;gap:18px;padding:32px}
+.wf-auth-close{position:absolute;top:12px;right:12px;display:grid;place-items:center;width:40px;height:40px;border:0;border-radius:10px;background:transparent;color:var(--ink-soft);cursor:pointer}
+.wf-auth-close:hover{background:var(--accent-soft)}
+.wf-auth-brand{display:flex;justify-content:center;align-items:center;gap:8px;font-size:.85rem;font-weight:700}
+.wf-auth-brand img{width:30px;height:30px}
+.wf-auth-intro{text-align:center;display:grid;gap:8px}
+.wf-auth-intro h2{font-size:1.65rem;letter-spacing:-.045em;line-height:1.15;margin:0}
+.wf-auth-intro p{font-size:.875rem;color:var(--ink-soft);line-height:1.6;margin:0}
+.wf-auth-benefits{display:grid;gap:10px;background:var(--accent-soft);border-radius:14px;padding:16px;list-style:none;margin:0}
+.wf-auth-benefits li{display:flex;gap:10px;align-items:center;color:var(--ink);font-size:.84rem;line-height:1.4}
+.wf-auth-benefits svg{color:var(--accent);width:18px;height:18px}
+.wf-auth-actions{display:grid;gap:8px}
+.wf-auth-actions button{display:flex;align-items:center;justify-content:center;gap:10px;min-height:46px;border:1px solid var(--border);border-radius:12px;padding:10px 16px;font:600 .875rem var(--font-ui,Inter,sans-serif);cursor:pointer;background:var(--card-bg);color:var(--ink)}
+.wf-auth-actions .wf-google{border-color:var(--accent);box-shadow:0 1px 3px #0000000b}
+.wf-auth-actions .wf-google:hover{background:var(--accent-soft)}
+.wf-auth-actions .wf-guest{border-color:transparent;background:transparent;color:var(--ink-soft)}
+.wf-auth-actions .wf-guest:hover{background:var(--bg)}
+.wf-auth-actions button:disabled{opacity:.6;cursor:wait}
+.wf-auth-note{font-size:.73rem;text-align:center;color:var(--ink-soft);line-height:1.5;margin:0}
+.wf-auth-error{font-size:.8rem;color:var(--danger);line-height:1.5;margin:0}
+.wf-auth-error:empty{display:none}
+.wf-auth-hint{display:flex;align-items:center;justify-content:space-between;gap:12px;grid-column:1/-1;padding:10px 14px;border:1px solid var(--border);border-radius:12px;background:var(--card-bg)}
+.wf-auth-hint-copy{display:grid;gap:3px;min-width:0}
+.wf-auth-hint-copy strong{font-size:.82rem;font-weight:600}
+.wf-auth-hint-copy small{font-size:.74rem;line-height:1.4;color:var(--ink-soft)}
+.wf-auth-hint-actions{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.wf-auth-hint .wf-auth-dismiss{border:0!important;background:transparent!important;min-width:36px;min-height:36px;padding:6px!important;color:var(--ink-soft)}
+.wf-auth-hint[hidden]{display:none!important}
+@media(max-width:480px){.wf-auth-body{padding:26px 20px}.wf-auth-hint{align-items:flex-start;flex-direction:column}.wf-auth-hint-actions{align-self:flex-end}.wf-auth-intro h2{font-size:1.45rem}}
+
 </style>
 </head>
 <body>
@@ -1542,13 +1576,24 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
 
     // Account access is optional until email delivery and OAuth are verified.
     const account=action('Sign in',openAccount);account.classList.add('wf-account');headerActions.prepend(account);
-    const cloudStatus=make('small','Local workspace');group(views.settings,'Account','Use your private WordFlow workspace on other devices.',[action('Manage account',openAccount),cloudStatus]);
+    const cloudStatus=make('small','Saved on this device');
+    const settingsAccount=action('Sign in',openAccount);
+    group(views.settings,'Account & backup','WordFlow is free without an account. Sign in to back up your words and access them on other devices.',[settingsAccount,cloudStatus]);
+    const authHint=make('div','');authHint.className='wf-auth-hint';
+    const hintCopy=make('div','');hintCopy.className='wf-auth-hint-copy';hintCopy.append(make('strong','Keep your words safe'),make('small','Sign in to back up your vocabulary and learn on other devices.'));
+    const hintActions=make('div','');hintActions.className='wf-auth-hint-actions';
+    const hintSignIn=action('Back up words',openAccount);
+    const dismiss=make('button','');dismiss.type='button';dismiss.className='wf-auth-dismiss';dismiss.innerHTML=glyph('close');dismiss.setAttribute('aria-label','Dismiss backup suggestion');dismiss.onclick=()=>{authHint.hidden=true;try{localStorage.setItem('wf_backup_hint_dismissed','1');}catch{}scheduleFit();};
+    hintActions.append(hintSignIn,dismiss);authHint.append(hintCopy,hintActions);
+    views.today.append(authHint);
+    function updateAuthHint(){let dismissed=false;try{dismissed=localStorage.getItem('wf_backup_hint_dismissed')==='1';}catch{}authHint.hidden=!!cloudUser||dismissed||wordPairs.length===0;}
+
     let cloudClient=null,cloudUser=null,cloudBusy=false,cloudReady=false,cloudTimer=0,cloudRevision=null,cloudSnapshot='',cloudGeneration=0;
     const redirectTo='https://unesjami.github.io/WordFlow/';
     const guestKey=STORAGE_KEY;
     let activeStorageKey=guestKey;
     const localPersist=persistAndRender;
-    persistAndRender=function(){if(!cloudUser){localPersist();return;}try{localStorage.setItem(activeStorageKey,JSON.stringify(wordPairs));}catch(e){showError('Local storage unavailable.');}renderAll();if(cloudReady){clearTimeout(cloudTimer);cloudTimer=setTimeout(pushCloud,800);}};
+    persistAndRender=function(){if(!cloudUser){localPersist();updateAuthHint();scheduleFit();return;}try{localStorage.setItem(activeStorageKey,JSON.stringify(wordPairs));}catch(e){showError('Local storage unavailable.');}renderAll();if(cloudReady){clearTimeout(cloudTimer);cloudTimer=setTimeout(pushCloud,800);}};
     function cloudLabel(s){cloudStatus.textContent=s;}
     function readWorkspace(key){try{const v=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(v)?v.filter(w=>w&&typeof w.en==='string'&&typeof w.fa==='string'):[];}catch{return [];}}
     async function pushCloud(){
@@ -1567,8 +1612,8 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
       if(user?.id===cloudUser?.id)return;
       ++cloudGeneration;const generation=cloudGeneration;clearTimeout(cloudTimer);cloudReady=false;cloudBusy=false;cloudRevision=null;cloudSnapshot='';cloudUser=user||null;
       activeStorageKey=user?guestKey+':'+user.id:guestKey;
-      wordPairs=readWorkspace(activeStorageKey);cardIndex=0;renderAll();account.textContent=user?'Account':'Sign in';
-      if(!user){cloudLabel('Local workspace');return;}
+      wordPairs=readWorkspace(activeStorageKey);cardIndex=0;renderAll();account.textContent=user?'Account':'Sign in';settingsAccount.textContent=user?'Manage account':'Sign in';updateAuthHint();
+      if(!user){cloudLabel('Saved on this device');return;}
       cloudLabel('Loading private workspace…');
       const {data,error}=await cloudClient.from('wordflow_workspaces').select('words,preferences,revision').eq('user_id',user.id).maybeSingle();
       if(generation!==cloudGeneration)return;
@@ -1582,16 +1627,33 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
       }else{cloudSnapshot='';}
       cloudReady=true;cloudLabel('Synced');if(!data)await pushCloud();
     }
-    async function openAccount(){
-      if(!cloudClient){showToast('Account service is loading or unavailable. Try again online.');return;}
-      if(cloudUser){
-        const result=await modalForm({title:'Your account',description:'Signed in. '+cloudStatus.textContent,submit:'Sign out'});
-        if(result){await pushCloud();if(cloudBusy||!cloudReady||JSON.stringify(wordPairs)!==cloudSnapshot){showToast('Export your backup before signing out if cloud sync is unavailable.');return;}const {error}=await cloudClient.auth.signOut();if(error)showToast(error.message);}
-        return;
-      }
-      const result=await modalForm({title:'Sign in to WordFlow',description:'Continue with Google to open your private workspace. Existing guest words stay on this device.',submit:'Continue with Google'});
-      if(result){const {error}=await cloudClient.auth.signInWithOAuth({provider:'google',options:{redirectTo}});if(error)showToast(error.message);}
+    const authDialog=document.createElement('dialog');authDialog.className='wf-auth-dialog';authDialog.setAttribute('aria-labelledby','wfAuthTitle');document.body.append(authDialog);
+    function authClose(){if(authDialog.open)authDialog.close();}
+    authDialog.addEventListener('click',e=>{if(e.target===authDialog)authClose();});
+    function showSignIn(){
+      if(authDialog.open)return;
+      authDialog.replaceChildren();
+      const body=make('div','');body.className='wf-auth-body';
+      const close=make('button','');close.type='button';close.className='wf-auth-close';close.innerHTML=glyph('close');close.setAttribute('aria-label','Close sign-in');close.onclick=authClose;
+      const brand=make('div','');brand.className='wf-auth-brand';const logo=document.createElement('img');logo.src=document.querySelector('.brand-mark').getAttribute('src');logo.alt='';brand.append(logo,make('span','WordFlow'));
+      const intro=make('div','');intro.className='wf-auth-intro';const title=make('h2','Your words, everywhere.');title.id='wfAuthTitle';intro.append(title,make('p','Keep your vocabulary safe and access your words and learning progress on your other devices.'));
+      const benefits=make('ul','');benefits.className='wf-auth-benefits';
+      for(const label of ['Free to use, with or without an account','Back up your vocabulary','Access your words on other devices']){const li=make('li','');li.innerHTML=glyph('check');li.append(make('span',label));benefits.append(li);}
+      const error=make('p','');error.className='wf-auth-error';error.setAttribute('role','status');
+      const actions=make('div','');actions.className='wf-auth-actions';
+      const google=make('button','');google.type='button';google.className='wf-google';google.innerHTML='<svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true"><path fill="#4285F4" d="M43.61 24.46c0-1.36-.12-2.66-.35-3.92H24v7.43h11.02a9.42 9.42 0 0 1-4.09 6.19v5.14h6.63c3.88-3.57 6.05-8.82 6.05-14.84z"/><path fill="#34A853" d="M24 44c5.51 0 10.13-1.82 13.51-4.93l-6.63-5.14c-1.82 1.22-4.15 1.95-6.88 1.95-5.33 0-9.85-3.6-11.47-8.44H5.69v5.29A20 20 0 0 0 24 44z"/><path fill="#FBBC05" d="M12.53 27.44A12 12 0 0 1 12 24c0-1.2.19-2.36.53-3.44v-5.29H5.69a20 20 0 0 0 0 17.46z"/><path fill="#EA4335" d="M24 12.12c3.01 0 5.7 1.04 7.83 3.08l5.87-5.87C34.12 5.99 29.51 4 24 4A20 20 0 0 0 5.69 15.27l6.84 5.29C14.15 15.72 18.67 12.12 24 12.12z"/></svg><span>Continue with Google</span>';
+      google.onclick=async()=>{if(!cloudClient){error.textContent='Sign-in is unavailable right now. You can still use WordFlow offline.';return;}google.disabled=true;error.textContent='';try{const {error:failure}=await cloudClient.auth.signInWithOAuth({provider:'google',options:{redirectTo}});if(failure)throw failure;}catch(e){error.textContent=e.message||'Could not sign in. Please try again.';google.disabled=false;}};
+      const guest=make('button','Continue without an account');guest.type='button';guest.className='wf-guest';guest.onclick=authClose;
+      actions.append(google,guest);
+      const note=make('p','Signing in is optional. Without an account, your words stay in this browser.');note.className='wf-auth-note';
+      body.append(close,brand,intro,benefits,error,actions,note);authDialog.append(body);authDialog.showModal();google.focus({preventScroll:true});
     }
+    async function openAccount(){
+      if(!cloudUser){showSignIn();return;}
+      const result=await modalForm({title:'Your account',description:'Signed in. '+cloudStatus.textContent,submit:'Sign out'});
+      if(result){await pushCloud();if(cloudBusy||!cloudReady||JSON.stringify(wordPairs)!==cloudSnapshot){showToast('Export your backup before signing out if cloud sync is unavailable.');return;}const {error}=await cloudClient.auth.signOut();if(error)showToast(error.message);}
+    }
+    updateAuthHint();scheduleFit();
     (async()=>{
       try{
         const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/+esm');
