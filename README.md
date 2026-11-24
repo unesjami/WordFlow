@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://unesjami.github.io/Word-Update/"><img src="https://img.shields.io/badge/Live_Demo-Open-14b8a6?style=for-the-badge" alt="Live demo"></a>
+  <a href="https://unesjami.github.io/WordFlow/"><img src="https://img.shields.io/badge/Live_Demo-Open-14b8a6?style=for-the-badge" alt="Live demo"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-2563eb?style=for-the-badge" alt="MIT license"></a>
   <img src="https://img.shields.io/badge/English_%E2%87%84_Persian-Bilingual-7c3aed?style=for-the-badge" alt="Bilingual">
 </p>
@@ -23,6 +23,16 @@ WordFlow is a lightweight browser application for collecting, translating, revie
 - Progress tracking and saved vocabulary in the browser
 - Responsive interface with light and dark themes
 
+## Workspace features
+
+- Search vocabulary and filter by tags
+- Manual bilingual entry and example sentences
+- Adaptive spaced review with self-rated recall statistics (not FSRS)
+- JSON backup export and merge import
+- Keyboard search shortcut (Ctrl/Cmd + K)
+
+Existing browser storage is retained. Export a backup before changing browsers or origins.
+
 ## Technology
 
 - HTML5
@@ -35,8 +45,8 @@ WordFlow is a lightweight browser application for collecting, translating, revie
 ## Run locally
 
 ```bash
-git clone https://github.com/unesjami/Word-Update.git
-cd Word-Update
+git clone https://github.com/unesjami/WordFlow.git
+cd WordFlow
 python -m http.server 8080
 ```
 
@@ -45,7 +55,7 @@ Open `http://localhost:8080`. You can also open `index.html` directly, although 
 ## Project structure
 
 ```text
-Word-Update/
+WordFlow/
 ├── index.html
 ├── README.md
 └── LICENSE
