@@ -646,6 +646,53 @@ body{font-family:var(--font-ui);line-height:1.5}
 .wf-content.wf-needs-room #view-library .word-stage{height:auto;min-height:180px}
 @media(max-height:540px){.wf-content{padding-block:8px}.wf-heading p{display:none}.wf-nav{overflow:auto}}
 
+
+/* Layout correction: content-sized actions, flexible input, restrained brand gradient. */
+:root{--wf-accent-end:#0e5559;--wf-hero-end:#f6fbfa}
+body.dark-mode{--wf-accent-end:#36a99f;--wf-hero-end:#192522}
+.wf-view{justify-items:stretch}
+.wf-view button:not(.seg-btn):not(.icon-btn),.wf-modal-form button{width:auto;max-width:100%;justify-self:start;flex:0 0 auto}
+.wf-view button.primary,.wf-header-actions .primary,.wf-view #wfReview,.translate-btn{background:linear-gradient(135deg,var(--accent),var(--wf-accent-end))!important}
+.wf-hero{background:linear-gradient(115deg,var(--accent-soft),var(--wf-hero-end));border-color:var(--border)}
+#view-today .wf-hero{grid-column:1/-1}
+#view-today>.wf-panel{grid-column:1/-1}
+#view-today .wf-panel .wf-action-row{min-width:0}
+#view-today .input-panel-bottom{display:grid;grid-template-columns:minmax(0,1fr) max-content;align-items:center;gap:8px;padding:0;width:100%;min-width:0}
+#view-today .small-input{display:flex;align-items:center;gap:8px;width:100%;min-width:0;max-width:none;padding:4px 8px;min-height:48px}
+#wordInput{flex:1 1 0;width:0;min-width:0;padding:8px 4px;font-family:var(--font-ui);font-size:.875rem;line-height:1.4}
+#wordInput::placeholder{font-size:.875rem}
+.mic-lang{display:inline-flex;flex:0 0 auto;align-items:center;gap:2px;margin:0;padding:3px;border-radius:8px}
+.mic-lang button{display:grid;place-items:center;flex:0 0 30px;width:30px;min-width:30px;height:30px;min-height:30px;padding:0;white-space:nowrap;overflow-wrap:normal;word-break:normal;font-size:11px;line-height:1;border-radius:6px}
+.mic-lang button.active{color:var(--on-accent)}
+#micBtn{flex:0 0 40px;width:40px;min-width:40px;height:40px;min-height:40px}
+#translateBtn{min-height:48px;padding:0 16px;border-radius:var(--radius-md);font-size:.875rem;font-weight:600;white-space:nowrap}
+#wfDictionary{display:grid;align-content:start;justify-items:stretch;gap:16px}
+.wf-dict-search{display:grid;grid-template-columns:minmax(0,1fr) max-content;align-items:center;gap:8px;min-width:0}
+#wfDictionary .wf-dict-search input{width:100%;min-width:0;margin:0;min-height:44px}
+#wfDictionary .wf-dict-search button{min-height:44px;min-width:110px;justify-content:center;padding-inline:16px}
+.wf-dict-output{display:grid;gap:12px;min-width:0}
+.wf-dict-output:empty{display:none}
+.wf-dict-entry{padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md)}
+.wf-dict-entry strong{font-size:.75rem;color:var(--ink-soft);font-weight:500}
+.wf-dict-output>.wf-pager{justify-content:flex-start;gap:12px}
+#wfPractice,#wfSession{justify-items:start;align-content:start}
+#wfPractice>.wf-progress,#wfSession>.wf-progress,#wfPractice>.wf-ratings,#wfSession>.wf-ratings,#wfPractice>.wf-feedback{width:100%;min-width:0}
+#wfPractice h2,#wfSession h2{max-width:100%;text-align:start}
+#wfPractice .wf-ratings button{white-space:normal;text-align:start;max-width:100%}
+#wfPractice .wf-ratings input,#wfSession input{width:min(100%,420px);min-width:0}
+#wfPractice .wf-complete,#wfSession .wf-complete{justify-self:stretch}
+.wf-panel .wf-action-row{width:100%;min-width:0}
+.wf-library-tools{display:flex;flex-wrap:wrap;align-items:center}
+.wf-library-tools .wf-search-wrap{flex:1 1 240px}
+.wf-library-tools .wf-dropdown{flex:0 1 auto;min-width:132px}
+.wf-view button.wf-icon-action{white-space:nowrap}
+.wf-view button:disabled{filter:none}
+@media(min-width:1051px){#view-today>.wf-hero{grid-column:1/7}#view-today>.wf-panel:nth-of-type(3){grid-column:7/-1}#view-today>.wf-panel:last-child{grid-column:1/-1}#view-today .input-panel-bottom{grid-template-columns:minmax(0,1fr)}#translateBtn{justify-self:end}}
+@media(min-width:761px) and (max-width:1050px){#view-today .input-panel-bottom{grid-template-columns:minmax(0,1fr) max-content}}
+@media(max-width:760px){#view-today .input-panel-bottom{grid-template-columns:minmax(0,1fr)}#translateBtn{justify-self:end;min-height:44px}.wf-library-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.wf-library-tools .wf-search-wrap{grid-column:1/-1}.wf-library-tools button{justify-self:start}.wf-library-tools .wf-dropdown-trigger{width:100%}.wf-dict-search{grid-template-columns:minmax(0,1fr) max-content}#wfDictionary .wf-dict-search button{min-width:0;padding-inline:12px}.wf-dict-entry{padding:12px}}
+@media(max-width:360px){.wf-library-tools{grid-template-columns:1fr}.wf-dict-search{grid-template-columns:minmax(0,1fr)}#wfDictionary .wf-dict-search button{justify-self:end}.mic-lang button{width:26px;min-width:26px;flex-basis:26px}#view-today .small-input{gap:4px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
 </style>
 </head>
 <body>
@@ -715,7 +762,7 @@ body{font-family:var(--font-ui);line-height:1.5}
         <button data-lang="fa-IR" title="Voice input in Persian">FA</button>
       </div>
       <button class="icon-btn mic-btn" id="micBtn" title="Speak a word">🎤</button>
-      <input type="text" id="wordInput" placeholder="Type or speak a word — EN or FA">
+      <input type="text" id="wordInput" placeholder="Type a word or phrase" aria-label="Word or phrase to translate" autocomplete="off">
     </div>
     <button class="translate-btn" id="translateBtn">Translate ↵</button>
   </div>
@@ -1325,12 +1372,12 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
       dictionaryPanel.hidden=!dictionaryPanel.hidden;
       if(dictionaryPanel.hidden)return;
       dictionaryPanel.replaceChildren();
-      const field=document.createElement('input');field.placeholder='English word';field.setAttribute('aria-label','Dictionary word');
-      const lookup=document.createElement('button');lookup.textContent='Look up';
-      const output=document.createElement('div');output.setAttribute('role','status');
+      const field=document.createElement('input');field.placeholder='Search an English word';field.setAttribute('aria-label','Dictionary word');field.autocomplete='off';field.spellcheck=false;
+      const lookup=document.createElement('button');lookup.type='button';lookup.className='primary';iconize(lookup,'search','Look up');
+      const output=document.createElement('div');output.className='wf-dict-output';output.setAttribute('role','status');
       lookup.onclick=async()=>{
-        const word=field.value.trim();if(!word)return;
-        lookup.disabled=true;output.textContent='Looking up…';
+        const word=field.value.trim();if(!word||lookup.disabled)return;
+        lookup.disabled=true;lookup.setAttribute('aria-busy','true');iconize(lookup,'search','Searching…');output.textContent='Looking up…';
         try{
           const response=await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/'+encodeURIComponent(word),{signal:AbortSignal.timeout(12000)});
           if(!response.ok)throw Error('No entry found or service unavailable');
@@ -1351,10 +1398,10 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
             output.append(card,pager,add);scheduleFit();
           }
           showDefinition();
-        }catch(e){output.textContent='Dictionary unavailable: '+e.message;}finally{lookup.disabled=false;}
+        }catch(e){output.textContent='Dictionary unavailable: '+e.message;}finally{lookup.disabled=false;lookup.removeAttribute('aria-busy');iconize(lookup,'search','Look up');scheduleFit();}
       };
       field.onkeydown=e=>{if(e.key==='Enter')lookup.click();};
-      dictionaryPanel.append(field,lookup,output);field.focus({preventScroll:true});
+      const searchRow=document.createElement('div');searchRow.className='wf-dict-search';searchRow.append(field,lookup);dictionaryPanel.append(searchRow,output);field.focus({preventScroll:true});
     };
     const installButton=document.createElement('button');
     installButton.textContent='Install app';installButton.hidden=true;
