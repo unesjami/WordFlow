@@ -514,6 +514,7 @@ button,input,textarea{font-family:Inter,Vazirmatn,system-ui,sans-serif}
 @media(max-width:760px){.wf-stats>div{min-height:86px}.wf-complete{padding:12px 4px}.wf-view button:not(.icon-btn){min-height:44px}}
 @media(prefers-reduced-motion:reduce){.wf-complete-mark svg{stroke-dashoffset:0;animation:none!important}.wf-progress-fill{transition:none!important}.wf-dialog.wf-exit,.wf-dropdown-menu.wf-exit{animation:none!important}}
 
+.wf-glyph,.lucide{flex-shrink:0;vertical-align:middle;pointer-events:none}.wf-nav-btn .lucide{width:19px;height:19px}.wf-dropdown-trigger .lucide{width:18px;height:18px}.wf-modal-close .lucide{width:20px;height:20px}.wf-icon-action[hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -591,6 +592,10 @@ button,input,textarea{font-family:Inter,Vazirmatn,system-ui,sans-serif}
   <footer class="site-footer">WordFlow · built by Unes Jami</footer>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+<script>
+window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search","copy":"copy","edit":"pencil","volume":"volume-2","check":"check","trash":"trash-2","left":"chevron-left","right":"chevron-right","mic":"mic","moon":"moon","sun":"sun","download":"download","upload":"upload","list":"list","arrow":"arrow-right","note":"notebook-pen","cards":"layers","today":"house","library":"library-big","review":"refresh-cw","practice":"brain","dictionary":"book-open","settings":"settings","filter":"list-filter","down":"chevron-down","close":"x"};const name=names[alias]||alias;const pascal=name.split('-').map(s=>s.charAt(0).toUpperCase()+s.slice(1)).join('');const nodes=window.lucide?.icons?.[pascal]||window.lucide?.[pascal];if(!Array.isArray(nodes))return '<i data-lucide="'+name+'" aria-hidden="true"></i>';const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');for(const [k,v] of Object.entries({class:'wf-glyph lucide lucide-'+name,viewBox:'0 0 24 24',width:'20',height:'20',fill:'none',stroke:'currentColor','stroke-width':'2','stroke-linecap':'round','stroke-linejoin':'round','aria-hidden':'true'}))svg.setAttribute(k,v);for(const [tag,attrs] of nodes){const child=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v] of Object.entries(attrs))child.setAttribute(k,String(v));svg.append(child);}return svg.outerHTML;};
+</script>
 <script>
   (function() {
 
@@ -605,7 +610,7 @@ button,input,textarea{font-family:Inter,Vazirmatn,system-ui,sans-serif}
       const form=document.createElement('form');form.className='wf-modal-form';form.noValidate=true;
       const head=document.createElement('div');head.className='wf-modal-head';
       const h=document.createElement('h2');h.id='wfDialogTitle';h.textContent=title;
-      const x=document.createElement('button');x.type='button';x.className='wf-modal-close';x.setAttribute('aria-label','Close dialog');x.textContent='×';x.onclick=()=>closeModal(null);head.append(h,x);form.append(head);
+      const x=document.createElement('button');x.type='button';x.className='wf-modal-close';x.setAttribute('aria-label','Close dialog');x.innerHTML=glyph('close');x.onclick=()=>closeModal(null);head.append(h,x);form.append(head);
       if(description){const p=document.createElement('p');p.textContent=description;form.append(p);}
       const inputs={};const validation=document.createElement('p');validation.className='wf-modal-error';validation.setAttribute('role','alert');
       for(const field of fields){const label=document.createElement('label');label.textContent=field.label;
@@ -644,7 +649,7 @@ button,input,textarea{font-family:Inter,Vazirmatn,system-ui,sans-serif}
     let isDark = localStorage.getItem('wordapp_dark') === 'true';
     function applyDarkMode() {
       document.body.classList.toggle('dark-mode', isDark);
-      darkModeToggle.textContent = isDark ? '☀️' : '🌙';
+      darkModeToggle.innerHTML = glyph(isDark?'sun':'moon');
       localStorage.setItem('wordapp_dark', isDark);
     }
     applyDarkMode();
@@ -985,7 +990,7 @@ button,input,textarea{font-family:Inter,Vazirmatn,system-ui,sans-serif}
     // Workspace tools — retain the original storage key and card format.
     const workspace = document.createElement('section');
     workspace.className='workspace';
-    workspace.innerHTML='<div class="wf-stats" id="wfStats"></div><div class="wf-tools"><input id="wfSearch" aria-label="Search vocabulary" placeholder="Search words or tags"><div id="wfFilter" class="wf-dropdown"><button type="button" id="wfFilterTrigger" class="wf-dropdown-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="wfFilterMenu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"/></svg><span id="wfFilterLabel">All tags</span><svg class="wf-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div id="wfFilterMenu" class="wf-dropdown-menu" role="listbox" aria-label="Filter by tag" hidden></div></div><button id="wfAdd">+ Manual</button><button id="wfReview">Smart review</button><button id="wfBackup">Export</button><button id="wfRestore">Import</button><input id="wfFile" type="file" accept=".json" hidden></div><div id="wfSession" hidden></div><p id="wfNotice" role="status"></p>';
+    workspace.innerHTML='<div class="wf-stats" id="wfStats"></div><div class="wf-tools"><input id="wfSearch" aria-label="Search vocabulary" placeholder="Search words or tags"><div id="wfFilter" class="wf-dropdown"><button type="button" id="wfFilterTrigger" class="wf-dropdown-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="wfFilterMenu"><i data-lucide="list-filter" aria-hidden="true"></i><span id="wfFilterLabel">All tags</span><i class="wf-chevron" data-lucide="chevron-down" aria-hidden="true"></i></button><div id="wfFilterMenu" class="wf-dropdown-menu" role="listbox" aria-label="Filter by tag" hidden></div></div><button id="wfAdd">+ Manual</button><button id="wfReview">Smart review</button><button id="wfBackup">Export</button><button id="wfRestore">Import</button><input id="wfFile" type="file" accept=".json" hidden></div><div id="wfSession" hidden></div><p id="wfNotice" role="status"></p>';
     document.querySelector('.mode-row').before(workspace);
     const $wf=id=>document.getElementById(id);
     const normalized=s=>String(s||'').normalize('NFKC').trim().toLowerCase();
@@ -1028,7 +1033,7 @@ button,input,textarea{font-family:Inter,Vazirmatn,system-ui,sans-serif}
       for(const option of options){
         const el=document.createElement('div');el.className='wf-dropdown-option';el.setAttribute('role','option');el.tabIndex=-1;el.dataset.tagValue=option.value;el.setAttribute('aria-selected',String(option.value===tagFilter.value));
         const text=document.createElement('span');text.textContent=option.label;text.dir='auto';el.append(text);
-        const mark=document.createElementNS('http://www.w3.org/2000/svg','svg');mark.setAttribute('viewBox','0 0 24 24');mark.setAttribute('width','16');mark.setAttribute('height','16');mark.setAttribute('fill','none');mark.setAttribute('stroke','currentColor');mark.setAttribute('stroke-width','2');mark.setAttribute('stroke-linecap','round');mark.setAttribute('stroke-linejoin','round');mark.setAttribute('aria-hidden','true');const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d','m5 12 4 4L19 6');mark.append(path);el.append(mark);
+        el.insertAdjacentHTML('beforeend',glyph('check'));
         el.addEventListener('click',()=>{tagFilter.value=option.value;closeTagMenu(true);updateWorkspace();});
         tagMenu.append(el);
       }
@@ -1072,7 +1077,7 @@ button,input,textarea{font-family:Inter,Vazirmatn,system-ui,sans-serif}
     };
     let queue=[], current=null, reversed=false,reviewTotal=0,reviewDone=0;
     function progressView(done,total,label){const box=document.createElement('div');box.className='wf-progress';const line=document.createElement('div');line.className='wf-progress-label';line.append(make('span',label),make('span',done+' / '+total));const track=document.createElement('div');track.className='wf-progress-track';track.setAttribute('role','progressbar');track.setAttribute('aria-label',label);track.setAttribute('aria-valuemin','0');track.setAttribute('aria-valuemax',String(Math.max(total,1)));track.setAttribute('aria-valuenow',String(done));const fill=document.createElement('div');fill.className='wf-progress-fill';track.append(fill);box.append(line,track);requestAnimationFrame(()=>{fill.style.width=(total?done/total*100:0)+'%';});return box;}
-    function completionView(title,description){const box=document.createElement('div');box.className='wf-complete';const mark=document.createElement('div');mark.className='wf-complete-mark';mark.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>';box.append(mark,make('h2',title),make('p',description));return box;}
+    function completionView(title,description){const box=document.createElement('div');box.className='wf-complete';const mark=document.createElement('div');mark.className='wf-complete-mark';mark.innerHTML=glyph('check');box.append(mark,make('h2',title),make('p',description));return box;}
     const session=$wf('wfSession');
     function nextReview(){
       current=queue.shift();
@@ -1238,11 +1243,11 @@ button,input,textarea{font-family:Inter,Vazirmatn,system-ui,sans-serif}
       const row=document.createElement('div');row.className='wf-action-row';row.append(...children);section.append(row);parent.append(section);return section;
     }
     const labels={today:['Today','A little progress, every day.'],library:['Vocabulary','Your words, meanings and personal examples.'],review:['Review','Remember more with focused daily review.'],practice:['Practice','Choose an exercise and put your knowledge to work.'],dictionary:['Dictionary','Explore meanings, pronunciation and examples.'],settings:['Settings','Manage your workspace and vocabulary data.']};
-    const paths={today:'M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z',library:'M4 19V5a2 2 0 0 1 2-2h14v18H6a2 2 0 0 1 0-4h14M8 7h8',review:'M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1',practice:'M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z',dictionary:'M3 5h7a2 2 0 0 1 2 2v14a3 3 0 0 0-3-3H3zM21 5h-7a2 2 0 0 0-2 2v14a3 3 0 0 1 3-3h6z',settings:'M4 7h16M4 12h16M4 17h16M8 5v4M16 10v4M10 15v4'};
+    const paths={today:'today',library:'library',review:'review',practice:'practice',dictionary:'dictionary',settings:'settings'};
     const buttons={};
     for(const key of Object.keys(views)){
       const b=document.createElement('button');b.className='wf-nav-btn';b.type='button';
-      b.innerHTML='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+paths[key]+'"/></svg><span>'+labels[key][0]+'</span>';
+      b.innerHTML=glyph(paths[key])+'<span>'+labels[key][0]+'</span>';
       b.onclick=()=>navigate(key);buttons[key]=b;nav.append(b);
     }
     function action(label,fn,primary=false){const b=make('button',label);b.className='wf-action'+(primary?' primary':'');b.onclick=fn;return b;}
@@ -1288,9 +1293,7 @@ button,input,textarea{font-family:Inter,Vazirmatn,system-ui,sans-serif}
     practiceHome=function(){originalPracticeHome();practice.querySelectorAll('button').forEach(b=>{if(b.textContent==='Close')b.onclick=()=>navigate('today');});};
     // The dictionary result stays on its own page; saving does not require moving the input.
 
-    const iconPaths={
-      plus:'M12 5v14M5 12h14',search:'M21 21l-4.3-4.3M19 11a8 8 0 1 1-16 0 8 8 0 0 1 16 0',copy:'M9 9h12v12H9zM15 9V3H3v12h6',edit:'M12 20h9M16 4l4 4L8 20H4v-4z',volume:'M11 5L6 9H3v6h3l5 4zM15 9a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12',check:'M5 12l4 4L19 6',trash:'M3 6h18M8 6V3h8v3M5 6l1 15h12l1-15M10 10v7M14 10v7',left:'M15 18l-6-6 6-6',right:'M9 18l6-6-6-6',mic:'M9 5a3 3 0 0 1 6 0v7a3 3 0 0 1-6 0zM5 11v1a7 7 0 0 0 14 0v-1M12 19v3M9 22h6',moon:'M20 15A9 9 0 0 1 9 4a9 9 0 1 0 11 11z',sun:'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8M12 2v2M12 20v2M2 12h2M20 12h2M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2',download:'M12 3v12M7 10l5 5 5-5M4 17v4h16v-4',upload:'M12 16V4M7 9l5-5 5 5M4 17v4h16v-4',list:'M8 6h13M8 12h13M8 18h13M3 6h1M3 12h1M3 18h1',arrow:'M4 12h16M14 6l6 6-6 6',note:'M5 3h14v18H5zM8 8h8M8 12h8M8 16h4',cards:'M7 3h14v15H7zM3 7v14h14'};
-    function glyph(name){return '<svg class="wf-glyph" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+iconPaths[name]+'"/></svg>';}
+    function glyph(name){return window.wfLucideGlyph(name);}
     function iconize(el,name,label,only=false){
       if(!el)return;el.innerHTML=glyph(name)+(only?'':'<span></span>');if(!only)el.lastElementChild.textContent=label;
       el.setAttribute('aria-label',label);el.title=label;el.classList.add('wf-icon-action');if(only)el.classList.add('wf-icon-only');
@@ -1317,6 +1320,7 @@ button,input,textarea{font-family:Inter,Vazirmatn,system-ui,sans-serif}
     navigate(location.hash.slice(1)||'today',true);
 
     renderAll();
+    if(window.lucide?.createIcons)window.lucide.createIcons({attrs:{'stroke-width':2,'aria-hidden':'true'}});
   })();
 </script>
 </body>
