@@ -1076,17 +1076,37 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
       }
     }
 
-    function speakEnglish(text) {
-      if (!window.speechSynthesis) return;
-      const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-      sentences.forEach((sentence, i) => {
-        setTimeout(() => {
-          const utterance = new SpeechSynthesisUtterance(sentence.trim());
-          utterance.lang = 'en-US';
-          utterance.rate = 0.9;
-          window.speechSynthesis.speak(utterance);
-        }, i * 500);
-      });
+    // Prefer high-quality English voices available on this device.
+    let englishVoices=[],activeSpeech=null;
+    function refreshEnglishVoices(){
+      if(!window.speechSynthesis)return;
+      englishVoices=window.speechSynthesis.getVoices().filter(v=>/^en(?:-|$)/i.test(v.lang));
+    }
+    function chooseEnglishVoice(){
+      refreshEnglishVoices();
+      const score=v=>{
+        const name=v.name.toLowerCase();
+        return (/natural|neural|premium|enhanced/.test(name)?100:0)+(/google us english|google uk english/.test(name)?60:0)+(/^en-us$/i.test(v.lang)?15:0)+(v.localService?5:0)+(v.default?3:0)-(/compact|espeak|robot/.test(name)?35:0);
+      };
+      return [...englishVoices].sort((a,b)=>score(b)-score(a))[0]||null;
+    }
+    if(window.speechSynthesis){
+      refreshEnglishVoices();
+      window.speechSynthesis.addEventListener('voiceschanged',refreshEnglishVoices);
+    }
+    function speakEnglish(text){
+      if(!window.speechSynthesis){showToast('Pronunciation is unavailable in this browser.');return;}
+      const spoken=String(text||'').trim();if(!spoken)return;
+      const synth=window.speechSynthesis;
+      if(synth.speaking||synth.pending)synth.cancel();
+      const voice=chooseEnglishVoice();
+      const utterance=new SpeechSynthesisUtterance(spoken);
+      if(voice){utterance.voice=voice;utterance.lang=voice.lang;}else utterance.lang='en-US';
+      utterance.rate=0.97;utterance.pitch=1;utterance.volume=1;
+      activeSpeech=utterance;
+      utterance.onend=()=>{if(activeSpeech===utterance)activeSpeech=null;};
+      utterance.onerror=e=>{if(activeSpeech!==utterance)return;activeSpeech=null;if(!['canceled','interrupted'].includes(e.error))showToast('Voice unavailable. Try another browser or install an English speech voice.');};
+      synth.speak(utterance);
     }
 
     function escapeHtml(unsafe) {
