@@ -68,6 +68,7 @@ body.dark-mode .wf-setting-mark{color:#8cdbcb;background:#24443f}body.dark-mode 
 .wf-analysis-footer{display:flex;align-items:center;justify-content:space-between;gap:12px}.wf-analysis-footer button{flex:none}
 @media(max-width:760px){#view-analyze{gap:8px;grid-template-rows:auto auto minmax(165px,1fr) auto}.wf-analysis-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.wf-analysis-tile{padding:8px}.wf-analysis-bars{gap:2px}.wf-analysis-footer{flex-wrap:wrap}#view-analyze .wf-panel{padding:10px 12px}}
 @media(prefers-reduced-motion:reduce){.wf-analysis-fill{transition:none}}
+.wf-auth-toggle{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:0;padding:4px;border-radius:999px;border:1px solid var(--border);background:var(--bg);isolation:isolate}.wf-auth-toggle:before{content:'';position:absolute;inset:4px auto 4px 4px;width:calc((100% - 8px)/2);background:var(--accent);border-radius:999px;z-index:-1;transition:transform .24s cubic-bezier(.22,.8,.25,1)}.wf-auth-toggle[data-mode=signup]:before{transform:translateX(100%)}.wf-auth-toggle button{min-height:40px;border:0;background:transparent;color:var(--ink-soft);font:600 .85rem Inter,sans-serif;border-radius:999px;cursor:pointer}.wf-auth-toggle button[aria-pressed=true]{color:var(--on-accent,#fff)}.wf-auth-form{font-family:Inter,system-ui,sans-serif;gap:14px!important}.wf-auth-main{padding:32px!important;min-height:100dvh}.wf-auth-form .wf-email-form{gap:12px}.wf-auth-form .wf-email-form input{min-height:46px}.wf-auth-error:empty{display:none}.wf-auth-note{font-size:.75rem}@media(prefers-reduced-motion:reduce){.wf-auth-toggle:before{transition:none}}
 </style>
   <script>(()=>{let mode='system';try{mode=localStorage.getItem('wf-appearance')||'system';}catch{}const dark=mode==='dark'||(mode!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.style.background=dark?'#111817':'#f7f8fa';document.documentElement.style.colorScheme=dark?'dark':'light';})();</script>
   <noscript><style>html.wf-booting body{visibility:visible}</style></noscript>
@@ -1815,7 +1816,7 @@ window.wfLucideGlyph=function(alias){const names={"chart":"chart-no-axes-column-
     const accountName=make('strong','');accountIdentity.append(accountName,cloudStatus);cloudStatus.setAttribute('role','status');
     const accountSettings=settingCard('Account','Back up your words and sync across devices.','today','account');
     const accountPanel=accountSettings.card;accountPanel.classList.add('wf-account-panel');
-    const guestCopy=make('div','');guestCopy.className='wf-setting-guest';guestCopy.append(make('strong','Guest mode'),make('small','Free to use without signing in.'));
+    const guestCopy=make('div','');guestCopy.className='wf-setting-guest';guestCopy.append(make('strong','Guest mode'),make('small','Sign in to sync your vocabulary.'));
     const accountRow=make('div','');accountRow.className='wf-setting-row wf-setting-account-row';accountRow.append(guestCopy,accountIdentity,settingsAccount,signOutButton);
     accountSettings.body.append(accountRow);views.settings.prepend(accountPanel);
     settingsAccount.classList.add('primary');
@@ -1908,7 +1909,7 @@ window.wfLucideGlyph=function(alias){const names={"chart":"chart-no-axes-column-
         if(consent&&guest.length){const merged=mergeWords([],wordPairs,guest);if(saveWorkspace(activeStorageKey,merged)){wordPairs=merged;pendingGuest={id:user.id,snapshot:JSON.stringify(guest)};}}
       }
       cardIndex=0;renderAll();account.textContent='Sign in';account.hidden=!!user;headerActions.hidden=!!user;settingsAccount.hidden=!!user;signOutButton.hidden=!user;accountIdentity.hidden=!user;guestCopy.hidden=!!user;accountName.textContent=user?(user.email||'Signed in'):'';updateAuthHint();
-      if(!user){cloudLabel('Saved on this device');return;}
+      if(!user){cloudLabel('Sign in to continue');showSignIn();return;}authClose();
       cloudLabel(navigator.onLine?'Loading private workspace…':'Saved on this device · offline');await pushCloud();
     }
     window.addEventListener('online',()=>{if(cloudUser)queueCloud(0);});
@@ -1917,8 +1918,8 @@ window.wfLucideGlyph=function(alias){const names={"chart":"chart-no-axes-column-
     document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cloudUser&&navigator.onLine)queueCloud(300);});
     setInterval(()=>{if(cloudUser&&navigator.onLine&&!document.hidden&&!cloudBusy)queueCloud(0);},60000);
     const authDialog=document.createElement('dialog');authDialog.className='wf-auth-dialog';authDialog.setAttribute('aria-labelledby','wfAuthTitle');document.body.append(authDialog);
-    function authClose(){if(authDialog.open)authDialog.close();}
-    authDialog.addEventListener('click',e=>{if(e.target===authDialog)authClose();});
+    function authClose(){if(cloudUser&&authDialog.open)authDialog.close();}
+    authDialog.addEventListener('cancel',e=>{if(!cloudUser)e.preventDefault();});
     function showSignIn(){
       if(authDialog.open)return;
       authDialog.replaceChildren();
@@ -1932,7 +1933,7 @@ window.wfLucideGlyph=function(alias){const names={"chart":"chart-no-axes-column-
       const sample=make('div','');sample.className='wf-auth-sample';sample.setAttribute('aria-hidden','true');
       for(const [en,fa] of [['Curiosity','کنجکاوی'],['Progress','پیشرفت']]){const row=make('div','');row.className='wf-auth-sample-row';const meaning=make('span',fa);meaning.lang='fa';meaning.dir='rtl';row.append(make('strong',en),meaning);sample.append(row);}
       storyContent.append(eyebrow,storyTitle,make('p','Build your vocabulary one word at a time. Keep your learning with you, wherever you go.'));
-      const footer=make('div','');footer.className='wf-auth-story-footer';footer.innerHTML=glyph('check');footer.append(make('span','Free to learn. Your choice to sign in.'));
+      const footer=make('div','');footer.className='wf-auth-story-footer';footer.innerHTML=glyph('check');footer.append(make('span','Your personal vocabulary, synced across devices.'));
       story.append(brand,storyContent,footer);
       const mainAuth=make('section','');mainAuth.className='wf-auth-main';
       const form=make('div','');form.className='wf-auth-form';
@@ -1943,32 +1944,34 @@ window.wfLucideGlyph=function(alias){const names={"chart":"chart-no-axes-column-
       const error=make('p','');error.className='wf-auth-error';error.setAttribute('role','status');
       const actions=make('div','');actions.className='wf-auth-actions';
       const google=make('button','');google.type='button';google.className='wf-google';google.innerHTML='<svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true"><path fill="#4285F4" d="M43.61 24.46c0-1.36-.12-2.66-.35-3.92H24v7.43h11.02a9.42 9.42 0 0 1-4.09 6.19v5.14h6.63c3.88-3.57 6.05-8.82 6.05-14.84z"/><path fill="#34A853" d="M24 44c5.51 0 10.13-1.82 13.51-4.93l-6.63-5.14c-1.82 1.22-4.15 1.95-6.88 1.95-5.33 0-9.85-3.6-11.47-8.44H5.69v5.29A20 20 0 0 0 24 44z"/><path fill="#FBBC05" d="M12.53 27.44A12 12 0 0 1 12 24c0-1.2.19-2.36.53-3.44v-5.29H5.69a20 20 0 0 0 0 17.46z"/><path fill="#EA4335" d="M24 12.12c3.01 0 5.7 1.04 7.83 3.08l5.87-5.87C34.12 5.99 29.51 4 24 4A20 20 0 0 0 5.69 15.27l6.84 5.29C14.15 15.72 18.67 12.12 24 12.12z"/></svg><span>Continue with Google</span>';
-      google.onclick=async()=>{if(!cloudClient){error.textContent='Sign-in is unavailable right now. You can still use WordFlow offline.';return;}try{sessionStorage.setItem('wf-import-guest','yes');}catch{}google.disabled=true;google.setAttribute('aria-busy','true');google.querySelector('span').textContent='Connecting…';error.textContent='';try{const {error:failure}=await cloudClient.auth.signInWithOAuth({provider:'google',options:{redirectTo}});if(failure)throw failure;}catch(e){try{sessionStorage.removeItem('wf-import-guest');}catch{}error.textContent=e.message||'Could not sign in. Please try again.';google.disabled=false;google.removeAttribute('aria-busy');google.querySelector('span').textContent='Continue with Google';}};
+      google.onclick=async()=>{if(!cloudClient){error.textContent='Sign-in is unavailable right now. Check your connection and reload.';return;}try{sessionStorage.setItem('wf-import-guest','yes');}catch{}google.disabled=true;google.setAttribute('aria-busy','true');google.querySelector('span').textContent='Connecting…';error.textContent='';try{const {error:failure}=await cloudClient.auth.signInWithOAuth({provider:'google',options:{redirectTo}});if(failure)throw failure;}catch(e){try{sessionStorage.removeItem('wf-import-guest');}catch{}error.textContent=e.message||'Could not sign in. Please try again.';google.disabled=false;google.removeAttribute('aria-busy');google.querySelector('span').textContent='Continue with Google';}};
       const guest=make('button','Continue without an account');guest.type='button';guest.className='wf-guest';guest.onclick=authClose;
       const divider=make('div','or');divider.className='wf-auth-divider';const emailForm=make('form','');emailForm.className='wf-email-form';
-      const emailLabel=make('label','Email');const emailInput=make('input','');emailInput.type='email';emailInput.name='email';emailInput.autocomplete='email';emailInput.required=true;emailInput.placeholder='you@example.com';emailLabel.append(emailInput);
-      const passwordLabel=make('label','Password');const passwordInput=make('input','');passwordInput.type='password';passwordInput.name='password';passwordInput.autocomplete='current-password';passwordInput.required=true;passwordInput.placeholder='Enter your password';passwordLabel.append(passwordInput);
-      const submit=make('button','Sign in with email');submit.type='submit';submit.className='wf-email-submit';
-      const switchMode=make('button','Create an account');switchMode.type='button';switchMode.className='wf-email-switch';
+      const emailLabel=make('label','Email');const emailInput=make('input','');emailInput.type='email';emailInput.name='email';emailInput.autocomplete='email';emailInput.required=true;emailLabel.append(emailInput);
+      const passwordLabel=make('label','Password');const passwordInput=make('input','');passwordInput.type='password';passwordInput.name='password';passwordInput.autocomplete='current-password';passwordInput.required=true;passwordLabel.append(passwordInput);
+      const submit=make('button','Sign in');submit.type='submit';submit.className='wf-email-submit';
+      const switchMode=make('div','');switchMode.className='wf-auth-toggle';switchMode.setAttribute('role','group');switchMode.setAttribute('aria-label','Account access');
+      const loginTab=make('button','Sign in'),signupTab=make('button','Sign up');loginTab.type=signupTab.type='button';switchMode.append(loginTab,signupTab);
       let signup=false;
-      switchMode.onclick=()=>{signup=!signup;submit.textContent=signup?'Create account':'Sign in with email';switchMode.textContent=signup?'Already have an account? Sign in':'Create an account';passwordInput.autocomplete=signup?'new-password':'current-password';passwordInput.minLength=signup?8:0;error.textContent='';};
-      emailForm.append(emailLabel,passwordLabel,submit,switchMode);
+      function selectMode(value){signup=value;loginTab.setAttribute('aria-pressed',String(!signup));signupTab.setAttribute('aria-pressed',String(signup));switchMode.dataset.mode=signup?'signup':'login';title.textContent=signup?'Start your learning journey.':'Welcome back.';submit.textContent=signup?'Sign up':'Sign in';passwordInput.autocomplete=signup?'new-password':'current-password';passwordInput.minLength=signup?8:0;error.textContent='';}
+      loginTab.onclick=()=>selectMode(false);signupTab.onclick=()=>selectMode(true);selectMode(false);
+      emailForm.append(emailLabel,passwordLabel,submit);
       emailForm.onsubmit=async e=>{e.preventDefault();if(submit.disabled)return;if(!cloudClient){error.textContent='Sign-in is unavailable. Check your connection.';return;}
-        submit.disabled=true;switchMode.disabled=true;google.disabled=true;error.textContent='';submit.textContent=signup?'Creating account…':'Signing in…';
+        submit.disabled=true;loginTab.disabled=signupTab.disabled=true;google.disabled=true;error.textContent='';submit.textContent=signup?'Creating account…':'Signing in…';
         try{
           sessionStorage.setItem('wf-import-guest','yes');
           const credentials={email:emailInput.value.trim(),password:passwordInput.value};
           const result=signup?await cloudClient.auth.signUp({...credentials,options:{emailRedirectTo:redirectTo}}):await cloudClient.auth.signInWithPassword(credentials);
           if(result.error)throw result.error;
           passwordInput.value='';
-          if(result.data.session){authClose();await activateAccount(result.data.session.user);}
+          if(result.data.session){await activateAccount(result.data.session.user);authClose();}
           else{error.textContent='Check your email for a confirmation link, then sign in.';}
         }catch(e){try{sessionStorage.removeItem('wf-import-guest');}catch{}error.textContent=e.message||'Unable to sign in. Try again.';}
-        finally{submit.disabled=false;switchMode.disabled=false;google.disabled=false;submit.textContent=signup?'Create account':'Sign in with email';}
+        finally{submit.disabled=false;loginTab.disabled=signupTab.disabled=false;google.disabled=false;submit.textContent=signup?'Sign up':'Sign in';}
       };
-      actions.append(google,divider,emailForm,guest);
-      const note=make('p','WordFlow is free to use. No account is required. If you continue as a guest, your words are saved in this browser.');note.className='wf-auth-note';
-      form.append(mobileBrand,intro,benefits,error,actions,note);mainAuth.append(close,form);body.append(story,mainAuth);authDialog.append(body);authDialog.showModal();close.focus({preventScroll:true});
+      actions.append(switchMode,google,divider,emailForm);
+      const note=make('p','Your account keeps your vocabulary and learning progress together.');note.className='wf-auth-note';
+      form.append(mobileBrand,intro,actions,error,note);mainAuth.append(form);body.append(story,mainAuth);authDialog.append(body);authDialog.showModal();loginTab.focus({preventScroll:true});
     }
     async function openAccount(){
       if(!cloudUser){showSignIn();return;}
@@ -1991,13 +1994,14 @@ window.wfLucideGlyph=function(alias){const names={"chart":"chart-no-axes-column-
         const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/+esm');
         cloudClient=createClient('https://wstxoeebgvkmlkpefcot.supabase.co','sb_publishable_97JMqvFbbwJgBMPmZgXMJw_pSV6nVtU',{auth:{flowType:'pkce',detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}});
         cloudClient.auth.onAuthStateChange((event,session)=>{setTimeout(()=>activateAccount(session?.user||null).catch(e=>cloudLabel(e.message)),0);});
-        const {data,error}=await cloudClient.auth.getSession();if(error)cloudLabel(error.message);else await activateAccount(data.session?.user||null);
-      }catch(e){cloudLabel('Account service unavailable offline');if(!cloudUser){account.hidden=false;headerActions.hidden=false;}}
+        const {data,error}=await cloudClient.auth.getSession();if(error){cloudLabel(error.message);showSignIn();}else await activateAccount(data.session?.user||null);
+      }catch(e){cloudLabel('Account service unavailable offline');if(!cloudUser){showSignIn();}}
     })();
     tagTrigger.querySelector('[data-lucide="list-filter"]')?.insertAdjacentHTML('beforebegin',glyph('filter'));tagTrigger.querySelector('[data-lucide="list-filter"]')?.remove();const arrow=tagTrigger.querySelector('[data-lucide="chevron-down"]');if(arrow){arrow.insertAdjacentHTML('beforebegin',glyph('down'));arrow.previousElementSibling.classList.add('wf-chevron');arrow.remove();}
     // Reveal only the finished interface, after routing, theme and layout are ready.
     cancelAnimationFrame(fitFrame);
     fitWorkspace();
+    showSignIn();
     document.documentElement.classList.remove('wf-booting');
   })();
 </script>
