@@ -866,6 +866,7 @@ body.dark-mode{--wf-accent-end:#36a99f;--wf-hero-end:#192522}
 .wf-content.wf-needs-room #view-today{grid-template-rows:auto}.wf-content.wf-needs-room #view-today .wf-recent-list{min-height:100px}
 .wf-undo-stack{position:fixed;z-index:1000;right:20px;bottom:20px;display:flex;flex-direction:column;gap:8px;max-width:calc(100vw - 32px);pointer-events:none}.wf-undo-toast{position:relative;display:flex;align-items:center;gap:22px;min-width:210px;max-width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:13px;background:var(--card-bg);color:var(--ink);box-shadow:0 8px 30px #0002;overflow:hidden;pointer-events:auto;animation:wfUndoIn .24s cubic-bezier(.22,.8,.25,1) both}.wf-undo-message{font:600 .83rem Inter,sans-serif;flex:1}.wf-undo-toast button{border:0;background:var(--accent-soft);color:var(--accent);font:700 .8rem Inter,sans-serif;padding:8px 13px;border-radius:8px;cursor:pointer;min-height:36px}.wf-undo-toast button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.wf-undo-timer{position:absolute;bottom:0;left:0;height:3px;width:100%;background:var(--accent);transform-origin:left;animation:wfUndoCount 5s linear forwards}.wf-undo-leave{animation:wfUndoOut .18s ease both}@keyframes wfUndoIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes wfUndoOut{to{opacity:0;transform:translateY(8px)}}@keyframes wfUndoCount{to{transform:scaleX(0)}}@media(max-width:760px){.wf-undo-stack{right:12px;bottom:calc(80px + env(safe-area-inset-bottom,0px))}}@media(prefers-reduced-motion:reduce){.wf-undo-toast,.wf-undo-leave{animation:none}.wf-undo-timer{animation:none}}
 #view-profile{display:grid;grid-template-columns:1fr;gap:12px;align-content:start}#view-profile[hidden]{display:none!important}#view-profile .wf-panel{min-width:0;padding:18px;border:1px solid var(--border);border-radius:16px;background:var(--card-bg)}#view-profile .wf-profile-hero{display:flex;align-items:center;gap:16px;background:linear-gradient(125deg,var(--accent-soft),var(--card-bg))}.wf-profile-avatar{width:76px;height:76px;flex:0 0 76px;display:grid;place-items:center;border-radius:50%;overflow:hidden;background:var(--accent);color:var(--on-accent,#fff);font:700 1.6rem Inter,sans-serif}.wf-profile-avatar img{width:100%;height:100%;object-fit:cover}.wf-profile-identity{flex:1;min-width:0}.wf-profile-identity h2{font-size:1.35rem;line-height:1.2;margin:0;overflow-wrap:anywhere}.wf-profile-identity p{font-size:.8rem;color:var(--ink-soft);margin:6px 0 0;overflow-wrap:anywhere}.wf-profile-status{display:flex;align-items:center;gap:5px;font-size:.72rem;color:var(--accent);white-space:nowrap}.wf-profile-status svg{width:15px;height:15px}.wf-profile-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}.wf-profile-field{display:grid;gap:6px;padding:10px 0;border-bottom:1px solid var(--border);min-width:0}.wf-profile-field small{font-size:.74rem;color:var(--ink-soft)}.wf-profile-field strong{font-size:.86rem;overflow-wrap:anywhere}.wf-profile-metrics{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:12px}@media(max-width:760px){#view-profile .wf-panel{padding:12px}.wf-profile-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.wf-profile-avatar{width:56px;height:56px;flex-basis:56px}.wf-profile-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.wf-profile-metrics .wf-analysis-tile{flex-direction:column;align-items:flex-start}.wf-nav-label{font-size:.61rem!important}.wf-nav-btn{min-width:0!important}.wf-profile-status{display:none}}
+.wf-heading p:empty,.wf-setting-copy p:empty,.wf-setting-copy small:empty,.wf-setting-row small:empty,.wf-setting-row p:empty{display:none!important}.wf-analysis-tile strong{font-size:clamp(1.25rem,2.4vw,1.9rem);font-weight:750;line-height:1.15}.wf-analysis-tile small{font-weight:600}.wf-analysis-hero h3{font-weight:750}
 </style>
 </head>
 <body>
@@ -1522,7 +1523,7 @@ window.wfLucideGlyph=function(alias){const names={"user":"user-round","chart":"c
     function practiceHome(){
       practice.replaceChildren(make('h2','Practice your vocabulary'));
       if(!wordPairs.length){practice.append(make('p','Add a word first.'));return;}
-      const description=make('p','Choose an exercise. Each session uses up to 10 of your saved words.');
+      const description=make('p','Up to 10 words');
       const actions=document.createElement('div');actions.className='wf-ratings';
       for(const [mode,label] of [['choice','Multiple choice'],['typing','English spelling'],['listen','Listening & dictation'],['cloze','Fill in the blank']]){
         const b=make('button',label);b.onclick=()=>{
@@ -1611,7 +1612,7 @@ window.wfLucideGlyph=function(alias){const names={"user":"user-round","chart":"c
       if(desc)section.append(make('p',desc));
       const row=document.createElement('div');row.className='wf-action-row';row.append(...children);section.append(row);parent.append(section);return section;
     }
-    const labels={today:['Today','Translate, save and remember new words.'],library:['Vocabulary','Your words, meanings and personal examples.'],review:['Review','Remember more with focused daily review.'],practice:['Practice','Choose an exercise and put your knowledge to work.'],analyze:['Analyze','See how your vocabulary and practice are growing.'],profile:['Profile',''],settings:['Settings','Your account, backups and app preferences.']};
+    const labels={today:['Today',''],library:['Vocabulary',''],review:['Review',''],practice:['Practice',''],analyze:['Analyze',''],profile:['Profile',''],settings:['Settings','']};
     const paths={today:'today',library:'library',review:'review',practice:'practice',analyze:'chart',profile:'user',settings:'settings'};
     const buttons={};
     for(const key of Object.keys(views)){
@@ -1623,7 +1624,7 @@ window.wfLucideGlyph=function(alias){const names={"user":"user-round","chart":"c
     const hero=document.createElement('section');hero.className='wf-hero wf-welcome';
     const welcomeCopy=make('div','');welcomeCopy.className='wf-welcome-copy';
     const welcomeTitle=make('h3','Turn new words into lasting knowledge.');
-    welcomeCopy.append(welcomeTitle,make('p','Translate English and Persian words, save them automatically, then practise until you remember them.'));
+    welcomeCopy.append(welcomeTitle);
     const journey=make('div','');journey.className='wf-learning-path';journey.setAttribute('aria-label','Three steps to learn vocabulary');
     for(const [number,label,desc] of [['1','Translate','Find the meaning'],['2','Save','Build your collection'],['3','Review','Remember what you learn']]){
       const step=make('div','');step.className='wf-path-step';const n=make('span',number);n.className='wf-step-number';const copy=make('div','');copy.append(make('strong',label),make('small',desc));step.append(n,copy);journey.append(step);
@@ -1640,7 +1641,7 @@ window.wfLucideGlyph=function(alias){const names={"user":"user-round","chart":"c
       if(dueCount){nextTitle.textContent=dueCount+' '+(dueCount===1?'word':'words')+' ready to review';nextDescription.textContent='Recall their meanings to help you remember.';nextAction.textContent='Review words';nextAction.onclick=()=>{navigate('review');$wf('wfReview').click();};}
       else{nextTitle.textContent='Build on what you know';nextDescription.textContent='Practise your saved words at your own pace.';nextAction.textContent='Practise';nextAction.onclick=()=>navigate('practice');}
     }
-    const capturePanel=group(views.today,'Translate a word','Type or speak in English or Persian. Your translation is saved automatically.',[capture]);capturePanel.classList.add('wf-capture-panel');
+    const capturePanel=group(views.today,'Translate a word','',[capture]);capturePanel.classList.add('wf-capture-panel');
     const captureStatus=make('p','');captureStatus.className='wf-capture-status';captureStatus.setAttribute('role','status');capturePanel.append(captureStatus);const exampleRow=make('div','');exampleRow.className='wf-try-example';exampleRow.append(make('span','Try an example:'));for(const sample of ['Apple','Curiosity']){const b=action(sample,()=>{inputEl.value=sample;addFromInput();});b.classList.add('wf-example');exampleRow.append(b);}capturePanel.append(exampleRow);
     const recent=make('section','');recent.className='wf-panel wf-recent';
     const recentHead=make('div','');recentHead.className='wf-recent-head';
@@ -1656,7 +1657,7 @@ window.wfLucideGlyph=function(alias){const names={"user":"user-round","chart":"c
       if(recentSelected&&rows.includes(recentSelected)){rows.splice(rows.indexOf(recentSelected),1);rows.unshift(recentSelected);}
       const pages=Math.max(1,Math.ceil(rows.length/recentSize));recentPage=Math.max(0,Math.min(recentPage,pages-1));
       recentList.replaceChildren();recentPager.hidden=pages<=1;
-      if(!rows.length){const empty=make('p','Your saved words will appear here. Translate your first word above to get started.');empty.className='wf-recent-empty';recentList.append(empty);return;}
+      if(!rows.length){const empty=make('p','No saved words');empty.className='wf-recent-empty';recentList.append(empty);return;}
       for(const w of rows.slice(recentPage*recentSize,(recentPage+1)*recentSize)){
         const row=make('div','');row.className='wf-recent-row';const en=make('strong',w.en);en.title=w.en;const fa=make('span',w.fa);fa.className='wf-recent-fa';fa.dir='rtl';fa.lang='fa';fa.title=w.fa;
         const actions=make('div','');actions.className='wf-recent-actions';
@@ -1687,7 +1688,7 @@ window.wfLucideGlyph=function(alias){const names={"user":"user-round","chart":"c
       if(activeView==='analyze')renderAnalysis();
     }
     const analysisHero=make('section','');analysisHero.className='wf-panel wf-analysis-hero';
-    const analysisTitle=make('h3','Small steps, lasting progress');const analysisCopy=make('p','See your learning over time. Every practice session counts.');analysisHero.append(analysisTitle,analysisCopy);
+    const analysisTitle=make('h3','Your progress');const analysisCopy=make('p','See your learning over time. Every practice session counts.');analysisHero.append(analysisTitle);
     const analysisMetrics=make('div','');analysisMetrics.className='wf-analysis-metrics';
     const analysisChart=make('section','');analysisChart.className='wf-panel wf-analysis-chart';
     const chartHead=make('div','');chartHead.className='wf-analysis-head';chartHead.append(make('h3','Learning activity'));
@@ -1699,7 +1700,7 @@ window.wfLucideGlyph=function(alias){const names={"user":"user-round","chart":"c
     const barDetail=make('p','');barDetail.className='wf-analysis-muted';barDetail.setAttribute('role','status');
     analysisChart.append(chartHead,chartSummary,bars,barDetail);
     const analysisFooter=make('section','');analysisFooter.className='wf-panel wf-analysis-footer';
-    const footerCopy=make('div','');footerCopy.append(make('h3','Practise at your own pace'),make('p','A short review can help words stick. Rest days are fine, too.'));
+    const footerCopy=make('div','');footerCopy.append(make('h3','Practice'));
     analysisFooter.append(footerCopy,action('Practise words',()=>navigate('practice'),true));
     analytics.append(analysisHero,analysisMetrics,analysisChart,analysisFooter);
     const profileView=views.profile;
@@ -1747,7 +1748,7 @@ window.wfLucideGlyph=function(alias){const names={"user":"user-round","chart":"c
       chartSummary.textContent=values.reduce((n,v)=>n+v.value,0)+' review & practice answers · '+values.reduce((n,v)=>n+v.saved,0)+' currently saved words added or edited';
       bars.replaceChildren();bars.style.setProperty('--bar-count',String(analysisDays));
       for(const v of values){const label=v.date.toLocaleDateString(undefined,{month:'short',day:'numeric'});const b=make('button','');b.type='button';b.className='wf-analysis-bar';b.setAttribute('aria-label',label+': '+v.value+' answers, '+v.saved+' saved words');b.title=b.getAttribute('aria-label');const track=make('span','');track.className='wf-analysis-track';const fill=make('span','');fill.className='wf-analysis-fill';fill.style.height=((v.value+v.saved)/max*100)+'%';const saved=make('span','');saved.className='wf-analysis-saved';saved.style.height=((v.value+v.saved)?v.saved/(v.value+v.saved)*100:0)+'%';fill.append(saved);track.append(fill);b.append(track,make('small',analysisDays===7?v.date.toLocaleDateString(undefined,{weekday:'short'}):String(v.date.getDate())));b.onclick=()=>{barDetail.textContent=label+' · '+v.value+' answers · '+v.saved+' saved words';};bars.append(b);}
-      barDetail.textContent='Select a day for details. Practice activity is recorded on this device from this update onward.';
+      barDetail.textContent='Activity on this device';
     }
 
     function settingCard(name,description,icon,style){
@@ -1763,9 +1764,9 @@ window.wfLucideGlyph=function(alias){const names={"user":"user-round","chart":"c
       const copy=make('div','');copy.className='wf-setting-copy';copy.append(make('strong',name));if(description)copy.append(make('small',description));
       row.append(symbol,copy,control);return row;
     }
-    const dataSettings=settingCard('Your vocabulary','Keep a copy of your words.','library','data');
-    dataSettings.body.append(settingRow('Export','Download a backup.','download',$wf('wfBackup')),settingRow('Import','Add words from a backup.','upload',$wf('wfRestore')),$wf('wfFile'));
-    const appSettings=settingCard('App preferences','Make WordFlow work for you.','settings','app');
+    const dataSettings=settingCard('Your vocabulary','','library','data');
+    dataSettings.body.append(settingRow('Export','','download',$wf('wfBackup')),settingRow('Import','','upload',$wf('wfRestore')),$wf('wfFile'));
+    const appSettings=settingCard('App preferences','','settings','app');
     const themeStatus=make('div','');themeStatus.className='wf-theme-selector';themeStatus.setAttribute('role','group');themeStatus.setAttribute('aria-label','Appearance');
     const themeChoices=[];
     const themeModes=['light','dark','system'];
@@ -1775,10 +1776,10 @@ window.wfLucideGlyph=function(alias){const names={"user":"user-round","chart":"c
       const b=make('button','');b.type='button';b.className='wf-theme-choice';b.innerHTML=glyph(icon);b.append(make('span',label));b.setAttribute('aria-pressed',String(mode===themeMode));themeChoices.push([mode,b]);themeStatus.append(b);
       b.onclick=()=>{themeMode=mode;try{localStorage.setItem('wf-appearance',mode);}catch{}syncDeviceTheme();themeStatus.style.setProperty('--theme-index',String(themeModes.indexOf(mode)));for(const [value,choice] of themeChoices)choice.setAttribute('aria-pressed',String(value===mode));};
     }
-    const themeRow=settingRow('Appearance','Choose your theme.','sun',themeStatus);themeRow.classList.add('wf-theme-row');
+    const themeRow=settingRow('Appearance','','sun',themeStatus);themeRow.classList.add('wf-theme-row');
     network.classList.add('wf-setting-value','wf-network-value');network.setAttribute('role','status');
     const connectionRow=settingRow('Connection','','review',network);
-    const installRow=settingRow('Install WordFlow','Open it like an app.','download',installButton);installRow.hidden=installButton.hidden;
+    const installRow=settingRow('Install WordFlow','','download',installButton);installRow.hidden=installButton.hidden;
     const installWatch=new MutationObserver(()=>{installRow.hidden=installButton.hidden;});installWatch.observe(installButton,{attributes:true,attributeFilter:['hidden']});
     appSettings.body.append(themeRow,connectionRow,installRow);
     const globalNotice=$wf('wfNotice');globalNotice.className='wf-global-notice';
@@ -1864,7 +1865,7 @@ window.wfLucideGlyph=function(alias){const names={"user":"user-round","chart":"c
     const signOutButton=action('Sign out',signOutFromSettings);signOutButton.classList.add('wf-signout');signOutButton.hidden=true;
     const accountIdentity=make('div','');accountIdentity.className='wf-account-identity';accountIdentity.hidden=true;
     const accountName=make('strong','');accountIdentity.append(accountName,cloudStatus);cloudStatus.setAttribute('role','status');
-    const accountSettings=settingCard('Account','Back up your words and sync across devices.','today','account');
+    const accountSettings=settingCard('Account','','today','account');
     const accountPanel=accountSettings.card;accountPanel.classList.add('wf-account-panel');
     const guestCopy=make('div','');guestCopy.className='wf-setting-guest';guestCopy.append(make('strong','Guest mode'),make('small','Sign in to sync your vocabulary.'));
     const accountRow=make('div','');accountRow.className='wf-setting-row wf-setting-account-row';accountRow.append(guestCopy,accountIdentity,settingsAccount,signOutButton);
@@ -1982,13 +1983,13 @@ window.wfLucideGlyph=function(alias){const names={"user":"user-round","chart":"c
       const storyTitle=make('h2','Make every word ');storyTitle.append(make('span','count.'));
       const sample=make('div','');sample.className='wf-auth-sample';sample.setAttribute('aria-hidden','true');
       for(const [en,fa] of [['Curiosity','کنجکاوی'],['Progress','پیشرفت']]){const row=make('div','');row.className='wf-auth-sample-row';const meaning=make('span',fa);meaning.lang='fa';meaning.dir='rtl';row.append(make('strong',en),meaning);sample.append(row);}
-      storyContent.append(eyebrow,storyTitle,make('p','Build your vocabulary one word at a time. Keep your learning with you, wherever you go.'));
+      storyContent.append(eyebrow,storyTitle);
       const footer=make('div','');footer.className='wf-auth-story-footer';footer.innerHTML=glyph('check');footer.append(make('span','Your personal vocabulary, synced across devices.'));
       story.append(brand,storyContent,footer);
       const mainAuth=make('section','');mainAuth.className='wf-auth-main';
       const form=make('div','');form.className='wf-auth-form';
       const mobileBrand=brand.cloneNode(true);mobileBrand.classList.add('wf-auth-mobile-brand');
-      const intro=make('div','');intro.className='wf-auth-intro';const title=make('h1','Your words, everywhere.');title.id='wfAuthTitle';intro.append(title,make('p','Back up your saved words and pick up where you left off on another device.'));
+      const intro=make('div','');intro.className='wf-auth-intro';const title=make('h1','Your words, everywhere.');title.id='wfAuthTitle';intro.append(title);
       const benefits=make('ul','');benefits.className='wf-auth-benefits';
       for(const label of ['Back up your saved words','Access your vocabulary on other devices','Keep your learning progress together']){const li=make('li','');li.innerHTML=glyph('check');li.append(make('span',label));benefits.append(li);}
       const error=make('p','');error.className='wf-auth-error';error.setAttribute('role','status');
@@ -2021,7 +2022,7 @@ window.wfLucideGlyph=function(alias){const names={"user":"user-round","chart":"c
       };
       actions.append(switchMode,google,divider,emailForm);
       const note=make('p','Your account keeps your vocabulary and learning progress together.');note.className='wf-auth-note';
-      form.append(mobileBrand,intro,actions,error,note);mainAuth.append(form);body.append(story,mainAuth);authDialog.append(body);authDialog.showModal();loginTab.focus({preventScroll:true});
+      form.append(mobileBrand,intro,actions,error);mainAuth.append(form);body.append(story,mainAuth);authDialog.append(body);authDialog.showModal();loginTab.focus({preventScroll:true});
     }
     async function openAccount(){
       if(!cloudUser){showSignIn();return;}
