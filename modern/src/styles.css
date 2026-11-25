@@ -79,3 +79,34 @@
 .wf-word-list li>span:first-child{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 @media(max-width:760px){.wf-shell{padding:0 12px}.wf-shell>.wf-header{min-height:58px;padding:8px 0}.wf-workspace{display:flex;flex-direction:column;padding:8px 0 0;gap:8px}.wf-sidebar{order:2;flex:none;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));padding:5px 2px calc(5px + env(safe-area-inset-bottom,0px));border-radius:14px 14px 0 0;overflow:visible}.wf-main{order:1;flex:1}.wf-toolbar{min-height:52px;padding-bottom:8px}.wf-toolbar h2{font-size:20px}.wf-page{padding-right:2px}.wf-nav-button{gap:4px;font-size:10px;min-height:48px}.wf-word-list li{grid-template-columns:minmax(0,1fr) auto;gap:8px}.wf-word-list li>span:nth-child(2){grid-row:2;grid-column:1;text-align:left}.wf-word-list li>div:last-child{grid-row:1/3;grid-column:2}.wf-learning-path{gap:5px}.wf-path-step{flex-direction:column;align-items:flex-start}.wf-path-step small{display:none}}
 @media(max-height:420px){.wf-shell{height:auto;min-height:100dvh;overflow:visible}.wf-workspace{height:auto}.wf-main,.wf-page{overflow:visible}.wf-sidebar{position:sticky;bottom:0;z-index:25}}
+
+
+/* Translation-first workspace */
+.wf-header-caption{color:var(--muted);font-size:12px}
+.wf-translator{display:grid;gap:12px;padding:clamp(14px,2.5vw,24px)}
+.wf-translate-label{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:650;color:var(--accent)}
+.wf-auto-label{margin-left:auto;font-size:11px;color:var(--muted);font-weight:500}
+.wf-translate-form{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px}
+.wf-translate-form input{border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:18px;width:100%;min-height:52px}
+.wf-translate-form .wf-primary,.wf-result-actions .wf-primary{padding:0 18px;white-space:nowrap}
+.wf-privacy-hint{font-size:11px;color:var(--muted)}
+.wf-translation-result{border-top:1px solid var(--line);padding-top:12px;min-height:70px}
+.wf-result-placeholder{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--muted);font-size:13px}
+.wf-result-skeleton{height:72px;background:var(--soft);border-radius:12px}
+.wf-result-form{display:grid;gap:12px}
+.wf-result-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.wf-result-fields label{display:grid;gap:6px;font-size:12px;color:var(--muted)}
+.wf-result-fields input{font-size:20px;color:var(--ink);padding:12px;border:1px solid var(--line);border-radius:10px;width:100%}
+.wf-result-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.wf-result-actions .wf-primary{margin-left:auto}
+.wf-library-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.wf-library-heading small{font-size:12px;color:var(--muted);margin-left:6px}
+.wf-segments{display:flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:12px;padding:4px;background:var(--bg)}
+.wf-segments button{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:9px 12px;border-radius:8px;font-size:13px;font-weight:600;color:var(--muted);text-transform:capitalize}
+.wf-segments button[aria-pressed=true]{background:var(--surface);color:var(--accent);box-shadow:0 1px 4px #0001}
+.wf-learn-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.wf-learn-overview>div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:4px}
+.wf-learn-overview strong{font-size:24px;color:var(--accent);font-variant-numeric:tabular-nums}
+.wf-learn-overview span{font-size:12px;color:var(--muted)}
+.wf-action:active:not(:disabled),.wf-primary:active:not(:disabled),.wf-segments button:active{transform:scale(.98)}
+@media(max-width:760px){.wf-sidebar{grid-template-columns:repeat(4,minmax(0,1fr))}.wf-header-caption{display:none}.wf-translate-form input{font-size:16px;padding:12px}.wf-translate-form .wf-primary{padding:0 12px}.wf-result-fields{grid-template-columns:1fr}.wf-result-actions{gap:5px}.wf-result-actions .wf-primary{padding:0 12px}.wf-word-list li>div:last-child{flex-wrap:wrap;max-width:104px;justify-content:flex-end}.wf-word-list .wf-action{padding:7px}}
