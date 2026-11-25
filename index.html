@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en" class="wf-booting">
 <head>
-  <style>html.wf-booting{background:#f7f8fa}html.wf-booting body{visibility:hidden;transition:none!important}@media(prefers-color-scheme:dark){html.wf-booting{background:#111817;color-scheme:dark}}html.wf-booting *,html.wf-booting *::before,html.wf-booting *::after{animation:none!important;transition:none!important}</style>
+  <style>html.wf-booting{background:#f7f8fa}html.wf-booting body{visibility:hidden;transition:none!important}@media(prefers-color-scheme:dark){html.wf-booting{background:#111817;color-scheme:dark}}html.wf-booting *,html.wf-booting *::before,html.wf-booting *::after{animation:none!important;transition:none!important}.wf-header-actions[hidden]{display:none!important}
+</style>
   <noscript><style>html.wf-booting body{visibility:visible}</style></noscript>
   <link rel="icon" type="image/svg+xml" href="./icon.svg?v=4">
   <link rel="manifest" href="./manifest.webmanifest">
@@ -1651,7 +1652,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     const searchWrap=document.createElement('div');searchWrap.className='wf-search-wrap';$wf('wfSearch').before(searchWrap);searchWrap.innerHTML=glyph('search');searchWrap.append($wf('wfSearch'));
     const shortcut=make('kbd','Ctrl K');searchWrap.append(shortcut);
     const quick=action('Add word',()=>{navigate('today');inputEl.focus({preventScroll:true});},true);iconize(quick,'plus','Add word');
-    const headerActions=document.createElement('div');headerActions.className='wf-header-actions';headerActions.append(quick);header.append(headerActions);
+    const headerActions=document.createElement('div');headerActions.className='wf-header-actions';header.append(headerActions);headerActions.hidden=true;
     iconize(recentBrowse,'list','View all');
     const heroButton=hero.querySelector('button');iconize(heroButton,'arrow','Start daily review');
     const reviewButton=$wf('wfReview');iconize(reviewButton,'cards','Start smart review');
@@ -1689,7 +1690,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     scheduleFit();
 
     // Account access is optional until email delivery and OAuth are verified.
-    const account=action('Sign in',openAccount);account.classList.add('wf-account');headerActions.prepend(account);
+    const account=action('Sign in',openAccount);account.classList.add('wf-account');account.hidden=true;
     const cloudStatus=make('small','Saved on this device');
     const settingsAccount=action('Sign in',openAccount);
     const signOutButton=action('Sign out',signOutFromSettings);signOutButton.classList.add('wf-signout');signOutButton.hidden=true;
