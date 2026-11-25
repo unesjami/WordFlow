@@ -758,6 +758,7 @@ body.dark-mode{--wf-accent-end:#36a99f;--wf-hero-end:#192522}
 @media(max-width:800px){.wf-auth-body{grid-template-columns:minmax(0,1fr)}.wf-auth-story{display:none}.wf-auth-main{min-height:100dvh;padding:70px 24px 36px}.wf-auth-main .wf-auth-close{top:16px;right:16px}.wf-auth-mobile-brand{display:flex;justify-content:flex-start;margin-bottom:4px}.wf-auth-form{gap:20px}}
 @media(max-height:650px) and (min-width:801px){.wf-auth-story{gap:18px;padding:28px}.wf-auth-story-content{gap:12px}.wf-auth-story h2{font-size:2.4rem}.wf-auth-sample-row{padding:10px 12px}.wf-auth-main{padding-block:60px 24px}.wf-auth-form{gap:14px}}
 @media(prefers-reduced-motion:reduce){.wf-auth-dialog,.wf-auth-main button{animation:none!important;transition:none!important}}
+.dark-toggle[hidden]{display:none!important}:root{color-scheme:light dark}@media(prefers-color-scheme:dark){html{background:#111817}}@media(prefers-color-scheme:light){html{background:#f7f8fa}}
 </style>
 </head>
 <body>
@@ -771,7 +772,7 @@ body.dark-mode{--wf-accent-end:#36a99f;--wf-hero-end:#192522}
         <p>Your personal vocabulary workspace</p>
       </div>
     </div>
-    <div class="dark-toggle" id="darkModeToggle" title="Toggle dark mode" role="button" aria-label="Toggle dark mode">🌙</div>
+    <div class="dark-toggle" id="darkModeToggle" hidden aria-hidden="true"></div>
   </header>
 
   <div class="mode-row">
@@ -888,14 +889,14 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     };
 
     // ---------- dark mode ----------
-    const deviceTheme=matchMedia('(prefers-color-scheme: dark)');let themeMode='system';try{const saved=localStorage.getItem('wordflow_theme_mode');if(['system','light','dark'].includes(saved))themeMode=saved;}catch{}let isDark=themeMode==='system'?deviceTheme.matches:themeMode==='dark';
+    const deviceTheme=matchMedia('(prefers-color-scheme: dark)');const themeMode='system';let isDark=deviceTheme.matches;
     function applyDarkMode() {
       document.body.classList.toggle('dark-mode', isDark);
       darkModeToggle.innerHTML = glyph(isDark?'sun':'moon');
-      document.documentElement.style.colorScheme=isDark?'dark':'light';try{localStorage.setItem('wordflow_theme_mode',themeMode);}catch{}
+      document.documentElement.style.colorScheme=isDark?'dark':'light';
     }
     applyDarkMode();
-    darkModeToggle.addEventListener('click', () => { themeMode=isDark?'light':'dark';isDark=!isDark;applyDarkMode(); });deviceTheme.addEventListener('change',()=>{if(themeMode==='system'){isDark=deviceTheme.matches;applyDarkMode();}});
+    function syncDeviceTheme(){isDark=deviceTheme.matches;applyDarkMode();}if(deviceTheme.addEventListener)deviceTheme.addEventListener('change',syncDeviceTheme);else deviceTheme.addListener(syncDeviceTheme);window.addEventListener('pageshow',syncDeviceTheme);window.addEventListener('focus',syncDeviceTheme);document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncDeviceTheme();});
 
     // ---------- load ----------
     try {
@@ -1358,7 +1359,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     $wf('wfReview').onclick=()=>{queue=wordPairs.filter(due).sort((a,b)=>(a.review?.due||0)-(b.review?.due||0)).slice(0,30);reviewTotal=queue.length;reviewDone=0;session.hidden=false;nextReview();};
     document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();$wf('wfSearch').focus({preventScroll:true});}});
     document.querySelector('.dark-toggle').tabIndex=0;
-    document.querySelector('.dark-toggle').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();darkModeToggle.click();}});
+
 
 
     const practiceButton=document.createElement('button');practiceButton.textContent='Practice';
@@ -1525,7 +1526,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     views.practice.append(practice);
     views.dictionary.append(dictionaryPanel);
     group(views.settings,'Your data','Export a backup before switching devices. Import merges new words with your existing library.',[$wf('wfBackup'),$wf('wfRestore'),$wf('wfFile')]);
-    group(views.settings,'App preferences','Install WordFlow on supported browsers. Offline review is available after setup.',[installButton,action('Toggle appearance',()=>darkModeToggle.click()),action('Use device theme',()=>{themeMode='system';isDark=deviceTheme.matches;applyDarkMode();showToast('Using device appearance');}),network]);
+    group(views.settings,'App preferences','Install WordFlow on supported browsers. Offline review is available after setup.',[installButton,make('span','Appearance: follows your device'),network]);
     const globalNotice=$wf('wfNotice');globalNotice.className='wf-global-notice';
     main.prepend(heading);main.append(status,globalNotice,footer);
     shell.replaceChildren(header,nav,main);
@@ -1567,7 +1568,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     const searchWrap=document.createElement('div');searchWrap.className='wf-search-wrap';$wf('wfSearch').before(searchWrap);searchWrap.innerHTML=glyph('search');searchWrap.append($wf('wfSearch'));
     const shortcut=make('kbd','Ctrl K');searchWrap.append(shortcut);
     const quick=action('Add word',()=>{navigate('today');inputEl.focus({preventScroll:true});},true);iconize(quick,'plus','Add word');
-    const headerActions=document.createElement('div');headerActions.className='wf-header-actions';headerActions.append(quick,darkModeToggle);header.append(headerActions);
+    const headerActions=document.createElement('div');headerActions.className='wf-header-actions';headerActions.append(quick);header.append(headerActions);
     const shortcuts=views.today.lastElementChild.querySelectorAll('button');iconize(shortcuts[0],'list','Browse vocabulary');iconize(shortcuts[1],'cards','Choose a practice');
     const heroButton=hero.querySelector('button');iconize(heroButton,'arrow','Start daily review');
     const reviewButton=$wf('wfReview');iconize(reviewButton,'cards','Start smart review');
