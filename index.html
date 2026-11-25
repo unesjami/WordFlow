@@ -760,6 +760,39 @@ body.dark-mode{--wf-accent-end:#36a99f;--wf-hero-end:#192522}
 @media(prefers-reduced-motion:reduce){.wf-auth-dialog,.wf-auth-main button{animation:none!important;transition:none!important}}
 .dark-toggle[hidden]{display:none!important}:root{color-scheme:light dark}@media(prefers-color-scheme:dark){html{background:#111817}}@media(prefers-color-scheme:light){html{background:#f7f8fa}}
 .wf-account-panel .wf-action-row{align-items:center;justify-content:space-between;gap:12px}.wf-account-identity{display:grid;gap:5px;min-width:0;flex:1}.wf-account-identity strong{font-size:.88rem;overflow-wrap:anywhere}.wf-account-identity small{font-size:.75rem;color:var(--ink-soft)}.wf-account-identity[hidden],.wf-signout[hidden],.wf-account-panel button[hidden]{display:none!important}.wf-account-panel .wf-signout{color:var(--ink-soft);background:transparent;border:1px solid var(--border);white-space:nowrap;min-height:44px;transition:background .15s,color .15s,transform .15s}.wf-account-panel .wf-signout:hover:not(:disabled){color:var(--danger);border-color:var(--danger);background:color-mix(in srgb,var(--danger) 6%,transparent)}.wf-signout:active{transform:scale(.98)}
+
+/* Unified input focus, compact dashboard, live translation history. */
+#view-today .small-input{border:1px solid var(--border);box-shadow:none;outline:none;transition:border-color .16s,box-shadow .16s;min-height:48px}
+#view-today .small-input:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 12%,transparent)}
+#wordInput,#wordInput:focus,#wordInput:focus-visible{border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;border-radius:0;min-height:36px}
+#wordInput:disabled{opacity:.65}
+.wf-search-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 12%,transparent)}
+.wf-search-wrap #wfSearch,.wf-search-wrap #wfSearch:focus,.wf-search-wrap #wfSearch:focus-visible{border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;min-width:0}
+#view-today{grid-template-rows:auto auto minmax(0,1fr) auto;gap:12px}
+#view-today .wf-stats{margin:0}
+#view-today .wf-hero,#view-today .wf-capture-panel{grid-column:1/-1}
+#view-today .wf-recent{grid-column:1/-1;min-height:0;display:flex;flex-direction:column;gap:8px;padding:14px 16px;overflow:hidden}
+.wf-recent-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:none}
+.wf-recent-head h3{margin:0;font-size:.95rem;letter-spacing:-.02em}
+.wf-recent-list{display:flex;flex-direction:column;gap:4px;min-height:0;flex:1 1 0;overflow:hidden}
+.wf-recent-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:12px;align-items:center;min-height:44px;padding:5px 8px;border-radius:9px;border-bottom:1px solid var(--border);flex:none}
+.wf-recent-row:last-child{border-bottom-color:transparent}
+.wf-recent-row strong,.wf-recent-row .wf-recent-fa{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;font-size:.9rem}
+.wf-recent-fa{text-align:right;font-family:Vazirmatn,var(--font-ui)}
+.wf-recent-actions{display:flex;gap:4px;align-items:center}
+.wf-recent-actions .icon-btn{width:36px;min-width:36px;height:36px;min-height:36px}
+.wf-recent-empty{color:var(--ink-soft);font-size:.84rem;margin:auto 0;line-height:1.5;padding:8px}
+.wf-recent-pager{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:none;font-size:.75rem;color:var(--ink-soft)}
+.wf-recent-pager button{min-height:36px!important;min-width:36px;padding:5px!important}
+.wf-recent-pager[hidden]{display:none!important}
+.wf-capture-status{font-size:.78rem;color:var(--ink-soft);margin:4px 0 0;line-height:1.4}
+.wf-capture-status:empty{display:none}
+#view-today .wf-auth-hint{grid-column:1/-1}
+#view-today .wf-capture-panel .input-panel-bottom{grid-template-columns:minmax(0,1fr) max-content}
+@media(min-width:1051px){#view-today .wf-hero{grid-column:1/6}#view-today .wf-capture-panel{grid-column:6/-1}}
+@media(max-width:1050px){#view-today{grid-template-rows:auto auto auto minmax(0,1fr) auto}#view-today .wf-hero{padding:10px 14px;display:flex;align-items:center;gap:12px;justify-content:space-between}#view-today .wf-hero p{display:none}#view-today .wf-hero h3{margin:0;font-size:1rem}}
+@media(max-width:760px){#view-today .wf-hero{display:none}#view-today{grid-template-rows:auto auto minmax(0,1fr) auto}#view-today .wf-capture-panel .input-panel-bottom{grid-template-columns:minmax(0,1fr)}#view-today .wf-capture-panel .translate-btn{justify-self:end}#view-today .wf-recent{padding:10px}.wf-recent-row{gap:6px;padding:4px}.wf-recent-actions .icon-btn{width:40px;min-width:40px;height:40px;min-height:40px}}
+.wf-content.wf-needs-room #view-today{grid-template-rows:auto}.wf-content.wf-needs-room #view-today .wf-recent-list{min-height:100px}
 </style>
 </head>
 <body>
@@ -971,6 +1004,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
       if (!raw || translateBtn.disabled) return;
 
       loadingIndicator.classList.add('show');
+      captureStatus.textContent='Translating…';
       inputEl.disabled = true;
       translateBtn.disabled = true;
 
@@ -984,13 +1018,15 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
           enWord = raw;
           faWord = await translateWithAPI(raw, 'en', 'fa');
         }
-        if(wordPairs.some(w=>normalized(w.en)===normalized(enWord)&&normalized(w.fa)===normalized(faWord))){showToast("Already saved");return;}
-        wordPairs.push({ en: enWord, fa: faWord, kept: false, timestamp: Date.now() });
+        const existing=wordPairs.find(w=>normalized(w.en)===normalized(enWord)&&normalized(w.fa)===normalized(faWord));
+        if(existing){recentSelected=existing;recentPage=0;renderRecent();captureStatus.textContent='Already in your vocabulary';inputEl.value='';return;}
+        const translated={en:enWord,fa:faWord,kept:false,timestamp:Date.now()};wordPairs.push(translated);recentSelected=translated;recentPage=0;
         persistAndRender();
         inputEl.value = '';
+        captureStatus.textContent='Saved to your vocabulary';
         showToast('Word saved');
-        setHighlight(wordPairs.length - 1);
       } catch (err) {
+        captureStatus.textContent='Translation failed. Check your connection and try again.';
         showError('Translation failed. Check your connection and try again.');
       } finally {
         loadingIndicator.classList.remove('show');
@@ -1514,8 +1550,31 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     views.today.append(stats);
     const hero=document.createElement('div');hero.className='wf-hero';
     hero.append(make('small','DAILY LEARNING'),make('h3','Make new words stick.'),make('p','Review your vocabulary at your own pace.'),action('Start daily review',()=>{navigate('review');$wf('wfReview').click();},true));views.today.append(hero);
-    group(views.today,'Quick capture','Add a word or phrase in English or Persian.',[capture]);
-    group(views.today,'Continue learning','',[action('Browse vocabulary',()=>navigate('library')),action('Choose a practice',()=>navigate('practice'))]);
+    const capturePanel=group(views.today,'Quick capture','Add a word or phrase in English or Persian.',[capture]);capturePanel.classList.add('wf-capture-panel');
+    const captureStatus=make('p','');captureStatus.className='wf-capture-status';captureStatus.setAttribute('role','status');capturePanel.append(captureStatus);
+    const recent=make('section','');recent.className='wf-panel wf-recent';
+    const recentHead=make('div','');recentHead.className='wf-recent-head';
+    const recentBrowse=action('View all',()=>navigate('library'));recentHead.append(make('h3','Recent translations'),recentBrowse);
+    const recentList=make('div','');recentList.className='wf-recent-list';
+    const recentPager=make('div','');recentPager.className='wf-recent-pager';
+    const recentPrev=action('Previous',()=>{recentPage--;renderRecent();}),recentNext=action('Next',()=>{recentPage++;renderRecent();}),recentCount=make('span','');
+    recentPrev.innerHTML=glyph('left');recentNext.innerHTML=glyph('right');recentPrev.setAttribute('aria-label','Previous translations');recentNext.setAttribute('aria-label','Next translations');
+    recentPager.append(recentPrev,recentCount,recentNext);recent.append(recentHead,recentList,recentPager);views.today.append(recent);
+    let recentPage=0,recentSize=2,recentSelected=null;
+    function renderRecent(){
+      const rows=[...wordPairs].sort((a,b)=>(Number(b.timestamp)||0)-(Number(a.timestamp)||0));
+      if(recentSelected&&rows.includes(recentSelected)){rows.splice(rows.indexOf(recentSelected),1);rows.unshift(recentSelected);}
+      const pages=Math.max(1,Math.ceil(rows.length/recentSize));recentPage=Math.max(0,Math.min(recentPage,pages-1));
+      recentList.replaceChildren();recentPager.hidden=pages<=1;
+      if(!rows.length){const empty=make('p','Your translations will appear here as soon as you save a word.');empty.className='wf-recent-empty';recentList.append(empty);return;}
+      for(const w of rows.slice(recentPage*recentSize,(recentPage+1)*recentSize)){
+        const row=make('div','');row.className='wf-recent-row';const en=make('strong',w.en);en.title=w.en;const fa=make('span',w.fa);fa.className='wf-recent-fa';fa.dir='rtl';fa.lang='fa';fa.title=w.fa;
+        const actions=make('div','');actions.className='wf-recent-actions';
+        for(const [name,label,fn] of [['volume','Listen',()=>speakEnglish(w.en)],['copy','Copy',()=>copyWord(wordPairs.indexOf(w))]]){const b=make('button','');b.type='button';b.className='icon-btn';b.innerHTML=glyph(name);b.title=label;b.setAttribute('aria-label',label+' '+w.en);b.onclick=fn;actions.append(b);}
+        row.append(en,fa,actions);recentList.append(row);
+      }
+      recentCount.textContent=(recentPage*recentSize+1)+'–'+Math.min((recentPage+1)*recentSize,rows.length)+' of '+rows.length;recentPrev.disabled=recentPage===0;recentNext.disabled=recentPage===pages-1;
+    }
     const libraryTools=document.createElement('div');libraryTools.className='wf-action-row wf-library-tools';
     libraryTools.append($wf('wfSearch'),$wf('wfFilter'),$wf('wfAdd'),batchButton);
     views.library.append(libraryTools,modes,stage);
@@ -1560,7 +1619,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     }
     const rowIcons={copy:['copy','Copy word'],edit:['edit','Edit word'],voice:['volume','Listen'],tick:['check','Keep word'],delete:['trash','Delete word'],details:['note','Tags and example']};
     function polishRows(){document.querySelectorAll('[data-action]').forEach(el=>{const item=rowIcons[el.dataset.action];if(item)iconize(el,item[0],item[1],true);});}
-    const originalRenderAll=renderAll;renderAll=function(){originalRenderAll();polishRows();};
+    const originalRenderAll=renderAll;renderAll=function(){originalRenderAll();polishRows();renderRecent();};
     for(const [id,name,label] of [['cardPrev','left','Previous card'],['cardNext','right','Next card'],['cardSpeak','volume','Listen'],['cardKeep','check','Keep word'],['micBtn','mic','Voice input']])iconize($wf(id),name,label,true);
     for(const [id,name,label] of [['wfAdd','plus','Add manually'],['wfBackup','download','Export backup'],['wfRestore','upload','Import backup']])iconize($wf(id),name,label);
     iconize(batchButton,'list','Bulk import');iconize(translateBtn,'arrow','Translate & save');iconize(installButton,'download','Install app');
@@ -1570,7 +1629,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     const shortcut=make('kbd','Ctrl K');searchWrap.append(shortcut);
     const quick=action('Add word',()=>{navigate('today');inputEl.focus({preventScroll:true});},true);iconize(quick,'plus','Add word');
     const headerActions=document.createElement('div');headerActions.className='wf-header-actions';headerActions.append(quick);header.append(headerActions);
-    const shortcuts=views.today.lastElementChild.querySelectorAll('button');iconize(shortcuts[0],'list','Browse vocabulary');iconize(shortcuts[1],'cards','Choose a practice');
+    iconize(recentBrowse,'list','View all');
     const heroButton=hero.querySelector('button');iconize(heroButton,'arrow','Start daily review');
     const reviewButton=$wf('wfReview');iconize(reviewButton,'cards','Start smart review');
     const first=views.library.querySelector('.wf-library-tools');const addQuick=action('Translate & add',()=>{navigate('today');inputEl.focus({preventScroll:true});},true);iconize(addQuick,'plus','Translate & add');first.append(addQuick);
@@ -1593,6 +1652,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
       }
       const view=views[activeView];
       const bottom=main.getBoundingClientRect().bottom;
+      if(activeView==='today'){const height=recentList.clientHeight;const size=Math.max(1,Math.min(8,Math.floor((height+4)/48)));if(size!==recentSize){recentSize=size;renderRecent();}}
       const overflow=view&&[...view.children].some(el=>!el.hidden&&el.getBoundingClientRect().bottom>bottom-4);
       const listOverflow=activeView==='library'&&[...document.querySelectorAll('#view-library .active-page .word-flow')].some(el=>el.scrollHeight>el.clientHeight+3);
       if(overflow||listOverflow||main.scrollHeight>main.clientHeight+4)main.classList.add('wf-needs-room');
