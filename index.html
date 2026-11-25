@@ -45,6 +45,7 @@ body.dark-mode .wf-setting-mark{color:#8cdbcb;background:#24443f}body.dark-mode 
 #view-settings .wf-account-identity{flex:1}
 @media(max-width:760px){#view-settings{grid-template-columns:minmax(0,1fr);grid-template-rows:auto;gap:8px}#view-settings .wf-setting-card{padding:12px;gap:8px}.wf-setting-mark{width:34px;height:34px}.wf-setting-row{min-height:48px;padding:7px 0}.wf-setting-copy p{font-size:.72rem}.wf-setting-copy small{font-size:.7rem}}
 @media(prefers-reduced-motion:reduce){#view-settings *{transition:none!important}}
+#view-settings .wf-account-panel .wf-signout{color:var(--danger);border:1px solid var(--danger);background:transparent;border-radius:10px;transition:background .15s,transform .15s}#view-settings .wf-account-panel .wf-signout:hover:not(:disabled){background:color-mix(in srgb,var(--danger) 9%,transparent)}#view-settings .wf-signout:focus-visible{outline:2px solid var(--danger);outline-offset:3px}.wf-header-actions .wf-guest-signin{background:var(--accent);color:var(--on-accent,#fff);border:1px solid var(--accent);border-radius:10px;padding:8px 14px;min-height:38px;font-weight:600;transition:opacity .15s,transform .15s}.wf-guest-signin:active{transform:scale(.98)}.wf-guest-signin[hidden]{display:none!important}
 </style>
   <noscript><style>html.wf-booting body{visibility:visible}</style></noscript>
   <link rel="icon" type="image/svg+xml" href="./icon.svg?v=4">
@@ -1771,7 +1772,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     scheduleFit();
 
     // Account access is optional until email delivery and OAuth are verified.
-    const account=action('Sign in',openAccount);account.classList.add('wf-account');account.hidden=true;
+    const account=action('Sign in',openAccount);account.classList.add('wf-account','wf-guest-signin');account.hidden=true;headerActions.append(account);
     const cloudStatus=make('small','Saved on this device');
     const settingsAccount=action('Sign in',openAccount);
     const signOutButton=action('Sign out',signOutFromSettings);signOutButton.classList.add('wf-signout');signOutButton.hidden=true;
@@ -1871,7 +1872,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
         let consent=false;try{consent=sessionStorage.getItem('wf-import-guest')==='yes';sessionStorage.removeItem('wf-import-guest');}catch{}
         if(consent&&guest.length){const merged=mergeWords([],wordPairs,guest);if(saveWorkspace(activeStorageKey,merged)){wordPairs=merged;pendingGuest={id:user.id,snapshot:JSON.stringify(guest)};}}
       }
-      cardIndex=0;renderAll();account.textContent=user?'Account':'Sign in';settingsAccount.hidden=!!user;signOutButton.hidden=!user;accountIdentity.hidden=!user;guestCopy.hidden=!!user;accountName.textContent=user?(user.email||'Signed in'):'';updateAuthHint();
+      cardIndex=0;renderAll();account.textContent='Sign in';account.hidden=!!user;headerActions.hidden=!!user;settingsAccount.hidden=!!user;signOutButton.hidden=!user;accountIdentity.hidden=!user;guestCopy.hidden=!!user;accountName.textContent=user?(user.email||'Signed in'):'';updateAuthHint();
       if(!user){cloudLabel('Saved on this device');return;}
       cloudLabel(navigator.onLine?'Loading private workspace…':'Saved on this device · offline');await pushCloud();
     }
@@ -1935,7 +1936,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
         cloudClient=createClient('https://wstxoeebgvkmlkpefcot.supabase.co','sb_publishable_97JMqvFbbwJgBMPmZgXMJw_pSV6nVtU',{auth:{flowType:'pkce',detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}});
         cloudClient.auth.onAuthStateChange((event,session)=>{setTimeout(()=>activateAccount(session?.user||null).catch(e=>cloudLabel(e.message)),0);});
         const {data,error}=await cloudClient.auth.getSession();if(error)cloudLabel(error.message);else await activateAccount(data.session?.user||null);
-      }catch(e){cloudLabel('Account service unavailable offline');}
+      }catch(e){cloudLabel('Account service unavailable offline');if(!cloudUser){account.hidden=false;headerActions.hidden=false;}}
     })();
     tagTrigger.querySelector('[data-lucide="list-filter"]')?.insertAdjacentHTML('beforebegin',glyph('filter'));tagTrigger.querySelector('[data-lucide="list-filter"]')?.remove();const arrow=tagTrigger.querySelector('[data-lucide="chevron-down"]');if(arrow){arrow.insertAdjacentHTML('beforebegin',glyph('down'));arrow.previousElementSibling.classList.add('wf-chevron');arrow.remove();}
     // Reveal only the finished interface, after routing, theme and layout are ready.
