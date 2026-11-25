@@ -759,6 +759,7 @@ body.dark-mode{--wf-accent-end:#36a99f;--wf-hero-end:#192522}
 @media(max-height:650px) and (min-width:801px){.wf-auth-story{gap:18px;padding:28px}.wf-auth-story-content{gap:12px}.wf-auth-story h2{font-size:2.4rem}.wf-auth-sample-row{padding:10px 12px}.wf-auth-main{padding-block:60px 24px}.wf-auth-form{gap:14px}}
 @media(prefers-reduced-motion:reduce){.wf-auth-dialog,.wf-auth-main button{animation:none!important;transition:none!important}}
 .dark-toggle[hidden]{display:none!important}:root{color-scheme:light dark}@media(prefers-color-scheme:dark){html{background:#111817}}@media(prefers-color-scheme:light){html{background:#f7f8fa}}
+.wf-account-panel .wf-action-row{align-items:center;justify-content:space-between;gap:12px}.wf-account-identity{display:grid;gap:5px;min-width:0;flex:1}.wf-account-identity strong{font-size:.88rem;overflow-wrap:anywhere}.wf-account-identity small{font-size:.75rem;color:var(--ink-soft)}.wf-account-identity[hidden],.wf-signout[hidden],.wf-account-panel button[hidden]{display:none!important}.wf-account-panel .wf-signout{color:var(--ink-soft);background:transparent;border:1px solid var(--border);white-space:nowrap;min-height:44px;transition:background .15s,color .15s,transform .15s}.wf-account-panel .wf-signout:hover:not(:disabled){color:var(--danger);border-color:var(--danger);background:color-mix(in srgb,var(--danger) 6%,transparent)}.wf-signout:active{transform:scale(.98)}
 </style>
 </head>
 <body>
@@ -1608,7 +1609,11 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     const account=action('Sign in',openAccount);account.classList.add('wf-account');headerActions.prepend(account);
     const cloudStatus=make('small','Saved on this device');
     const settingsAccount=action('Sign in',openAccount);
-    group(views.settings,'Account & backup','WordFlow is free without an account. Sign in to back up your words and access them on other devices.',[settingsAccount,cloudStatus]);
+    const signOutButton=action('Sign out',signOutFromSettings);signOutButton.classList.add('wf-signout');signOutButton.hidden=true;
+    const accountIdentity=make('div','');accountIdentity.className='wf-account-identity';accountIdentity.hidden=true;
+    const accountName=make('strong','');accountIdentity.append(accountName,cloudStatus);cloudStatus.setAttribute('role','status');
+    const accountPanel=group(views.settings,'Account & backup','WordFlow is free without an account. Sign in to back up your words and access them on other devices.',[accountIdentity,settingsAccount,signOutButton]);
+    accountPanel.classList.add('wf-account-panel');
     const authHint=make('div','');authHint.className='wf-auth-hint';
     const hintCopy=make('div','');hintCopy.className='wf-auth-hint-copy';hintCopy.append(make('strong','Keep your words safe'),make('small','Sign in to back up your vocabulary and learn on other devices.'));
     const hintActions=make('div','');hintActions.className='wf-auth-hint-actions';
@@ -1697,7 +1702,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
         let consent=false;try{consent=sessionStorage.getItem('wf-import-guest')==='yes';sessionStorage.removeItem('wf-import-guest');}catch{}
         if(consent&&guest.length){const merged=mergeWords([],wordPairs,guest);if(saveWorkspace(activeStorageKey,merged)){wordPairs=merged;pendingGuest={id:user.id,snapshot:JSON.stringify(guest)};}}
       }
-      cardIndex=0;renderAll();account.textContent=user?'Account':'Sign in';settingsAccount.textContent=user?'Manage account':'Sign in';updateAuthHint();
+      cardIndex=0;renderAll();account.textContent=user?'Account':'Sign in';settingsAccount.hidden=!!user;signOutButton.hidden=!user;accountIdentity.hidden=!user;accountName.textContent=user?(user.email||'Signed in'):'';updateAuthHint();
       if(!user){cloudLabel('Saved on this device');return;}
       cloudLabel(navigator.onLine?'Loading private workspace…':'Saved on this device · offline');await pushCloud();
     }
@@ -1741,8 +1746,18 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     }
     async function openAccount(){
       if(!cloudUser){showSignIn();return;}
-      const result=await modalForm({title:'Your account',description:'Signed in. '+cloudStatus.textContent,submit:'Sign out'});
-      if(result){await pushCloud();if(cloudBusy||!cloudReady||JSON.stringify(wordPairs)!==cloudSnapshot){showToast('Export your backup before signing out if cloud sync is unavailable.');return;}const {error}=await cloudClient.auth.signOut();if(error)showToast(error.message);}
+      navigate('settings');accountPanel.animate?.([{opacity:.7,transform:'translateY(3px)'},{opacity:1,transform:'translateY(0)'}],{duration:matchMedia('(prefers-reduced-motion: reduce)').matches?0:160,easing:'ease-out'});
+    }
+    async function signOutFromSettings(){
+      if(activeView!=='settings'||!cloudUser||!cloudClient||signOutButton.disabled)return;
+      signOutButton.disabled=true;signOutButton.textContent='Signing out…';signOutButton.setAttribute('aria-busy','true');
+      try{
+        if(!saveWorkspace(activeStorageKey,wordPairs))throw Error('Unable to save words locally. Export a backup before signing out.');
+        await pushCloud();
+        const {error}=await cloudClient.auth.signOut({scope:'local'});if(error)throw error;
+        await activateAccount(null);showToast('Signed out. Your saved words are kept.');
+      }catch(e){cloudLabel(e.message||'Could not sign out. Try again.');}
+      finally{signOutButton.disabled=false;signOutButton.textContent='Sign out';signOutButton.removeAttribute('aria-busy');}
     }
     updateAuthHint();scheduleFit();
     (async()=>{
