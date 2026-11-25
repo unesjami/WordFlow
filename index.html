@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="wf-booting">
 <head>
+  <style>html.wf-booting{background:#f7f8fa}html.wf-booting body{visibility:hidden;transition:none!important}@media(prefers-color-scheme:dark){html.wf-booting{background:#111817;color-scheme:dark}}html.wf-booting *,html.wf-booting *::before,html.wf-booting *::after{animation:none!important;transition:none!important}</style>
+  <noscript><style>html.wf-booting body{visibility:visible}</style></noscript>
   <link rel="icon" type="image/svg+xml" href="./icon.svg?v=4">
   <link rel="manifest" href="./manifest.webmanifest">
   <meta name="theme-color" content="#146464">
@@ -796,6 +798,7 @@ body.dark-mode{--wf-accent-end:#36a99f;--wf-hero-end:#192522}
 </style>
 </head>
 <body>
+<script>document.body.classList.toggle("dark-mode",matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.style.colorScheme=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";</script>
 <div class="shell">
 
   <header class="site-header">
@@ -1634,7 +1637,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     const reviewButton=$wf('wfReview');iconize(reviewButton,'cards','Start smart review');
     const first=views.library.querySelector('.wf-library-tools');const addQuick=action('Translate & add',()=>{navigate('today');inputEl.focus({preventScroll:true});},true);iconize(addQuick,'plus','Translate & add');first.append(addQuick);
     flipCard.tabIndex=0;flipCard.setAttribute('role','button');flipCard.setAttribute('aria-label','Reveal or hide translation');flipCard.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flipCard.click();}});
-    const originalNavigate=navigate;navigate=function(key,replace=false){const before=activeView;originalNavigate(key,replace);const view=views[activeView];if(before!==activeView&&view&&view.animate&&!matchMedia('(prefers-reduced-motion: reduce)').matches)view.animate([{opacity:.65},{opacity:1}],{duration:150,easing:'ease-out'});};
+    const originalNavigate=navigate;navigate=function(key,replace=false){const before=activeView;originalNavigate(key,replace);const view=views[activeView];if(before!==activeView&&view&&view.animate&&!document.documentElement.classList.contains('wf-booting')&&!matchMedia('(prefers-reduced-motion: reduce)').matches)view.animate([{opacity:.65},{opacity:1}],{duration:150,easing:'ease-out'});};
 
     let fitFrame=0;
     function scheduleFit(){cancelAnimationFrame(fitFrame);fitFrame=requestAnimationFrame(fitWorkspace);}
@@ -1829,7 +1832,21 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
       }catch(e){cloudLabel('Account service unavailable offline');}
     })();
     tagTrigger.querySelector('[data-lucide="list-filter"]')?.insertAdjacentHTML('beforebegin',glyph('filter'));tagTrigger.querySelector('[data-lucide="list-filter"]')?.remove();const arrow=tagTrigger.querySelector('[data-lucide="chevron-down"]');if(arrow){arrow.insertAdjacentHTML('beforebegin',glyph('down'));arrow.previousElementSibling.classList.add('wf-chevron');arrow.remove();}
+    // Reveal only the finished interface, after routing, theme and layout are ready.
+    cancelAnimationFrame(fitFrame);
+    fitWorkspace();
+    document.documentElement.classList.remove('wf-booting');
   })();
+</script>
+<script>
+if(document.documentElement.classList.contains('wf-booting')){
+  document.body.replaceChildren();
+  const recovery=document.createElement('main');recovery.style.cssText='max-width:440px;margin:15vh auto;padding:24px;font:16px system-ui;color:var(--ink)';
+  const heading=document.createElement('h2');heading.textContent='WordFlow could not start';
+  const text=document.createElement('p');text.textContent='Your saved words have not been cleared. Reload to try again.';
+  const retry=document.createElement('button');retry.textContent='Reload';retry.style.cssText='margin-top:16px;padding:10px 18px';retry.onclick=()=>location.reload();
+  recovery.append(heading,text,retry);document.body.append(recovery);document.documentElement.classList.remove('wf-booting');
+}
 </script>
 </body>
 </html>
