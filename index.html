@@ -46,7 +46,9 @@ body.dark-mode .wf-setting-mark{color:#8cdbcb;background:#24443f}body.dark-mode 
 @media(max-width:760px){#view-settings{grid-template-columns:minmax(0,1fr);grid-template-rows:auto;gap:8px}#view-settings .wf-setting-card{padding:12px;gap:8px}.wf-setting-mark{width:34px;height:34px}.wf-setting-row{min-height:48px;padding:7px 0}.wf-setting-copy p{font-size:.72rem}.wf-setting-copy small{font-size:.7rem}}
 @media(prefers-reduced-motion:reduce){#view-settings *{transition:none!important}}
 #view-settings .wf-account-panel .wf-signout{color:var(--danger);border:1px solid var(--danger);background:transparent;border-radius:10px;transition:background .15s,transform .15s}#view-settings .wf-account-panel .wf-signout:hover:not(:disabled){background:color-mix(in srgb,var(--danger) 9%,transparent)}#view-settings .wf-signout:focus-visible{outline:2px solid var(--danger);outline-offset:3px}.wf-header-actions .wf-guest-signin{background:var(--accent);color:var(--on-accent,#fff);border:1px solid var(--accent);border-radius:10px;padding:8px 14px;min-height:38px;font-weight:600;transition:opacity .15s,transform .15s}.wf-guest-signin:active{transform:scale(.98)}.wf-guest-signin[hidden]{display:none!important}
+#view-settings .wf-theme-row{flex-wrap:wrap}#view-settings .wf-theme-selector{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;padding:3px;border:1px solid var(--border);border-radius:11px;background:var(--bg);flex:1 0 100%}#view-settings .wf-theme-selector .wf-theme-choice{display:flex;align-items:center;justify-content:center;gap:6px;min-width:0;padding:7px 6px;border:1px solid transparent;background:transparent;color:var(--ink-soft);border-radius:8px;font-size:.78rem;transition:background .15s,color .15s}#view-settings .wf-theme-choice[aria-pressed=true]{background:var(--card-bg);border-color:var(--border);color:var(--accent);box-shadow:0 1px 3px #0001}#view-settings .wf-theme-choice:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 </style>
+  <script>(()=>{let mode='system';try{mode=localStorage.getItem('wf-appearance')||'system';}catch{}const dark=mode==='dark'||(mode!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.style.background=dark?'#111817':'#f7f8fa';document.documentElement.style.colorScheme=dark?'dark':'light';})();</script>
   <noscript><style>html.wf-booting body{visibility:visible}</style></noscript>
   <link rel="icon" type="image/svg+xml" href="./icon.svg?v=4">
   <link rel="manifest" href="./manifest.webmanifest">
@@ -843,7 +845,7 @@ body.dark-mode{--wf-accent-end:#36a99f;--wf-hero-end:#192522}
 </style>
 </head>
 <body>
-<script>document.body.classList.toggle("dark-mode",matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.style.colorScheme=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";</script>
+<script>(()=>{let mode='system';try{mode=localStorage.getItem('wf-appearance')||'system';}catch{}const dark=mode==='dark'||(mode!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);document.body.classList.toggle('dark-mode',dark);document.documentElement.style.colorScheme=dark?'dark':'light';document.documentElement.style.background=dark?'#111817':'#f7f8fa';})();</script>
 <div class="shell">
 
   <header class="site-header">
@@ -971,14 +973,14 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     };
 
     // ---------- dark mode ----------
-    const deviceTheme=matchMedia('(prefers-color-scheme: dark)');const themeMode='system';let isDark=deviceTheme.matches;
+    const deviceTheme=matchMedia('(prefers-color-scheme: dark)');let themeMode='system';try{const saved=localStorage.getItem('wf-appearance');if(['light','dark','system'].includes(saved))themeMode=saved;}catch{}let isDark=themeMode==='dark'||(themeMode==='system'&&deviceTheme.matches);
     function applyDarkMode() {
       document.body.classList.toggle('dark-mode', isDark);
       darkModeToggle.innerHTML = glyph(isDark?'sun':'moon');
       document.documentElement.style.colorScheme=isDark?'dark':'light';
     }
     applyDarkMode();
-    function syncDeviceTheme(){isDark=deviceTheme.matches;applyDarkMode();}if(deviceTheme.addEventListener)deviceTheme.addEventListener('change',syncDeviceTheme);else deviceTheme.addListener(syncDeviceTheme);window.addEventListener('pageshow',syncDeviceTheme);window.addEventListener('focus',syncDeviceTheme);document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncDeviceTheme();});
+    function syncDeviceTheme(){isDark=themeMode==='dark'||(themeMode==='system'&&deviceTheme.matches);applyDarkMode();document.documentElement.style.background=isDark?'#111817':'#f7f8fa';}if(deviceTheme.addEventListener)deviceTheme.addEventListener('change',syncDeviceTheme);else deviceTheme.addListener(syncDeviceTheme);window.addEventListener('pageshow',syncDeviceTheme);window.addEventListener('focus',syncDeviceTheme);document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncDeviceTheme();});
 
     // ---------- load ----------
     try {
@@ -1686,8 +1688,13 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     const dataSettings=settingCard('Your vocabulary','Keep a copy of your words.','library','data');
     dataSettings.body.append(settingRow('Export','Download a backup.','download',$wf('wfBackup')),settingRow('Import','Add words from a backup.','upload',$wf('wfRestore')),$wf('wfFile'));
     const appSettings=settingCard('App preferences','Make WordFlow work for you.','settings','app');
-    const themeStatus=make('span','System');themeStatus.className='wf-setting-value';
-    const themeRow=settingRow('Appearance','Matches your device.','sun',themeStatus);
+    const themeStatus=make('div','');themeStatus.className='wf-theme-selector';themeStatus.setAttribute('role','group');themeStatus.setAttribute('aria-label','Appearance');
+    const themeChoices=[];
+    for(const [mode,label,icon] of [['light','Light','sun'],['dark','Dark','moon'],['system','Device','monitor']]){
+      const b=make('button','');b.type='button';b.className='wf-theme-choice';b.innerHTML=glyph(icon);b.append(make('span',label));b.setAttribute('aria-pressed',String(mode===themeMode));themeChoices.push([mode,b]);themeStatus.append(b);
+      b.onclick=()=>{themeMode=mode;try{localStorage.setItem('wf-appearance',mode);}catch{}syncDeviceTheme();for(const [value,choice] of themeChoices)choice.setAttribute('aria-pressed',String(value===mode));};
+    }
+    const themeRow=settingRow('Appearance','Choose your theme.','sun',themeStatus);themeRow.classList.add('wf-theme-row');
     network.classList.add('wf-setting-value','wf-network-value');network.setAttribute('role','status');
     const connectionRow=settingRow('Connection','','review',network);
     const installRow=settingRow('Install WordFlow','Open it like an app.','download',installButton);installRow.hidden=installButton.hidden;
