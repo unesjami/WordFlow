@@ -1,6 +1,6 @@
 import {useEffect,useRef,useState} from 'react';
 import {motion} from 'motion/react';
-import {BookOpen,RefreshCw,Brain,UserRound,Download,Cloud,Volume2,Pencil,Trash2,Languages,Search,Settings,Check,ChevronLeft,ChevronRight,Copy,Plus,Sun,Moon,Monitor,LogOut} from 'lucide-react';
+import {BookOpen,RefreshCw,Brain,UserRound,Download,Cloud,Volume2,Pencil,Trash2,Languages,Search,Settings,Check,ChevronLeft,ChevronRight,Copy,Plus,Sun,Moon,Monitor,LogOut,PanelLeftClose,PanelLeftOpen} from 'lucide-react';
 import {metrics} from '../profile/analytics';
 import type {FormEvent} from 'react';
 import type {Word} from '../../domain';
@@ -17,6 +17,8 @@ import {PracticePanel} from '../learning/PracticePanel';
 
 export function Vocabulary({userId,user,theme,setTheme,signOut}:{userId:string;user:User;theme:'system'|'light'|'dark';setTheme:(theme:'system'|'light'|'dark')=>void;signOut:()=>Promise<void>}){
  const [view,setView]=useState<'vocabulary'|'learn'|'profile'|'settings'>('vocabulary');
+ const [collapsed,setCollapsed]=useState(()=>{try{return localStorage.getItem('wf-sidebar-collapsed')==='1';}catch{return false;}});
+ useEffect(()=>{try{localStorage.setItem('wf-sidebar-collapsed',collapsed?'1':'0');}catch{}},[collapsed]);
  const [learnMode,setLearnMode]=useState<'review'|'practice'|'cards'>('review');
  const [words,setWords]=useState<Word[]|null>(null);
  const snapshot=useRef<Snapshot|null>(null);
@@ -74,8 +76,8 @@ export function Vocabulary({userId,user,theme,setTheme,signOut}:{userId:string;u
  const filtered=searchWords(words??[],query).filter(({word})=>filter==='kept'?word.kept:!word.kept);
  const pageRef=useRef<HTMLDivElement>(null);
  useEffect(()=>{pageRef.current?.scrollTo({top:0});},[view]);
- return <div className="wf-workspace">
- <nav aria-label="Learning views" className="wf-sidebar">{nav.map(({id,label,Icon})=><button key={id} type="button" aria-current={view===id?'page':undefined} onClick={()=>{stopSpeech();setView(id);}} className="wf-nav-button">{view===id&&<motion.span layoutId="wf-active-tab" className="wf-nav-active" transition={{type:'spring',stiffness:400,damping:35}}/>}<Icon size={20}/><span>{label}</span></button>)}</nav>
+ return <div className="wf-workspace" data-sidebar-collapsed={collapsed}>
+ <nav aria-label="Learning views" className="wf-sidebar" id="wf-navigation"><div className="wf-sidebar-top"><span className="wf-sidebar-title">Workspace</span><button type="button" className="wf-sidebar-toggle" aria-label={collapsed?"Expand navigation":"Collapse navigation"} aria-expanded={!collapsed} title={collapsed?"Expand navigation":"Collapse navigation"} onClick={()=>setCollapsed(v=>!v)}>{collapsed?<PanelLeftOpen size={19}/>:<PanelLeftClose size={19}/>}</button></div>{nav.map(({id,label,Icon})=><button key={id} type="button" aria-label={label} title={label} aria-current={view===id?'page':undefined} onClick={()=>{stopSpeech();setView(id);}} className="wf-nav-button">{view===id&&<motion.span layoutId="wf-active-tab" className="wf-nav-active" transition={{type:'spring',stiffness:400,damping:35}}/>}<Icon size={20}/><span className="wf-nav-label">{label}</span></button>)}</nav>
  <section className="wf-main" aria-labelledby="workspace-title">
  <div className="wf-toolbar"><div><h2 id="workspace-title">{nav.find(n=>n.id===view)?.label}</h2><span role="status" className="wf-status"><Cloud size={14}/>{syncStatus}</span></div></div>
  <div className="wf-workspace-feedback" aria-live="polite">{(error||notice)&&<motion.div initial={{opacity:0,y:-4}} animate={{opacity:1,y:0}}><div className="flex items-start gap-3"><p className={error?"text-red-600":"text-[var(--accent)]"}>{error||notice}</p><button type="button" aria-label="Dismiss message" className="ml-auto" onClick={()=>{setError('');setNotice('');}}>×</button></div></motion.div>}</div>
