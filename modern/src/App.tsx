@@ -1,0 +1,1 @@
+export function App() { return <main className="mx-auto grid min-h-screen max-w-xl place-content-center gap-3 p-8"><h1 className="text-4xl font-bold tracking-tight">WordFlow</h1><p className="text-sm opacity-75">Development foundation · Not the production application</p></main>; }
