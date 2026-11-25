@@ -16,6 +16,35 @@
 #view-today>.wf-auth-hint{grid-column:1/-1;min-height:42px;padding:8px 12px}
 @media(max-width:760px){#view-today>.wf-welcome{display:grid!important;grid-template-columns:1fr;gap:10px;padding:12px 14px}.wf-welcome-copy p{font-size:.78rem}.wf-learning-path{gap:8px}.wf-path-step{display:flex;align-items:center;gap:5px}.wf-path-step small{display:none!important}.wf-step-number{width:23px;height:23px;flex:none}#view-today>.wf-stats>div{display:grid;gap:2px;padding:6px 8px}#view-today>.wf-capture-panel{padding:10px 12px}.wf-next-step{padding:8px 10px}}
 @media(max-height:680px){#view-today>.wf-welcome{padding:10px 14px}.wf-path-step small{display:none!important}.wf-welcome-copy p{font-size:.76rem}#view-today>.wf-auth-hint{padding:6px 10px}}
+
+/* Settings only: small, readable groups with a restrained accent palette. */
+#view-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto auto;align-content:start;gap:12px}
+#view-settings[hidden]{display:none!important}
+#view-settings .wf-setting-card{grid-column:auto;min-width:0;padding:16px;background:var(--card-bg);border:1px solid var(--border);border-radius:16px;display:flex;flex-direction:column;gap:12px}
+#view-settings .wf-setting-account{grid-column:1/-1}
+.wf-setting-head{display:flex;align-items:center;gap:12px;min-width:0}
+.wf-setting-mark{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none;color:#146464;background:#e2f0ed}
+.wf-setting-data .wf-setting-mark{color:#315e98;background:#eaf0f9}
+.wf-setting-app .wf-setting-mark{color:#6f5694;background:#f0ebf7}
+body.dark-mode .wf-setting-mark{color:#8cdbcb;background:#24443f}body.dark-mode .wf-setting-data .wf-setting-mark{color:#a8c8f3;background:#23394d}body.dark-mode .wf-setting-app .wf-setting-mark{color:#d0b8ee;background:#382d47}
+.wf-setting-mark .lucide{width:21px;height:21px}
+.wf-setting-copy{display:grid;gap:3px;min-width:0;flex:1}
+.wf-setting-copy h3{font-size:1rem;letter-spacing:-.025em;margin:0}
+.wf-setting-copy p,.wf-setting-copy small,.wf-setting-guest small{color:var(--ink-soft);font-size:.76rem;line-height:1.45;margin:0}
+.wf-setting-body{display:flex;flex-direction:column;min-width:0}
+.wf-setting-row{display:flex;align-items:center;gap:10px;min-height:60px;padding:10px 0;border-top:1px solid var(--border);min-width:0}
+.wf-setting-row[hidden],.wf-setting-guest[hidden],#view-settings button[hidden]{display:none!important}
+.wf-setting-symbol{display:grid;place-items:center;flex:0 0 24px;color:var(--ink-soft)}
+.wf-setting-symbol svg{width:18px;height:18px}
+.wf-setting-copy strong,.wf-setting-guest strong{font-size:.83rem;font-weight:600}
+#view-settings .wf-setting-row button{min-height:38px;flex:0 0 auto;width:auto;white-space:nowrap;padding:8px 12px}
+#view-settings .wf-setting-row button svg{width:16px;height:16px}
+.wf-setting-value{flex:none;font-size:.73rem;font-weight:600;padding:5px 9px;border-radius:7px;background:var(--accent-soft);color:var(--ink)}
+.wf-network-value{color:var(--ink)!important}
+.wf-setting-guest{display:grid;gap:4px;flex:1;min-width:0}
+#view-settings .wf-account-identity{flex:1}
+@media(max-width:760px){#view-settings{grid-template-columns:minmax(0,1fr);grid-template-rows:auto;gap:8px}#view-settings .wf-setting-card{padding:12px;gap:8px}.wf-setting-mark{width:34px;height:34px}.wf-setting-row{min-height:48px;padding:7px 0}.wf-setting-copy p{font-size:.72rem}.wf-setting-copy small{font-size:.7rem}}
+@media(prefers-reduced-motion:reduce){#view-settings *{transition:none!important}}
 </style>
   <noscript><style>html.wf-booting body{visibility:visible}</style></noscript>
   <link rel="icon" type="image/svg+xml" href="./icon.svg?v=4">
@@ -1553,7 +1582,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     window.addEventListener('appinstalled',()=>{installButton.hidden=true;notice('WordFlow installed.');});
     const network=document.createElement('small');network.setAttribute('role','status');network.style.color='var(--ink-soft)';
     document.querySelector('.wf-tools').append(network);
-    function networkStatus(){network.textContent=navigator.onLine?'Online':'Offline · manual entry and review available';}
+    function networkStatus(){network.textContent=navigator.onLine?'Online':'Offline';}
     window.addEventListener('online',networkStatus);window.addEventListener('offline',networkStatus);networkStatus();
     if('serviceWorker' in navigator && location.protocol!=='file:') navigator.serviceWorker.register('./sw.js').catch(()=>notice('Offline setup unavailable.'));
 
@@ -1576,7 +1605,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
       if(desc)section.append(make('p',desc));
       const row=document.createElement('div');row.className='wf-action-row';row.append(...children);section.append(row);parent.append(section);return section;
     }
-    const labels={today:['Today','Translate, save and remember new words.'],library:['Vocabulary','Your words, meanings and personal examples.'],review:['Review','Remember more with focused daily review.'],practice:['Practice','Choose an exercise and put your knowledge to work.'],dictionary:['Dictionary','Explore meanings, pronunciation and examples.'],settings:['Settings','Manage your workspace and vocabulary data.']};
+    const labels={today:['Today','Translate, save and remember new words.'],library:['Vocabulary','Your words, meanings and personal examples.'],review:['Review','Remember more with focused daily review.'],practice:['Practice','Choose an exercise and put your knowledge to work.'],dictionary:['Dictionary','Explore meanings, pronunciation and examples.'],settings:['Settings','Your account, backups and app preferences.']};
     const paths={today:'today',library:'library',review:'review',practice:'practice',dictionary:'dictionary',settings:'settings'};
     const buttons={};
     for(const key of Object.keys(views)){
@@ -1640,8 +1669,29 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     views.review.append(session);
     views.practice.append(practice);
     views.dictionary.append(dictionaryPanel);
-    group(views.settings,'Your data','Export a backup before switching devices. Import merges new words with your existing library.',[$wf('wfBackup'),$wf('wfRestore'),$wf('wfFile')]);
-    group(views.settings,'App preferences','Install WordFlow on supported browsers. Offline review is available after setup.',[installButton,make('span','Appearance: follows your device'),network]);
+    function settingCard(name,description,icon,style){
+      const card=make('section','');card.className='wf-setting-card wf-setting-'+style;
+      const head=make('div','');head.className='wf-setting-head';
+      const mark=make('span','');mark.className='wf-setting-mark';mark.innerHTML=glyph(icon);
+      const copy=make('div','');copy.className='wf-setting-copy';copy.append(make('h3',name),make('p',description));head.append(mark,copy);
+      const body=make('div','');body.className='wf-setting-body';card.append(head,body);views.settings.append(card);return {card,body};
+    }
+    function settingRow(name,description,icon,control){
+      const row=make('div','');row.className='wf-setting-row';
+      const symbol=make('span','');symbol.className='wf-setting-symbol';symbol.innerHTML=glyph(icon);
+      const copy=make('div','');copy.className='wf-setting-copy';copy.append(make('strong',name));if(description)copy.append(make('small',description));
+      row.append(symbol,copy,control);return row;
+    }
+    const dataSettings=settingCard('Your vocabulary','Keep a copy of your words.','library','data');
+    dataSettings.body.append(settingRow('Export','Download a backup.','download',$wf('wfBackup')),settingRow('Import','Add words from a backup.','upload',$wf('wfRestore')),$wf('wfFile'));
+    const appSettings=settingCard('App preferences','Make WordFlow work for you.','settings','app');
+    const themeStatus=make('span','System');themeStatus.className='wf-setting-value';
+    const themeRow=settingRow('Appearance','Matches your device.','sun',themeStatus);
+    network.classList.add('wf-setting-value','wf-network-value');network.setAttribute('role','status');
+    const connectionRow=settingRow('Connection','','review',network);
+    const installRow=settingRow('Install WordFlow','Open it like an app.','download',installButton);installRow.hidden=installButton.hidden;
+    const installWatch=new MutationObserver(()=>{installRow.hidden=installButton.hidden;});installWatch.observe(installButton,{attributes:true,attributeFilter:['hidden']});
+    appSettings.body.append(themeRow,connectionRow,installRow);
     const globalNotice=$wf('wfNotice');globalNotice.className='wf-global-notice';
     main.prepend(heading);main.append(status,globalNotice,footer);
     shell.replaceChildren(header,nav,main);
@@ -1676,8 +1726,8 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     function polishRows(){document.querySelectorAll('[data-action]').forEach(el=>{const item=rowIcons[el.dataset.action];if(item)iconize(el,item[0],item[1],true);});}
     const originalRenderAll=renderAll;renderAll=function(){originalRenderAll();polishRows();renderRecent();updateTodayGuide();exampleRow.hidden=wordPairs.length>0;stats.hidden=wordPairs.length===0;};
     for(const [id,name,label] of [['cardPrev','left','Previous card'],['cardNext','right','Next card'],['cardSpeak','volume','Listen'],['cardKeep','check','Keep word'],['micBtn','mic','Voice input']])iconize($wf(id),name,label,true);
-    for(const [id,name,label] of [['wfAdd','plus','Add manually'],['wfBackup','download','Export backup'],['wfRestore','upload','Import backup']])iconize($wf(id),name,label);
-    iconize(batchButton,'list','Bulk import');iconize(translateBtn,'arrow','Translate & save');iconize(installButton,'download','Install app');
+    for(const [id,name,label] of [['wfAdd','plus','Add manually'],['wfBackup','download','Export'],['wfRestore','upload','Import']])iconize($wf(id),name,label);
+    iconize(batchButton,'list','Bulk import');iconize(translateBtn,'arrow','Translate & save');iconize(installButton,'download','Install');
     function themeIcon(){iconize(darkModeToggle,isDark?'sun':'moon',isDark?'Switch to light theme':'Switch to dark theme',true);}
     const originalTheme=applyDarkMode;applyDarkMode=function(){originalTheme();themeIcon();};themeIcon();
     const searchWrap=document.createElement('div');searchWrap.className='wf-search-wrap';$wf('wfSearch').before(searchWrap);searchWrap.innerHTML=glyph('search');searchWrap.append($wf('wfSearch'));
@@ -1727,8 +1777,12 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     const signOutButton=action('Sign out',signOutFromSettings);signOutButton.classList.add('wf-signout');signOutButton.hidden=true;
     const accountIdentity=make('div','');accountIdentity.className='wf-account-identity';accountIdentity.hidden=true;
     const accountName=make('strong','');accountIdentity.append(accountName,cloudStatus);cloudStatus.setAttribute('role','status');
-    const accountPanel=group(views.settings,'Account & backup','WordFlow is free without an account. Sign in to back up your words and access them on other devices.',[accountIdentity,settingsAccount,signOutButton]);
-    accountPanel.classList.add('wf-account-panel');
+    const accountSettings=settingCard('Account','Back up your words and sync across devices.','today','account');
+    const accountPanel=accountSettings.card;accountPanel.classList.add('wf-account-panel');
+    const guestCopy=make('div','');guestCopy.className='wf-setting-guest';guestCopy.append(make('strong','Guest mode'),make('small','Free to use without signing in.'));
+    const accountRow=make('div','');accountRow.className='wf-setting-row wf-setting-account-row';accountRow.append(guestCopy,accountIdentity,settingsAccount,signOutButton);
+    accountSettings.body.append(accountRow);views.settings.prepend(accountPanel);
+    settingsAccount.classList.add('primary');
     const authHint=make('div','');authHint.className='wf-auth-hint';
     const hintCopy=make('div','');hintCopy.className='wf-auth-hint-copy';hintCopy.append(make('strong','Back up your vocabulary'),make('small','Optional: sign in to access your saved words on other devices.'));
     const hintActions=make('div','');hintActions.className='wf-auth-hint-actions';
@@ -1817,7 +1871,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
         let consent=false;try{consent=sessionStorage.getItem('wf-import-guest')==='yes';sessionStorage.removeItem('wf-import-guest');}catch{}
         if(consent&&guest.length){const merged=mergeWords([],wordPairs,guest);if(saveWorkspace(activeStorageKey,merged)){wordPairs=merged;pendingGuest={id:user.id,snapshot:JSON.stringify(guest)};}}
       }
-      cardIndex=0;renderAll();account.textContent=user?'Account':'Sign in';settingsAccount.hidden=!!user;signOutButton.hidden=!user;accountIdentity.hidden=!user;accountName.textContent=user?(user.email||'Signed in'):'';updateAuthHint();
+      cardIndex=0;renderAll();account.textContent=user?'Account':'Sign in';settingsAccount.hidden=!!user;signOutButton.hidden=!user;accountIdentity.hidden=!user;guestCopy.hidden=!!user;accountName.textContent=user?(user.email||'Signed in'):'';updateAuthHint();
       if(!user){cloudLabel('Saved on this device');return;}
       cloudLabel(navigator.onLine?'Loading private workspace…':'Saved on this device · offline');await pushCloud();
     }
