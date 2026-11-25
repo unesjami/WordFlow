@@ -174,3 +174,12 @@
 @media(max-width:1100px){.wf-settings-grid{grid-template-columns:minmax(0,1fr)}.wf-setting-account{grid-column:auto}}
 @media(max-width:400px){.wf-setting-card{padding:0 12px}.wf-setting-row{grid-template-columns:26px minmax(0,1fr) auto;gap:6px}.wf-setting-action{padding:6px 8px}.wf-theme-compact button{width:27px}}
 @media(prefers-reduced-motion:reduce){.wf-setting-switch,.wf-setting-switch span,.wf-setting-action{transition:none}}
+
+
+/* Settings: equal-height top cards, balanced rows, no orphaned space. */
+.wf-settings-grid{grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:16px}
+.wf-setting-card{display:flex;flex-direction:column}
+.wf-setting-head{flex:none;min-height:88px}
+.wf-setting-row{flex:1;min-height:76px}
+.wf-setting-account{grid-column:1/-1}
+@media(max-width:1100px){.wf-settings-grid{grid-template-columns:minmax(0,1fr)}.wf-setting-account{grid-column:auto}.wf-setting-row{flex:none}}
