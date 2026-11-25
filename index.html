@@ -56,6 +56,7 @@ body.dark-mode .wf-setting-mark{color:#8cdbcb;background:#24443f}body.dark-mode 
 @media(prefers-reduced-motion:reduce){#view-settings .wf-theme-thumb,#view-settings .wf-theme-choice{transition:none!important}}
 #view-settings .wf-theme-selector{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;justify-items:stretch;direction:ltr}#view-settings .wf-theme-selector .wf-theme-choice{box-sizing:border-box;width:100%;min-width:0;max-width:none;margin:0;padding:8px 4px;justify-self:stretch;display:flex;align-items:center;justify-content:center;text-align:center;gap:7px;line-height:1.2}#view-settings .wf-theme-choice>svg{display:block;width:16px;height:16px;flex:0 0 16px;margin:0}#view-settings .wf-theme-choice>span{display:block;margin:0;padding:0;white-space:nowrap;text-align:center}#view-settings .wf-theme-thumb{width:calc((100% - 8px)/3)}
 .wf-backup-symbol{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border-radius:11px;color:var(--accent);background:var(--accent-soft)}#view-today .wf-auth-hint{display:flex;flex-direction:row;align-items:center;gap:10px;border-color:var(--border);background:var(--card-bg);border-radius:12px}.wf-auth-hint-copy{flex:1}.wf-auth-hint-actions .primary{white-space:nowrap;min-height:36px!important}.wf-auth-hint[hidden]{display:none!important}@media(max-width:480px){#view-today .wf-auth-hint{flex-wrap:wrap}.wf-auth-hint-actions{margin-left:auto}}
+ .wf-email-form{display:grid;gap:9px}.wf-email-form label{display:grid;gap:5px;font-size:.8rem;font-weight:600;color:var(--ink)}.wf-email-form input{width:100%;min-width:0;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--card-bg);color:var(--ink);font:inherit;min-height:42px}.wf-email-form input:focus{outline:2px solid var(--accent);outline-offset:1px}.wf-email-submit{border:0;border-radius:10px;background:var(--accent);color:var(--on-accent,#fff);font:600 .85rem Inter,sans-serif;min-height:44px;cursor:pointer}.wf-email-switch{border:0;background:transparent;color:var(--accent);font:600 .8rem Inter,sans-serif;padding:8px;cursor:pointer}.wf-auth-main{overflow:auto}.wf-auth-form{gap:12px}.wf-auth-benefits{gap:4px}.wf-auth-actions{gap:8px}
 </style>
   <script>(()=>{let mode='system';try{mode=localStorage.getItem('wf-appearance')||'system';}catch{}const dark=mode==='dark'||(mode!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.style.background=dark?'#111817':'#f7f8fa';document.documentElement.style.colorScheme=dark?'dark':'light';})();</script>
   <noscript><style>html.wf-booting body{visibility:visible}</style></noscript>
@@ -1838,7 +1839,7 @@ window.wfLucideGlyph=function(alias){const names={"monitor":"monitor","plus":"pl
       finally{if(generation===cloudGeneration){cloudBusy=false;if(cloudReady&&JSON.stringify(wordPairs)!==cloudSnapshot)queueCloud(1500);}}
     }
     async function activateAccount(user){
-      if(user?.id===cloudUser?.id)return;
+      if((user||cloudUser)&&user?.id===cloudUser?.id)return;
       ++cloudGeneration;clearTimeout(cloudTimer);cloudReady=false;cloudBusy=false;cloudRevision=null;cloudSnapshot='';pendingGuest=null;cloudUser=user||null;
       activeStorageKey=user?guestKey+':'+user.id:guestKey;
       wordPairs=readWorkspace(activeStorageKey);
@@ -1886,7 +1887,28 @@ window.wfLucideGlyph=function(alias){const names={"monitor":"monitor","plus":"pl
       const google=make('button','');google.type='button';google.className='wf-google';google.innerHTML='<svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true"><path fill="#4285F4" d="M43.61 24.46c0-1.36-.12-2.66-.35-3.92H24v7.43h11.02a9.42 9.42 0 0 1-4.09 6.19v5.14h6.63c3.88-3.57 6.05-8.82 6.05-14.84z"/><path fill="#34A853" d="M24 44c5.51 0 10.13-1.82 13.51-4.93l-6.63-5.14c-1.82 1.22-4.15 1.95-6.88 1.95-5.33 0-9.85-3.6-11.47-8.44H5.69v5.29A20 20 0 0 0 24 44z"/><path fill="#FBBC05" d="M12.53 27.44A12 12 0 0 1 12 24c0-1.2.19-2.36.53-3.44v-5.29H5.69a20 20 0 0 0 0 17.46z"/><path fill="#EA4335" d="M24 12.12c3.01 0 5.7 1.04 7.83 3.08l5.87-5.87C34.12 5.99 29.51 4 24 4A20 20 0 0 0 5.69 15.27l6.84 5.29C14.15 15.72 18.67 12.12 24 12.12z"/></svg><span>Continue with Google</span>';
       google.onclick=async()=>{if(!cloudClient){error.textContent='Sign-in is unavailable right now. You can still use WordFlow offline.';return;}try{sessionStorage.setItem('wf-import-guest','yes');}catch{}google.disabled=true;google.setAttribute('aria-busy','true');google.querySelector('span').textContent='Connecting…';error.textContent='';try{const {error:failure}=await cloudClient.auth.signInWithOAuth({provider:'google',options:{redirectTo}});if(failure)throw failure;}catch(e){try{sessionStorage.removeItem('wf-import-guest');}catch{}error.textContent=e.message||'Could not sign in. Please try again.';google.disabled=false;google.removeAttribute('aria-busy');google.querySelector('span').textContent='Continue with Google';}};
       const guest=make('button','Continue without an account');guest.type='button';guest.className='wf-guest';guest.onclick=authClose;
-      const divider=make('div','or');divider.className='wf-auth-divider';actions.append(google,divider,guest);
+      const divider=make('div','or');divider.className='wf-auth-divider';const emailForm=make('form','');emailForm.className='wf-email-form';
+      const emailLabel=make('label','Email');const emailInput=make('input','');emailInput.type='email';emailInput.name='email';emailInput.autocomplete='email';emailInput.required=true;emailInput.placeholder='you@example.com';emailLabel.append(emailInput);
+      const passwordLabel=make('label','Password');const passwordInput=make('input','');passwordInput.type='password';passwordInput.name='password';passwordInput.autocomplete='current-password';passwordInput.required=true;passwordInput.placeholder='Enter your password';passwordLabel.append(passwordInput);
+      const submit=make('button','Sign in with email');submit.type='submit';submit.className='wf-email-submit';
+      const switchMode=make('button','Create an account');switchMode.type='button';switchMode.className='wf-email-switch';
+      let signup=false;
+      switchMode.onclick=()=>{signup=!signup;submit.textContent=signup?'Create account':'Sign in with email';switchMode.textContent=signup?'Already have an account? Sign in':'Create an account';passwordInput.autocomplete=signup?'new-password':'current-password';passwordInput.minLength=signup?8:0;error.textContent='';};
+      emailForm.append(emailLabel,passwordLabel,submit,switchMode);
+      emailForm.onsubmit=async e=>{e.preventDefault();if(submit.disabled)return;if(!cloudClient){error.textContent='Sign-in is unavailable. Check your connection.';return;}
+        submit.disabled=true;switchMode.disabled=true;google.disabled=true;error.textContent='';submit.textContent=signup?'Creating account…':'Signing in…';
+        try{
+          sessionStorage.setItem('wf-import-guest','yes');
+          const credentials={email:emailInput.value.trim(),password:passwordInput.value};
+          const result=signup?await cloudClient.auth.signUp({...credentials,options:{emailRedirectTo:redirectTo}}):await cloudClient.auth.signInWithPassword(credentials);
+          if(result.error)throw result.error;
+          passwordInput.value='';
+          if(result.data.session){authClose();await activateAccount(result.data.session.user);}
+          else{error.textContent='Check your email for a confirmation link, then sign in.';}
+        }catch(e){try{sessionStorage.removeItem('wf-import-guest');}catch{}error.textContent=e.message||'Unable to sign in. Try again.';}
+        finally{submit.disabled=false;switchMode.disabled=false;google.disabled=false;submit.textContent=signup?'Create account':'Sign in with email';}
+      };
+      actions.append(google,divider,emailForm,guest);
       const note=make('p','WordFlow is free to use. No account is required. If you continue as a guest, your words are saved in this browser.');note.className='wf-auth-note';
       form.append(mobileBrand,intro,benefits,error,actions,note);mainAuth.append(close,form);body.append(story,mainAuth);authDialog.append(body);authDialog.showModal();close.focus({preventScroll:true});
     }
