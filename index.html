@@ -55,6 +55,7 @@ body.dark-mode .wf-setting-mark{color:#8cdbcb;background:#24443f}body.dark-mode 
 #view-settings .wf-theme-choice:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 @media(prefers-reduced-motion:reduce){#view-settings .wf-theme-thumb,#view-settings .wf-theme-choice{transition:none!important}}
 #view-settings .wf-theme-selector{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;justify-items:stretch;direction:ltr}#view-settings .wf-theme-selector .wf-theme-choice{box-sizing:border-box;width:100%;min-width:0;max-width:none;margin:0;padding:8px 4px;justify-self:stretch;display:flex;align-items:center;justify-content:center;text-align:center;gap:7px;line-height:1.2}#view-settings .wf-theme-choice>svg{display:block;width:16px;height:16px;flex:0 0 16px;margin:0}#view-settings .wf-theme-choice>span{display:block;margin:0;padding:0;white-space:nowrap;text-align:center}#view-settings .wf-theme-thumb{width:calc((100% - 8px)/3)}
+.wf-backup-symbol{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border-radius:11px;color:var(--accent);background:var(--accent-soft)}#view-today .wf-auth-hint{display:flex;flex-direction:row;align-items:center;gap:10px;border-color:var(--border);background:var(--card-bg);border-radius:12px}.wf-auth-hint-copy{flex:1}.wf-auth-hint-actions .primary{white-space:nowrap;min-height:36px!important}.wf-auth-hint[hidden]{display:none!important}@media(max-width:480px){#view-today .wf-auth-hint{flex-wrap:wrap}.wf-auth-hint-actions{margin-left:auto}}
 </style>
   <script>(()=>{let mode='system';try{mode=localStorage.getItem('wf-appearance')||'system';}catch{}const dark=mode==='dark'||(mode!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.style.background=dark?'#111817':'#f7f8fa';document.documentElement.style.colorScheme=dark?'dark':'light';})();</script>
   <noscript><style>html.wf-booting body{visibility:visible}</style></noscript>
@@ -1803,13 +1804,13 @@ window.wfLucideGlyph=function(alias){const names={"monitor":"monitor","plus":"pl
     accountSettings.body.append(accountRow);views.settings.prepend(accountPanel);
     settingsAccount.classList.add('primary');
     const authHint=make('div','');authHint.className='wf-auth-hint';
-    const hintCopy=make('div','');hintCopy.className='wf-auth-hint-copy';hintCopy.append(make('strong','Back up your vocabulary'),make('small','Optional: sign in to access your saved words on other devices.'));
+    const hintCopy=make('div','');hintCopy.className='wf-auth-hint-copy';hintCopy.append(make('strong','Your words, wherever you go.'),make('small','Sign in to back up your vocabulary and learning progress across devices.'));
     const hintActions=make('div','');hintActions.className='wf-auth-hint-actions';
-    const hintSignIn=action('Back up words',openAccount);
+    const hintSignIn=action('Sign in',openAccount,true);
     const dismiss=make('button','');dismiss.type='button';dismiss.className='wf-auth-dismiss';dismiss.innerHTML=glyph('close');dismiss.setAttribute('aria-label','Dismiss backup suggestion');dismiss.onclick=()=>{authHint.hidden=true;try{localStorage.setItem('wf_backup_hint_dismissed','1');}catch{}scheduleFit();};
-    hintActions.append(hintSignIn,dismiss);authHint.append(hintCopy,hintActions);
+    const hintIcon=make('span','');hintIcon.className='wf-backup-symbol';hintIcon.innerHTML='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 16.2A5 5 0 0 0 18 7h-1.3A7 7 0 1 0 4 15.3"/><path d="m9 16 2 2 4-4"/></svg>';hintActions.append(hintSignIn,dismiss);authHint.append(hintIcon,hintCopy,hintActions);
     views.today.append(authHint);
-    function updateAuthHint(){let dismissed=false;try{dismissed=localStorage.getItem('wf_backup_hint_dismissed')==='1';}catch{}authHint.hidden=!!cloudUser||dismissed||wordPairs.length===0;}
+    function updateAuthHint(){let dismissed=false;try{dismissed=localStorage.getItem('wf_backup_hint_dismissed')==='1';}catch{}authHint.hidden=!!cloudUser||dismissed;}
 
     let cloudClient=null,cloudUser=null,cloudBusy=false,cloudReady=false,cloudTimer=0,cloudRevision=null,cloudSnapshot='',cloudGeneration=0;
     const redirectTo='https://unesjami.github.io/WordFlow/';
@@ -1914,13 +1915,13 @@ window.wfLucideGlyph=function(alias){const names={"monitor":"monitor","plus":"pl
       const storyTitle=make('h2','Make every word ');storyTitle.append(make('span','count.'));
       const sample=make('div','');sample.className='wf-auth-sample';sample.setAttribute('aria-hidden','true');
       for(const [en,fa] of [['Curiosity','کنجکاوی'],['Progress','پیشرفت']]){const row=make('div','');row.className='wf-auth-sample-row';const meaning=make('span',fa);meaning.lang='fa';meaning.dir='rtl';row.append(make('strong',en),meaning);sample.append(row);}
-      storyContent.append(eyebrow,storyTitle,make('p','Build your vocabulary one word at a time. Keep your learning with you, wherever you go.'),sample);
+      storyContent.append(eyebrow,storyTitle,make('p','Build your vocabulary one word at a time. Keep your learning with you, wherever you go.'));
       const footer=make('div','');footer.className='wf-auth-story-footer';footer.innerHTML=glyph('check');footer.append(make('span','Free to learn. Your choice to sign in.'));
       story.append(brand,storyContent,footer);
       const mainAuth=make('section','');mainAuth.className='wf-auth-main';
       const form=make('div','');form.className='wf-auth-form';
       const mobileBrand=brand.cloneNode(true);mobileBrand.classList.add('wf-auth-mobile-brand');
-      const intro=make('div','');intro.className='wf-auth-intro';const title=make('h1','Your words, everywhere.');title.id='wfAuthTitle';intro.append(title,make('p','Sign in to back up your saved words, including words already in this browser, and pick up where you left off on another device.'));
+      const intro=make('div','');intro.className='wf-auth-intro';const title=make('h1','Your words, everywhere.');title.id='wfAuthTitle';intro.append(title,make('p','Back up your saved words and pick up where you left off on another device.'));
       const benefits=make('ul','');benefits.className='wf-auth-benefits';
       for(const label of ['Back up your saved words','Access your vocabulary on other devices','Keep your learning progress together']){const li=make('li','');li.innerHTML=glyph('check');li.append(make('span',label));benefits.append(li);}
       const error=make('p','');error.className='wf-auth-error';error.setAttribute('role','status');
