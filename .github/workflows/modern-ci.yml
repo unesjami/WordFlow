@@ -1,7 +1,7 @@
 name: Modern WordFlow CI
 on:
   push:
-    branches: [modernization]
+    branches: [modernization, main]
   pull_request:
     branches: [modernization, main]
     paths: ['modern/**', '.github/workflows/modern-ci.yml']
