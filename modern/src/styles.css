@@ -28,3 +28,24 @@
 .wf-email-submit{border:0;border-radius:10px;background:#146464;color:#fff;font-size:.85rem;font-weight:600;min-height:44px}.wf-email-submit:hover{background:#115451}
 .wf-auth-mobile-brand{display:none}
 @media(max-width:800px){.wf-auth-body{grid-template-columns:minmax(0,1fr)}.wf-auth-story{display:none}.wf-auth-main{padding:32px 24px}.wf-auth-mobile-brand{display:flex;margin-bottom:4px}}
+
+
+/* Authentication refinement: stable feedback geometry, accessible OTP and motion. */
+.wf-auth-form{max-width:390px;gap:14px}
+.wf-auth-form h1{min-height:2.2em;display:flex;align-items:end}
+.wf-auth-links{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:32px;flex-wrap:wrap}
+.wf-auth-links button{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--accent);padding:5px 0;transition:opacity .15s,color .15s}
+.wf-auth-links button:hover:not(:disabled){text-decoration:underline;text-underline-offset:3px}
+.wf-auth-feedback{contain:layout;scrollbar-width:thin}
+.wf-auth-feedback .wf-error{font-size:13px;padding:10px 12px;margin:0}
+.wf-otp{position:relative;min-width:0}
+.wf-otp-cells{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.wf-otp-cell{display:grid;place-items:center;height:58px;border:1px solid var(--line);border-radius:13px;background:var(--surface);color:var(--ink);font-size:25px;font-weight:650;font-variant-numeric:tabular-nums;transition:border-color .15s,box-shadow .15s,background .15s}
+.wf-otp-cell[data-filled=true]{background:var(--soft);border-color:var(--accent)}
+.wf-otp-cell[data-active=true]{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 15%,transparent)}
+.wf-otp[data-invalid=true] .wf-otp-cell{border-color:#cb6262}
+.wf-email-form .wf-otp-native{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:text;font-size:16px;letter-spacing:0;padding:0;z-index:1}
+.wf-auth-form .wf-email-submit:active:not(:disabled),.wf-auth-form .wf-google:active:not(:disabled){transform:scale(.985)}
+.wf-auth-form .wf-email-submit,.wf-auth-form .wf-google{transition:background .16s,border-color .16s,transform .16s,box-shadow .16s}
+@media(max-width:400px){.wf-otp-cells{gap:5px}.wf-otp-cell{height:49px;font-size:22px;border-radius:10px}}
+@media(prefers-reduced-motion:reduce){.wf-auth-form button,.wf-otp-cell{transition:none!important}}
