@@ -864,6 +864,7 @@ body.dark-mode{--wf-accent-end:#36a99f;--wf-hero-end:#192522}
 @media(max-width:1050px){#view-today{grid-template-rows:auto auto auto minmax(0,1fr) auto}#view-today .wf-hero{padding:10px 14px;display:flex;align-items:center;gap:12px;justify-content:space-between}#view-today .wf-hero p{display:none}#view-today .wf-hero h3{margin:0;font-size:1rem}}
 @media(max-width:760px){#view-today .wf-hero{display:none}#view-today{grid-template-rows:auto auto minmax(0,1fr) auto}#view-today .wf-capture-panel .input-panel-bottom{grid-template-columns:minmax(0,1fr)}#view-today .wf-capture-panel .translate-btn{justify-self:end}#view-today .wf-recent{padding:10px}.wf-recent-row{gap:6px;padding:4px}.wf-recent-actions .icon-btn{width:40px;min-width:40px;height:40px;min-height:40px}}
 .wf-content.wf-needs-room #view-today{grid-template-rows:auto}.wf-content.wf-needs-room #view-today .wf-recent-list{min-height:100px}
+.wf-undo-stack{position:fixed;z-index:1000;right:20px;bottom:20px;display:flex;flex-direction:column;gap:8px;max-width:calc(100vw - 32px);pointer-events:none}.wf-undo-toast{position:relative;display:flex;align-items:center;gap:22px;min-width:210px;max-width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:13px;background:var(--card-bg);color:var(--ink);box-shadow:0 8px 30px #0002;overflow:hidden;pointer-events:auto;animation:wfUndoIn .24s cubic-bezier(.22,.8,.25,1) both}.wf-undo-message{font:600 .83rem Inter,sans-serif;flex:1}.wf-undo-toast button{border:0;background:var(--accent-soft);color:var(--accent);font:700 .8rem Inter,sans-serif;padding:8px 13px;border-radius:8px;cursor:pointer;min-height:36px}.wf-undo-toast button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.wf-undo-timer{position:absolute;bottom:0;left:0;height:3px;width:100%;background:var(--accent);transform-origin:left;animation:wfUndoCount 5s linear forwards}.wf-undo-leave{animation:wfUndoOut .18s ease both}@keyframes wfUndoIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes wfUndoOut{to{opacity:0;transform:translateY(8px)}}@keyframes wfUndoCount{to{transform:scaleX(0)}}@media(max-width:760px){.wf-undo-stack{right:12px;bottom:calc(80px + env(safe-area-inset-bottom,0px))}}@media(prefers-reduced-motion:reduce){.wf-undo-toast,.wf-undo-leave{animation:none}.wf-undo-timer{animation:none}}
 </style>
 </head>
 <body>
@@ -1123,10 +1124,29 @@ window.wfLucideGlyph=function(alias){const names={"chart":"chart-no-axes-column-
       }
     }
 
-    async function deleteWord(index) {
+    const pendingDeletes=new Set();
+    function deleteWord(index){
       const word=wordPairs[index];if(!word)return;
-      const result=await modalForm({title:'Delete this word?',description:'“'+word.en+'” will be removed from your vocabulary and review history.',submit:'Delete word',danger:true});
-      if(result&&wordPairs.includes(word)){wordPairs.splice(wordPairs.indexOf(word),1);persistAndRender();showToast('Word deleted');}
+      const owner=activeStorageKey;
+      const removed=wordPairs.splice(index,1)[0];persistAndRender();
+      let stack=document.getElementById('wfUndoStack');
+      if(!stack){stack=document.createElement('div');stack.id='wfUndoStack';stack.className='wf-undo-stack';document.body.append(stack);}
+      const item=document.createElement('div');item.className='wf-undo-toast';
+      const message=document.createElement('span');message.className='wf-undo-message';message.setAttribute('role','status');message.textContent='Word deleted';
+      const undo=document.createElement('button');undo.type='button';undo.textContent='Undo';undo.setAttribute('aria-label','Undo deletion of '+removed.en);
+      const timerBar=document.createElement('span');timerBar.className='wf-undo-timer';timerBar.setAttribute('aria-hidden','true');
+      item.append(message,undo,timerBar);stack.append(item);
+      let finished=false;const entry={owner,close:null};pendingDeletes.add(entry);
+      function close(){if(finished)return;finished=true;clearTimeout(timer);pendingDeletes.delete(entry);undo.disabled=true;item.classList.add('wf-undo-leave');setTimeout(()=>item.remove(),180);}
+      const timer=setTimeout(close,5000);entry.close=close;
+      undo.onclick=()=>{
+        if(finished)return;
+        if(activeStorageKey!==owner){close();return;}
+        if(!wordPairs.some(w=>normalized(w.en)===normalized(removed.en)&&normalized(w.fa)===normalized(removed.fa))){
+          wordPairs.splice(Math.min(index,wordPairs.length),0,removed);persistAndRender();showToast('Word restored');
+        }
+        close();
+      };
     }
 
     function copyWord(index) {
@@ -1899,7 +1919,7 @@ window.wfLucideGlyph=function(alias){const names={"chart":"chart-no-axes-column-
     }
     async function activateAccount(user){
       if((user||cloudUser)&&user?.id===cloudUser?.id)return;
-      ++cloudGeneration;clearTimeout(cloudTimer);cloudReady=false;cloudBusy=false;cloudRevision=null;cloudSnapshot='';pendingGuest=null;cloudUser=user||null;
+      for(const entry of [...pendingDeletes])entry.close();++cloudGeneration;clearTimeout(cloudTimer);cloudReady=false;cloudBusy=false;cloudRevision=null;cloudSnapshot='';pendingGuest=null;cloudUser=user||null;
       activeStorageKey=user?guestKey+':'+user.id:guestKey;
       wordPairs=readWorkspace(activeStorageKey);
       if(user){
