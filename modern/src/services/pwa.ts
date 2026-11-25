@@ -1,0 +1,1 @@
+export function registerPwa(){if(!import.meta.env.PROD||!('serviceWorker' in navigator))return;window.addEventListener('load',()=>{void navigator.serviceWorker.register(new URL('sw.js',document.baseURI),{scope:'./'}).catch(error=>console.warn('Offline shell registration failed',error));},{once:true});}

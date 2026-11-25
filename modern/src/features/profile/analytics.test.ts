@@ -1,0 +1,4 @@
+import {describe,it,expect} from 'vitest';
+import {metrics,activitySeries,dayKey} from './analytics';
+import type {Word} from '../../domain';
+describe('real learning analytics',()=>{it('does not invent accuracy for empty history',()=>expect(metrics([],0).accuracy).toBeNull());it('calculates weighted accuracy and due words',()=>{const a:Word={en:'a',fa:'الف',kept:false,timestamp:1,review:{due:10,interval:1,count:4,correct:3}};expect(metrics([a,{...a,review:undefined}],0)).toEqual({words:2,reviewed:1,attempts:4,accuracy:75,due:1});});it('fills missing days with zero across month boundaries',()=>{const now=new Date(2026,10,2);const rows=activitySeries({'2026-11-02':{review:2,practice:3,correct:4}},7,now);expect(rows).toHaveLength(7);expect(rows[0].date).toBe('2026-10-27');expect(rows[6]).toEqual({date:dayKey(now),label:'11-02',review:2,practice:3});expect(rows[0].review).toBe(0);expect(activitySeries({},30,now)).toHaveLength(30);});});

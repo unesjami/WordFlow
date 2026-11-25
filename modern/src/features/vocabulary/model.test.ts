@@ -1,0 +1,5 @@
+import {describe,it,expect} from 'vitest';
+import {searchWords,saveWord,removeWord} from './model';
+import type {Word} from '../../domain';
+const original:Word[]=[{en:'Apple',fa:'سیب',kept:true,timestamp:10,review:{due:20,interval:2,count:4,correct:3},tags:['fruit']}];
+describe('vocabulary',()=>{it('searches both languages and tags',()=>{for(const q of ['APPLE','سیب','fruit'])expect(searchWords(original,q)[0]?.index).toBe(0);expect(searchWords(original,'pear')).toEqual([]);});it('adds without mutating previous words',()=>{expect(saveWord(original,' Pear ','ناک')).toHaveLength(2);expect(original).toHaveLength(1);});it('rejects duplicates and empty input',()=>{expect(()=>saveWord(original,'apple','سیب')).toThrow();expect(()=>saveWord(original,'','ناک')).toThrow();});it('preserves review history while editing',()=>{expect(saveWord(original,'Apples','سیب',0)[0]).toEqual({...original[0],en:'Apples'});});it('deletes only the selected word',()=>{expect(removeWord(saveWord(original,'Pear','ناک'),0)[0].en).toBe('Pear');expect(()=>removeWord(original,4)).toThrow();});});

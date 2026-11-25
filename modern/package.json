@@ -1,0 +1,32 @@
+{
+  "name": "wordflow-modern",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "build:production": "npm test && npm run build"
+  },
+  "dependencies": {
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "@supabase/supabase-js": "2.49.4",
+    "recharts": "3.1.2",
+    "motion": "12.23.12",
+    "lucide-react": "0.468.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.10",
+    "@types/react-dom": "19.1.7",
+    "@vitejs/plugin-react": "4.7.0",
+    "typescript": "5.9.2",
+    "vite": "6.3.6",
+    "tailwindcss": "4.1.12",
+    "@tailwindcss/vite": "4.1.12",
+    "vitest": "3.2.4",
+    "fake-indexeddb": "6.1.0"
+  }
+}
