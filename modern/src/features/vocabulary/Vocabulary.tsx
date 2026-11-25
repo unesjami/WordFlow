@@ -5,8 +5,11 @@ import {readWorkspace,writeWorkspace} from '../../services/workspace';
 import {searchWords,saveWord,removeWord} from './model';
 import {translate,detectLanguage} from '../../services/translation';
 import {speakEnglish,stopSpeech} from '../../services/speech';
+import {ReviewPanel} from '../learning/ReviewPanel';
+import {PracticePanel} from '../learning/PracticePanel';
 
 export function Vocabulary({userId}:{userId:string}){
+ const [view,setView]=useState<'vocabulary'|'review'|'practice'>('vocabulary');
  const [words,setWords]=useState<Word[]|null>(null);
  const [revision,setRevision]=useState<number|null>(null);
  const [query,setQuery]=useState('');
@@ -40,19 +43,20 @@ export function Vocabulary({userId}:{userId:string}){
    return ()=>{generation.current++;};
  },[userId,reload]);
  function reset(){setEditing(null);setEn('');setFa('');}
- async function persist(next:Word[],success:string){
-   if(locked.current||blocked||words===null)return;
+ async function persist(next:Word[],success:string):Promise<boolean>{
+   if(locked.current||blocked||words===null)return false;
    locked.current=true;setBusy(true);setError('');setNotice('');
    const current=generation.current;
-   try{const rev=await writeWorkspace(userId,next,revision);if(generation.current===current){setWords(next);setRevision(rev);reset();setDeleting(null);setNotice(success);}}
-   catch(e){if(generation.current===current){setBlocked(true);setError(e instanceof Error?e.message:'Save failed. Reload before retrying.');}}
+   try{const rev=await writeWorkspace(userId,next,revision);if(generation.current===current){setWords(next);setRevision(rev);reset();setDeleting(null);setNotice(success);return true;}return false;}
+   catch(e){if(generation.current===current){setBlocked(true);setError(e instanceof Error?e.message:'Save failed. Reload before retrying.');}return false;}
    finally{if(generation.current===current){locked.current=false;setBusy(false);}}
  }
  function submit(event:FormEvent<HTMLFormElement>){event.preventDefault();if(words===null||busy||blocked||translating)return;try{void persist(saveWord(words,en,fa,editing),editing===null?'Word added.':'Word updated.');}catch(e){setError(e instanceof Error?e.message:'Invalid word.');}}
  return <section aria-labelledby="vocabulary-title" className="space-y-4">
  <div className="flex items-center justify-between gap-3"><h2 id="vocabulary-title" className="text-xl font-semibold">Vocabulary {words!==null&&<span className="opacity-60">· {words.length}</span>}</h2><button type="button" disabled={busy||translating} onClick={()=>setReload(n=>n+1)} className="rounded-lg border px-3 py-2">Reload</button></div>
  {error&&<p role="alert" className="rounded-lg border border-red-500 p-3">{error}</p>}{notice&&<p role="status" className="text-sm text-teal-600">{notice}</p>}
- {words===null?<p role="status">{error?'Vocabulary unavailable':'Loading vocabulary…'}</p>:<>
+ <nav aria-label="Learning views" className="grid grid-cols-3 gap-2">{(['vocabulary','review','practice'] as const).map(v=><button key={v} type="button" disabled={busy||translating} aria-pressed={view===v} onClick={()=>{stopSpeech();setView(v);}} className={'rounded-lg border p-2 capitalize '+(view===v?'bg-teal-700 text-white':'')}>{v}</button>)}</nav>
+ {words===null?<p role="status">{error?'Vocabulary unavailable':'Loading vocabulary…'}</p>:view==='review'?<ReviewPanel key={reload} words={words} disabled={busy||blocked} save={next=>persist(next,'Review saved.')}/>:view==='practice'?<PracticePanel key={reload} words={words} onActivity={correct=>{try{const key='wf-modern-activity:'+userId;const day=new Date().toLocaleDateString('en-CA');const old=JSON.parse(localStorage.getItem(key)||'{}');const record=old[day]||{practice:0,correct:0};old[day]={...record,practice:record.practice+1,correct:record.correct+(correct?1:0)};localStorage.setItem(key,JSON.stringify(old));}catch{/* Practice remains usable if local storage is unavailable. */}}}/>:<>
  <form onSubmit={translateInput} className="grid gap-3 rounded-xl border p-4" aria-busy={translating}><label className="grid gap-1 text-sm">Translate<textarea value={source} onChange={e=>setSource(e.target.value)} dir="auto" maxLength={500} required disabled={translating||busy||blocked} className="rounded-lg border p-3" placeholder="English / فارسی"/></label><p className="text-xs opacity-70">Online translation sends this text to external translation providers. Do not enter private information.</p><button disabled={translating||busy||blocked||!source.trim()} className="rounded-lg bg-teal-700 px-4 py-2 text-white disabled:opacity-50">{translating?'Translating…':'Translate'}</button>{translating&&<div role="status" className="h-10 rounded-lg bg-current opacity-10 motion-safe:animate-pulse"><span className="sr-only">Translating</span></div>}</form>
  <form onSubmit={submit} className="grid gap-3 rounded-xl border p-4"><h3 className="font-medium">{editing===null?'Add word':'Edit word'}</h3><label className="grid gap-1 text-sm">English<input required value={en} onChange={e=>setEn(e.target.value)} disabled={busy||blocked||translating} className="rounded-lg border p-2"/></label><label className="grid gap-1 text-sm">Persian<input required lang="fa" dir="rtl" value={fa} onChange={e=>setFa(e.target.value)} disabled={busy||blocked} className="rounded-lg border p-2"/></label><div className="flex gap-2"><button disabled={busy||blocked} className="rounded-lg bg-teal-700 px-4 py-2 text-white disabled:opacity-50">{busy?'Saving…':editing===null?'Add':'Save'}</button>{editing!==null&&<button type="button" disabled={busy} onClick={reset} className="rounded-lg border px-4 py-2">Cancel</button>}</div></form>
  <label className="grid gap-1 text-sm">Search vocabulary<input type="search" value={query} onChange={e=>setQuery(e.target.value)} className="rounded-lg border p-3" placeholder="English / فارسی"/></label>
