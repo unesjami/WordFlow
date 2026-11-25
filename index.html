@@ -2,6 +2,20 @@
 <html lang="en" class="wf-booting">
 <head>
   <style>html.wf-booting{background:#f7f8fa}html.wf-booting body{visibility:hidden;transition:none!important}@media(prefers-color-scheme:dark){html.wf-booting{background:#111817;color-scheme:dark}}html.wf-booting *,html.wf-booting *::before,html.wf-booting *::after{animation:none!important;transition:none!important}.wf-header-actions[hidden]{display:none!important}
+
+/* Today: clear purpose, one primary action, progressive disclosure. */
+#view-today{grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:auto auto minmax(104px,1fr) auto auto auto;gap:10px}
+#view-today>.wf-welcome{grid-column:1/-1!important;display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);gap:18px;align-items:center;padding:18px 20px;background:linear-gradient(120deg,var(--accent-soft),var(--card-bg));border:1px solid var(--border);border-radius:16px}
+.wf-welcome-copy{display:grid;gap:6px}.wf-welcome-copy h3{font-size:clamp(1.1rem,2vw,1.4rem)!important;line-height:1.25;letter-spacing:-.035em;margin:0}.wf-welcome-copy p{display:block!important;color:var(--ink-soft);font-size:.83rem;line-height:1.5;margin:0}
+.wf-learning-path{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.wf-path-step{display:grid;gap:6px;align-content:start}.wf-step-number{display:grid;place-items:center;width:26px;height:26px;border-radius:9px;background:var(--card-bg);border:1px solid var(--border);color:var(--accent);font-size:.75rem;font-weight:700}.wf-path-step div{display:grid;gap:3px}.wf-path-step strong{font-size:.8rem;color:var(--ink)}.wf-path-step small{display:block!important;font-size:.68rem;line-height:1.35;color:var(--ink-soft)}
+#view-today>.wf-capture-panel{grid-column:1/-1!important;padding:14px 16px;min-width:0}.wf-capture-panel h3{font-size:1rem}.wf-capture-panel>p{display:block!important;margin-bottom:4px;font-size:.8rem;line-height:1.4}
+.wf-try-example{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:.74rem;color:var(--ink-soft);margin-top:6px}.wf-try-example[hidden]{display:none!important}#view-today .wf-example{min-height:30px;padding:4px 10px;font-size:.75rem;background:var(--accent-soft);border-color:transparent;color:var(--ink)}
+#view-today>.wf-recent{grid-column:1/-1!important}.wf-next-step{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 14px;border:1px solid var(--border);border-radius:12px;background:var(--card-bg)}.wf-next-copy{display:grid;gap:4px;min-width:0}.wf-next-copy strong{font-size:.85rem}.wf-next-copy small{font-size:.74rem;color:var(--ink-soft);line-height:1.4}.wf-next-step button{min-height:36px!important;white-space:nowrap}.wf-next-step button[hidden]{display:none!important}
+#view-today>.wf-stats{grid-column:1/-1!important;gap:8px}#view-today>.wf-stats[hidden]{display:none!important}#view-today>.wf-stats>div{min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px}#view-today>.wf-stats strong{font-size:1.05rem;margin:0}
+#view-today>.wf-auth-hint{grid-column:1/-1;min-height:42px;padding:8px 12px}
+@media(max-width:760px){#view-today>.wf-welcome{display:grid!important;grid-template-columns:1fr;gap:10px;padding:12px 14px}.wf-welcome-copy p{font-size:.78rem}.wf-learning-path{gap:8px}.wf-path-step{display:flex;align-items:center;gap:5px}.wf-path-step small{display:none!important}.wf-step-number{width:23px;height:23px;flex:none}#view-today>.wf-stats>div{display:grid;gap:2px;padding:6px 8px}#view-today>.wf-capture-panel{padding:10px 12px}.wf-next-step{padding:8px 10px}}
+@media(max-height:680px){#view-today>.wf-welcome{padding:10px 14px}.wf-path-step small{display:none!important}.wf-welcome-copy p{font-size:.76rem}#view-today>.wf-auth-hint{padding:6px 10px}}
 </style>
   <noscript><style>html.wf-booting body{visibility:visible}</style></noscript>
   <link rel="icon" type="image/svg+xml" href="./icon.svg?v=4">
@@ -1562,7 +1576,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
       if(desc)section.append(make('p',desc));
       const row=document.createElement('div');row.className='wf-action-row';row.append(...children);section.append(row);parent.append(section);return section;
     }
-    const labels={today:['Today','A little progress, every day.'],library:['Vocabulary','Your words, meanings and personal examples.'],review:['Review','Remember more with focused daily review.'],practice:['Practice','Choose an exercise and put your knowledge to work.'],dictionary:['Dictionary','Explore meanings, pronunciation and examples.'],settings:['Settings','Manage your workspace and vocabulary data.']};
+    const labels={today:['Today','Translate, save and remember new words.'],library:['Vocabulary','Your words, meanings and personal examples.'],review:['Review','Remember more with focused daily review.'],practice:['Practice','Choose an exercise and put your knowledge to work.'],dictionary:['Dictionary','Explore meanings, pronunciation and examples.'],settings:['Settings','Manage your workspace and vocabulary data.']};
     const paths={today:'today',library:'library',review:'review',practice:'practice',dictionary:'dictionary',settings:'settings'};
     const buttons={};
     for(const key of Object.keys(views)){
@@ -1571,26 +1585,43 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
       b.onclick=()=>navigate(key);buttons[key]=b;nav.append(b);
     }
     function action(label,fn,primary=false){const b=make('button',label);b.className='wf-action'+(primary?' primary':'');b.onclick=fn;return b;}
-    views.today.append(stats);
-    const hero=document.createElement('div');hero.className='wf-hero';
-    hero.append(make('small','DAILY LEARNING'),make('h3','Make new words stick.'),make('p','Review your vocabulary at your own pace.'),action('Start daily review',()=>{navigate('review');$wf('wfReview').click();},true));views.today.append(hero);
-    const capturePanel=group(views.today,'Quick capture','Add a word or phrase in English or Persian.',[capture]);capturePanel.classList.add('wf-capture-panel');
-    const captureStatus=make('p','');captureStatus.className='wf-capture-status';captureStatus.setAttribute('role','status');capturePanel.append(captureStatus);
+    const hero=document.createElement('section');hero.className='wf-hero wf-welcome';
+    const welcomeCopy=make('div','');welcomeCopy.className='wf-welcome-copy';
+    const welcomeTitle=make('h3','Turn new words into lasting knowledge.');
+    welcomeCopy.append(welcomeTitle,make('p','Translate English and Persian words, save them automatically, then practise until you remember them.'));
+    const journey=make('div','');journey.className='wf-learning-path';journey.setAttribute('aria-label','Three steps to learn vocabulary');
+    for(const [number,label,desc] of [['1','Translate','Find the meaning'],['2','Save','Build your collection'],['3','Review','Remember what you learn']]){
+      const step=make('div','');step.className='wf-path-step';const n=make('span',number);n.className='wf-step-number';const copy=make('div','');copy.append(make('strong',label),make('small',desc));step.append(n,copy);journey.append(step);
+    }
+    hero.append(welcomeCopy,journey);views.today.append(hero);
+    const nextStep=make('div','');nextStep.className='wf-next-step';
+    const nextCopy=make('div','');nextCopy.className='wf-next-copy';const nextTitle=make('strong','Start with a word');const nextDescription=make('small','Type a word below to translate and save it.');nextCopy.append(nextTitle,nextDescription);
+    const nextAction=action('Start learning',()=>inputEl.focus({preventScroll:true}),true);
+    nextStep.append(nextCopy,nextAction);
+    function updateTodayGuide(){
+      const total=wordPairs.length;const dueCount=wordPairs.filter(due).length;
+      if(!total){nextTitle.textContent='Start with a word';nextDescription.textContent='Try a word in English or Persian.';nextAction.hidden=true;return;}
+      nextAction.hidden=false;
+      if(dueCount){nextTitle.textContent=dueCount+' '+(dueCount===1?'word':'words')+' ready to review';nextDescription.textContent='Recall their meanings to help you remember.';nextAction.textContent='Review words';nextAction.onclick=()=>{navigate('review');$wf('wfReview').click();};}
+      else{nextTitle.textContent='Build on what you know';nextDescription.textContent='Practise your saved words at your own pace.';nextAction.textContent='Practise';nextAction.onclick=()=>navigate('practice');}
+    }
+    const capturePanel=group(views.today,'Translate a word','Type or speak in English or Persian. Your translation is saved automatically.',[capture]);capturePanel.classList.add('wf-capture-panel');
+    const captureStatus=make('p','');captureStatus.className='wf-capture-status';captureStatus.setAttribute('role','status');capturePanel.append(captureStatus);const exampleRow=make('div','');exampleRow.className='wf-try-example';exampleRow.append(make('span','Try an example:'));for(const sample of ['Apple','Curiosity']){const b=action(sample,()=>{inputEl.value=sample;addFromInput();});b.classList.add('wf-example');exampleRow.append(b);}capturePanel.append(exampleRow);
     const recent=make('section','');recent.className='wf-panel wf-recent';
     const recentHead=make('div','');recentHead.className='wf-recent-head';
-    const recentBrowse=action('View all',()=>navigate('library'));recentHead.append(make('h3','Recent translations'),recentBrowse);
+    const recentBrowse=action('View all',()=>navigate('library'));recentHead.append(make('h3','Your saved words'),recentBrowse);
     const recentList=make('div','');recentList.className='wf-recent-list';
     const recentPager=make('div','');recentPager.className='wf-recent-pager';
     const recentPrev=action('Previous',()=>{recentPage--;renderRecent();}),recentNext=action('Next',()=>{recentPage++;renderRecent();}),recentCount=make('span','');
     recentPrev.innerHTML=glyph('left');recentNext.innerHTML=glyph('right');recentPrev.setAttribute('aria-label','Previous translations');recentNext.setAttribute('aria-label','Next translations');
-    recentPager.append(recentPrev,recentCount,recentNext);recent.append(recentHead,recentList,recentPager);views.today.append(recent);
+    recentPager.append(recentPrev,recentCount,recentNext);recent.append(recentHead,recentList,recentPager);views.today.append(recent,nextStep,stats);
     let recentPage=0,recentSize=2,recentSelected=null;
     function renderRecent(){
       const rows=[...wordPairs].sort((a,b)=>(Number(b.timestamp)||0)-(Number(a.timestamp)||0));
       if(recentSelected&&rows.includes(recentSelected)){rows.splice(rows.indexOf(recentSelected),1);rows.unshift(recentSelected);}
       const pages=Math.max(1,Math.ceil(rows.length/recentSize));recentPage=Math.max(0,Math.min(recentPage,pages-1));
       recentList.replaceChildren();recentPager.hidden=pages<=1;
-      if(!rows.length){const empty=make('p','Your translations will appear here as soon as you save a word.');empty.className='wf-recent-empty';recentList.append(empty);return;}
+      if(!rows.length){const empty=make('p','Your saved words will appear here. Translate your first word above to get started.');empty.className='wf-recent-empty';recentList.append(empty);return;}
       for(const w of rows.slice(recentPage*recentSize,(recentPage+1)*recentSize)){
         const row=make('div','');row.className='wf-recent-row';const en=make('strong',w.en);en.title=w.en;const fa=make('span',w.fa);fa.className='wf-recent-fa';fa.dir='rtl';fa.lang='fa';fa.title=w.fa;
         const actions=make('div','');actions.className='wf-recent-actions';
@@ -1643,7 +1674,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     }
     const rowIcons={copy:['copy','Copy word'],edit:['edit','Edit word'],voice:['volume','Listen'],tick:['check','Keep word'],delete:['trash','Delete word'],details:['note','Tags and example']};
     function polishRows(){document.querySelectorAll('[data-action]').forEach(el=>{const item=rowIcons[el.dataset.action];if(item)iconize(el,item[0],item[1],true);});}
-    const originalRenderAll=renderAll;renderAll=function(){originalRenderAll();polishRows();renderRecent();};
+    const originalRenderAll=renderAll;renderAll=function(){originalRenderAll();polishRows();renderRecent();updateTodayGuide();exampleRow.hidden=wordPairs.length>0;stats.hidden=wordPairs.length===0;};
     for(const [id,name,label] of [['cardPrev','left','Previous card'],['cardNext','right','Next card'],['cardSpeak','volume','Listen'],['cardKeep','check','Keep word'],['micBtn','mic','Voice input']])iconize($wf(id),name,label,true);
     for(const [id,name,label] of [['wfAdd','plus','Add manually'],['wfBackup','download','Export backup'],['wfRestore','upload','Import backup']])iconize($wf(id),name,label);
     iconize(batchButton,'list','Bulk import');iconize(translateBtn,'arrow','Translate & save');iconize(installButton,'download','Install app');
@@ -1654,7 +1685,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     const quick=action('Add word',()=>{navigate('today');inputEl.focus({preventScroll:true});},true);iconize(quick,'plus','Add word');
     const headerActions=document.createElement('div');headerActions.className='wf-header-actions';header.append(headerActions);headerActions.hidden=true;
     iconize(recentBrowse,'list','View all');
-    const heroButton=hero.querySelector('button');iconize(heroButton,'arrow','Start daily review');
+    
     const reviewButton=$wf('wfReview');iconize(reviewButton,'cards','Start smart review');
     const first=views.library.querySelector('.wf-library-tools');const addQuick=action('Translate & add',()=>{navigate('today');inputEl.focus({preventScroll:true});},true);iconize(addQuick,'plus','Translate & add');first.append(addQuick);
     flipCard.tabIndex=0;flipCard.setAttribute('role','button');flipCard.setAttribute('aria-label','Reveal or hide translation');flipCard.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flipCard.click();}});
@@ -1699,7 +1730,7 @@ window.wfLucideGlyph=function(alias){const names={"plus":"plus","search":"search
     const accountPanel=group(views.settings,'Account & backup','WordFlow is free without an account. Sign in to back up your words and access them on other devices.',[accountIdentity,settingsAccount,signOutButton]);
     accountPanel.classList.add('wf-account-panel');
     const authHint=make('div','');authHint.className='wf-auth-hint';
-    const hintCopy=make('div','');hintCopy.className='wf-auth-hint-copy';hintCopy.append(make('strong','Keep your words safe'),make('small','Sign in to back up your vocabulary and learn on other devices.'));
+    const hintCopy=make('div','');hintCopy.className='wf-auth-hint-copy';hintCopy.append(make('strong','Back up your vocabulary'),make('small','Optional: sign in to access your saved words on other devices.'));
     const hintActions=make('div','');hintActions.className='wf-auth-hint-actions';
     const hintSignIn=action('Back up words',openAccount);
     const dismiss=make('button','');dismiss.type='button';dismiss.className='wf-auth-dismiss';dismiss.innerHTML=glyph('close');dismiss.setAttribute('aria-label','Dismiss backup suggestion');dismiss.onclick=()=>{authHint.hidden=true;try{localStorage.setItem('wf_backup_hint_dismissed','1');}catch{}scheduleFit();};
