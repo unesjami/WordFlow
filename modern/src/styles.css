@@ -231,3 +231,12 @@
 .wf-profile-security form{padding-top:12px;border-top:1px solid var(--line)}
 @media(max-width:1000px){.wf-profile-metric{padding:12px;gap:8px}.wf-profile-symbol{width:38px;height:38px}.wf-profile-metric strong{font-size:22px}}
 @media(max-width:600px){.wf-profile-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.wf-profile-metric{min-height:78px}.wf-profile-metric p{font-size:11px}.wf-profile-avatar{width:52px;height:52px;border-radius:17px}.wf-profile-name strong{font-size:19px}.wf-profile-section-heading span{display:none}.wf-profile-security .wf-action{font-size:11px}.wf-profile-legend small{margin-left:0}.wf-profile-name-form input{font-size:15px}}
+
+/* Pronunciation feedback follows the actual audio lifecycle. */
+.wf-pronounce{min-height:36px;min-width:36px;padding:8px;flex:none;transition:color .15s,background .15s,border-color .15s}
+.wf-pronounce[data-phase=loading],.wf-pronounce[data-phase=playing]{color:var(--accent);background:var(--soft);border-color:var(--accent)}
+.wf-pronounce-spinner{animation:wf-speech-spin .8s linear infinite}
+.wf-pronounce-wave{animation:wf-speech-wave .8s ease-in-out infinite alternate;transform-origin:center}
+@keyframes wf-speech-spin{to{transform:rotate(360deg)}}
+@keyframes wf-speech-wave{from{transform:scaleY(.65);opacity:.65}to{transform:scaleY(1);opacity:1}}
+@media(prefers-reduced-motion:reduce){.wf-pronounce-spinner,.wf-pronounce-wave{animation:none!important}}
