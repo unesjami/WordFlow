@@ -750,3 +750,15 @@ body{min-width:0}
 .wf-translator .wf-translate-form textarea{transition:border-color .15s ease,box-shadow .15s ease}
 .wf-translator .wf-translate-form textarea:focus,.wf-translator .wf-translate-form textarea:focus-visible{outline:none;border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 @media(prefers-reduced-motion:reduce){.wf-translator .wf-translate-form textarea{transition:none}}
+
+/* Consistent rounded hover and keyboard focus across navigation states. */
+@media(min-width:761px){
+ .wf-sidebar .wf-nav-button:not([aria-current=page]){border-radius:24px}
+ .wf-sidebar .wf-nav-button:not([aria-current=page]):hover{background:transparent}
+ .wf-sidebar .wf-nav-button:not([aria-current=page])::after{content:"";position:absolute;inset:0 8px 0 0;z-index:-1;pointer-events:none;border-radius:24px;background:transparent;border:2px solid transparent;transition:background .16s,border-color .16s}
+ .wf-sidebar .wf-nav-button:not([aria-current=page]):hover::after{background:#ffffff12}
+ .wf-sidebar .wf-nav-button:not([aria-current=page]):focus-visible{outline:none}
+ .wf-sidebar .wf-nav-button:not([aria-current=page]):focus-visible::after{border-color:light-dark(#ffffff,var(--accent))}
+ .wf-sidebar .wf-nav-button[aria-current=page]:focus-visible .wf-nav-active{border-color:var(--accent)}
+}
+@media(prefers-reduced-motion:reduce){.wf-sidebar .wf-nav-button::after{transition:none!important}}
