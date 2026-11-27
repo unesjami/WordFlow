@@ -868,3 +868,11 @@ body{min-width:0}
 .wf-otp:has(.wf-otp-native:disabled) .wf-otp-cell::after{display:none}
 @keyframes wf-otp-caret{0%,100%{opacity:1}50%{opacity:.12}}
 @media(prefers-reduced-motion:reduce){.wf-otp-cell[data-active=true][data-filled=false]::after{animation:none}}
+
+/* Reserve verification feedback and resend geometry to prevent layout shifts. */
+.wf-auth-form:has(.wf-verification-form) .wf-auth-feedback,.wf-auth-form:has(.wf-verification-form) .wf-auth-feedback:empty{box-sizing:border-box;height:72px;min-height:72px;max-height:72px;overflow-y:auto}
+.wf-verification-form .wf-auth-links{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:8px;min-height:36px}
+.wf-verification-form .wf-auth-links>button{height:36px;min-width:0;white-space:nowrap}
+.wf-verification-form .wf-auth-links>.wf-resend-code{justify-content:flex-end;justify-self:stretch;font-variant-numeric:tabular-nums}
+.wf-resend-code svg{flex:none}
+@media(pointer:coarse){.wf-verification-form .wf-auth-links,.wf-verification-form .wf-auth-links>button{min-height:44px}}
