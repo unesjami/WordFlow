@@ -362,3 +362,18 @@ body{min-width:0}
 .wf-inline-error{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 12px;margin-bottom:12px;color:var(--wf-danger);font-size:13px;overflow-wrap:anywhere}
 .wf-inline-error button{display:grid;place-items:center;min-width:32px;min-height:32px;flex:none}
 @media(pointer:coarse){.wf-entry-actions{grid-auto-columns:var(--wf-touch)}.wf-inline-error button{min-width:44px;min-height:44px}}
+
+/* Fixed English action columns and unobtrusive deletion undo. */
+.wf-entry-line.wf-entry-english{display:grid;grid-template-columns:32px 32px minmax(0,1fr);gap:4px;align-items:start}
+.wf-entry-english>.wf-pronounce{width:32px;height:32px;min-width:32px;min-height:32px;padding:0;border:0;background:transparent;color:var(--muted);display:grid;place-items:center}
+.wf-entry-english>.wf-pronounce:hover,.wf-entry-english>.wf-pronounce[data-phase=playing],.wf-entry-english>.wf-pronounce[data-phase=loading]{color:var(--accent);background:transparent}
+.wf-entry-english>span{padding-block:4px;text-align:start}
+.wf-undo-toast{position:fixed;z-index:90;right:max(24px,env(safe-area-inset-right));bottom:max(24px,env(safe-area-inset-bottom));display:flex;align-items:center;gap:14px;max-width:calc(100vw - 32px);padding:10px 12px 14px 16px;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);box-shadow:0 6px 24px #0002;font-size:13px}
+.wf-undo-toast button{color:var(--accent);font-weight:650;padding:8px;min-height:36px;border-radius:8px}
+.wf-undo-toast button:hover:not(:disabled){background:var(--soft)}
+.wf-undo-count{font-variant-numeric:tabular-nums;min-width:24px;height:24px;display:grid;place-items:center;border-radius:50%;background:var(--soft);color:var(--accent);font-size:12px}
+.wf-undo-track{position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--soft)}
+.wf-undo-track>div{height:100%;background:var(--accent);transform-origin:left}
+@media(max-width:760px){.wf-undo-toast{bottom:calc(88px + env(safe-area-inset-bottom));right:16px}}
+@media(pointer:coarse){.wf-entry-line.wf-entry-english{grid-template-columns:44px 44px minmax(0,1fr)}.wf-entry-english>.wf-pronounce{width:44px;height:44px;min-width:44px;min-height:44px}.wf-undo-toast button{min-height:44px}}
+@media(prefers-reduced-motion:reduce){.wf-undo-track{display:none}}
