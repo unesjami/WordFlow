@@ -615,3 +615,18 @@ body{min-width:0}
 @media(max-width:480px){.wf-color-row .wf-color-options{grid-column:2/-1;justify-content:flex-start}}
 @media(pointer:coarse){.wf-color-row .wf-color-option,.wf-color-row .wf-color-option[aria-pressed=true]{width:44px;height:44px;min-height:44px}}
 @media(prefers-reduced-motion:reduce){.wf-color-swatch,.wf-sidebar-brand span{transition:none!important}}
+
+/* Stable logo: reserve a fixed origin and never overlay it with the rail control. */
+@media(min-width:761px){
+ .wf-sidebar .wf-sidebar-top,.wf-workspace[data-sidebar-collapsed=true] .wf-sidebar-top{display:block;position:relative;overflow:hidden}
+ .wf-sidebar .wf-sidebar-brand,.wf-workspace[data-sidebar-collapsed=true] .wf-sidebar-brand{position:absolute;top:6px;left:7px;padding:0;width:max-content;max-width:none;overflow:visible;gap:10px;transform:none}
+ .wf-sidebar .wf-sidebar-brand img{display:block;flex:none;width:34px;height:34px;opacity:1;transform:none;transition:none}
+ .wf-sidebar .wf-sidebar-brand span,.wf-workspace[data-sidebar-collapsed=true] .wf-sidebar-brand span{display:block;white-space:nowrap;opacity:1;transition:none}
+ .wf-sidebar .wf-sidebar-toggle,.wf-workspace[data-sidebar-collapsed=true] .wf-sidebar-toggle{position:absolute;top:7px;right:0;left:auto;transform:none;margin:0;width:30px;height:32px;background:var(--rail-bg)}
+ .wf-workspace[data-sidebar-collapsed=true] .wf-sidebar-toggle{opacity:0;pointer-events:none}
+ .wf-workspace[data-sidebar-collapsed=true] .wf-sidebar-toggle:focus-visible{opacity:1;pointer-events:auto;z-index:2;right:0}
+ .wf-workspace[data-sidebar-collapsed=true] .wf-sidebar-brand span{visibility:hidden}
+ .wf-sidebar .wf-sidebar-toggle:hover{background:color-mix(in srgb,var(--rail-bg) 88%,white)}
+}
+/* All settings section icons use the exact same active theme tokens. */
+.wf-setting-head .wf-setting-mark{background:var(--soft);color:var(--accent)}
