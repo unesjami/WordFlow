@@ -1,6 +1,6 @@
 import {useEffect,useRef,useState} from 'react';
 import {motion} from 'motion/react';
-import {BookOpen,RefreshCw,Brain,UserRound,Download,Cloud,LoaderCircle,NotebookPen,ArrowRightLeft,Trash2,Settings,Check,ChevronLeft,ChevronRight,Copy,Sun,Moon,Monitor,LogOut,ShieldCheck,X} from 'lucide-react';
+import {BookOpen,RefreshCw,Brain,UserRound,Download,Cloud,LoaderCircle,ArrowRightLeft,Trash2,Settings,Check,ChevronLeft,ChevronRight,Copy,Sun,Moon,Monitor,LogOut,ShieldCheck,X} from 'lucide-react';
 import {metrics} from '../profile/analytics';
 import type {FormEvent} from 'react';
 import type {Word} from '../../domain';
@@ -29,8 +29,7 @@ export function Vocabulary({userId,user,theme,setTheme,signOut}:{userId:string;u
  const [filter,setFilter]=useState<'active'|'kept'|'sentences'>('active');
  const [cardIndex,setCardIndex]=useState(0);
  const [cardReveal,setCardReveal]=useState(false);
- const [exampleIndex,setExampleIndex]=useState<number|null>(null);
- const [exampleDraft,setExampleDraft]=useState('');
+
  const [deleting,setDeleting]=useState<number|null>(null);
  const [busy,setBusy]=useState(false);
  const [blocked,setBlocked]=useState(false);
@@ -55,7 +54,7 @@ export function Vocabulary({userId,user,theme,setTheme,signOut}:{userId:string;u
    const kind=classifyText(text)==='sentence'||classifyText(english)==='sentence'?'sentence':'word';
    const next=saveWord(latest.words,english,language==='fa'?text:result,null,kind);
    if(await persist(next,kind==='sentence'?'Sentence added.':'Word added.')){
-    setSource('');reset();setFilter(kind==='sentence'?'sentences':'active');
+    setSource('');setFilter(kind==='sentence'?'sentences':'active');
    }
   }
   catch(e){if(!controller.signal.aborted)setError(e instanceof Error?e.message:'Translation failed.');}
@@ -64,24 +63,22 @@ export function Vocabulary({userId,user,theme,setTheme,signOut}:{userId:string;u
 
  useEffect(()=>{
    const current=++generation.current;
-   setWords(null);snapshot.current=null;setError('');setBlocked(false);setBusy(false);locked.current=false;setExampleIndex(null);setDeleting(null);setExampleDraft('');setNotice('');
+   setWords(null);snapshot.current=null;setError('');setBlocked(false);setBusy(false);locked.current=false;setDeleting(null);setNotice('');
    openWorkspace(userId).then(result=>{if(generation.current===current){snapshot.current=result;setWords(result.words);setSyncStatus(result.dirty?'Pending sync':'Saved locally');}}).catch(()=>{if(generation.current===current)setError('Could not load vocabulary. Your data was not changed.');});
    return ()=>{generation.current++;};
  },[userId,reload]);
- function reset(){setExampleIndex(null);setExampleDraft('');}
  async function copy(text:string){try{await navigator.clipboard.writeText(text);setNotice('Copied.');}catch{setError('Could not copy.');}}
  useEffect(()=>{if(!notice)return;const t=window.setTimeout(()=>setNotice(''),2200);return()=>window.clearTimeout(t);},[notice]);
  async function persist(next:Word[],success:string):Promise<boolean>{
    if(locked.current||blocked||!snapshot.current)return false;
    locked.current=true;setBusy(true);setError('');setNotice('');
    const current=generation.current;
-   try{const previous=snapshot.current;if(!previous)throw Error('Workspace unavailable');const local=makeSnapshot(userId,next,previous.revision,true);await storeLocal(local,previous.version);if(generation.current!==current)return false;snapshot.current=local;setWords(next);setSyncStatus('Pending sync');if(!translationRequest.current)reset();setDeleting(null);setNotice(success);return true;}
+   try{const previous=snapshot.current;if(!previous)throw Error('Workspace unavailable');const local=makeSnapshot(userId,next,previous.revision,true);await storeLocal(local,previous.version);if(generation.current!==current)return false;snapshot.current=local;setWords(next);setSyncStatus('Pending sync');setDeleting(null);setNotice(success);return true;}
    catch(e){if(generation.current===current){setBlocked(true);setError(e instanceof Error?e.message:'Save failed. Reload before retrying.');}return false;}
    finally{if(generation.current===current){locked.current=false;setBusy(false);}}
  }
  useEffect(()=>{let active=true;async function flush(){const local=snapshot.current;if(!active||!local?.dirty||locked.current||translationRequest.current||!navigator.onLine)return;locked.current=true;setBusy(true);setSyncStatus('Syncing');try{const clean=await syncLocal(local);if(active&&snapshot.current?.version===local.version){snapshot.current=clean;setSyncStatus('Synced');}}catch(e){if(active){setSyncStatus('Pending sync');setError(e instanceof Error?e.message:'Cloud sync unavailable. Local changes preserved.');}}finally{if(active){locked.current=false;setBusy(false);}}}const timer=window.setInterval(()=>void flush(),15000);window.addEventListener('online',flush);void flush();return()=>{active=false;window.clearInterval(timer);window.removeEventListener('online',flush);};},[userId,reload]);
  function exportLocal(){const local=snapshot.current;if(!local)return;const url=URL.createObjectURL(new Blob([JSON.stringify({words:local.words,revision:local.revision},null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='wordflow-local-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
- function saveExample(event:FormEvent<HTMLFormElement>){event.preventDefault();if(exampleIndex===null||!words||busy||blocked||translating||!exampleDraft.trim())return;void persist(words.map((w,i)=>i===exampleIndex?{...w,example:exampleDraft.trim()}:w),'Example saved.');}
  const nav=[{id:'vocabulary',label:'Vocabulary',Icon:BookOpen},{id:'learn',label:'Learn',Icon:Brain},{id:'profile',label:'Profile',Icon:UserRound},{id:'settings',label:'Settings',Icon:Settings}] as const;
  const studyWords=learningWords(words??[]);
  const stats=metrics(studyWords);
@@ -114,11 +111,11 @@ export function Vocabulary({userId,user,theme,setTheme,signOut}:{userId:string;u
  </motion.section>
  </div>:<>
  <section className="wf-panel wf-translator"><form autoComplete="off" onSubmit={translateInput} className="wf-translate-form"><textarea id="wf-source" rows={1} autoComplete="off" dir="auto" aria-label="Translate and save a word or sentence" value={source} onChange={e=>setSource(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();e.currentTarget.form?.requestSubmit();}}} maxLength={500} required placeholder="Translate a word or sentence…" disabled={translating}/><button className="wf-primary wf-translate-button" aria-busy={translating} disabled={translating||busy||blocked||words===null||!source.trim()}>{translating?<><LoaderCircle size={18} className="wf-pronounce-spinner"/>Translating</>:'Translate'}</button></form></section>
- <div className="wf-panel"><div className="wf-library-heading"><strong>My vocabulary</strong><div className="wf-segments">{(['active','kept','sentences'] as const).map(id=><button key={id} aria-pressed={filter===id} onClick={()=>{setFilter(id);setDeleting(null);reset();}}>{id==='active'?'Words':id==='kept'?'Kept':'Sentences'}</button>)}</div></div>
+ <div className="wf-panel"><div className="wf-library-heading"><strong>My vocabulary</strong><div className="wf-segments">{(['active','kept','sentences'] as const).map(id=><button key={id} aria-pressed={filter===id} onClick={()=>{setFilter(id);setDeleting(null);}}>{id==='active'?'Words':id==='kept'?'Kept':'Sentences'}</button>)}</div></div>
  {filtered.length===0?<p className="wf-empty">{words===null?'Loading…':filter==='sentences'?'No sentences yet.':filter==='kept'?'No kept words.':'No words yet.'}</p>:<ul className="wf-entry-list">{filtered.map(({word,index})=><motion.li key={index} layout="position" initial={{opacity:0,y:4}} animate={{opacity:1,y:0}} className="wf-entry">
  <div className="wf-entry-text"><div className="wf-entry-line"><span dir="auto">{word.en}</span><button type="button" className="wf-entry-icon" title="Copy English" aria-label="Copy English" onClick={()=>void copy(word.en)}><Copy size={15}/></button></div><div className="wf-entry-line" lang="fa"><span dir="rtl">{word.fa}</span><button type="button" className="wf-entry-icon" title="Copy Persian" aria-label="Copy Persian" onClick={()=>void copy(word.fa)}><Copy size={15}/></button></div>{word.example&&entryKind(word)==='word'&&<p className="wf-entry-example" dir="auto">{word.example}</p>}</div>
- <div className="wf-entry-actions">{deleting===index?<><button type="button" className="wf-entry-icon wf-entry-delete" title="Confirm delete" aria-label="Confirm delete" disabled={busy||blocked||translating} onClick={()=>void persist(removeWord(words??[],index),'Deleted.')}><Check size={17}/></button><button type="button" className="wf-entry-icon" title="Cancel delete" aria-label="Cancel delete" onClick={()=>setDeleting(null)}><X size={17}/></button></>:<>{entryKind(word)==='word'&&<button type="button" className="wf-entry-icon" title="Example sentence" aria-label="Example sentence" disabled={busy||blocked||translating} onClick={()=>{setExampleIndex(index);setExampleDraft(word.example??'');}}><NotebookPen size={17}/></button>}<PronounceButton text={word.en} onError={setError} label={"Pronounce "+word.en}/>{entryKind(word)==='word'&&<button type="button" className="wf-entry-icon wf-entry-check" title={word.kept?'Return to words':'Keep word'} aria-label={word.kept?'Return to words':'Keep word'} disabled={busy||blocked||translating} onClick={()=>void persist((words??[]).map((w,i)=>i===index?{...w,kept:!w.kept}:w),word.kept?'Word returned.':'Word kept.')}>{word.kept?<ArrowRightLeft size={17}/>:<Check size={17}/>}</button>}<button type="button" className="wf-entry-icon wf-entry-delete" title="Delete" aria-label="Delete" disabled={busy||blocked||translating} onClick={()=>setDeleting(index)}><Trash2 size={17}/></button></>}</div>
- {exampleIndex===index&&<form className="wf-example-form" onSubmit={saveExample}><input aria-label="Example sentence" placeholder="Write an example sentence…" value={exampleDraft} onChange={e=>setExampleDraft(e.target.value)} maxLength={500} required/><button className="wf-entry-icon" title="Save example" aria-label="Save example" disabled={busy||blocked||translating}><Check size={18}/></button><button type="button" className="wf-entry-icon" title="Cancel" aria-label="Cancel" onClick={reset}><X size={18}/></button></form>}</motion.li>)}</ul>}
+ <div className="wf-entry-actions">{deleting===index?<><button type="button" className="wf-entry-icon wf-entry-delete" title="Confirm delete" aria-label="Confirm delete" disabled={busy||blocked||translating} onClick={()=>void persist(removeWord(words??[],index),'Deleted.')}><Check size={17}/></button><button type="button" className="wf-entry-icon" title="Cancel delete" aria-label="Cancel delete" onClick={()=>setDeleting(null)}><X size={17}/></button></>:<><PronounceButton text={word.en} onError={setError} label={"Pronounce "+word.en}/>{entryKind(word)==='word'&&<button type="button" className="wf-entry-icon wf-entry-check" title={word.kept?'Return to practice':'Mark as learned'} aria-label={word.kept?'Return to practice':'Mark as learned'} disabled={busy||blocked||translating} onClick={()=>void persist((words??[]).map((w,i)=>i===index?{...w,kept:!w.kept}:w),word.kept?'Word returned.':'Word kept.')}>{word.kept?<ArrowRightLeft size={17}/>:<Check size={17}/>}</button>}<button type="button" className="wf-entry-icon wf-entry-delete" title="Delete" aria-label="Delete" disabled={busy||blocked||translating} onClick={()=>setDeleting(index)}><Trash2 size={17}/></button></>}</div>
+ </motion.li>)}</ul>}
  </div></>}
  </motion.div></section></div>;
 }
