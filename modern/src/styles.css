@@ -644,3 +644,10 @@ body{min-width:0}
 .wf-setting-action.wf-setting-danger:hover:not(:disabled){color:var(--wf-danger);border-color:var(--wf-danger);background:color-mix(in srgb,var(--wf-danger) 7%,var(--surface))}
 .wf-setting-action.wf-setting-danger:focus-visible{outline-color:var(--wf-danger)}
 @media(prefers-reduced-motion:reduce){.wf-sidebar .wf-nav-label,.wf-sidebar .wf-sidebar-brand span{transition:none!important}}
+
+/* Pointer focus must not keep the sidebar control visible after leaving. */
+@media(min-width:761px) and (hover:hover) and (pointer:fine){
+ .wf-sidebar .wf-sidebar-toggle,.wf-sidebar:focus-within .wf-sidebar-toggle,.wf-workspace[data-sidebar-collapsed=true] .wf-sidebar-toggle{opacity:0;pointer-events:none}
+ .wf-sidebar:hover .wf-sidebar-toggle,.wf-sidebar .wf-sidebar-toggle:focus-visible{opacity:1;pointer-events:auto}
+ .wf-workspace[data-sidebar-collapsed=true] .wf-sidebar .wf-sidebar-toggle:not(:focus-visible){opacity:0;pointer-events:none}
+}
