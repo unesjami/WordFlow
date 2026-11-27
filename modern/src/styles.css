@@ -456,3 +456,14 @@ body{min-width:0}
 .wf-nav-button:active{transform:scale(.98)}
 .wf-nav-active{background:var(--soft);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 12%,transparent)}
 @media(pointer:coarse){.wf-sidebar-toggle{opacity:1}}
+
+/* Viewport-anchored application chrome; constrain reading content, not navigation. */
+@media(min-width:761px){
+ .wf-shell{width:100%;max-width:none;margin:0;padding:0}
+ .wf-shell>.wf-header{padding:12px 20px}
+ .wf-workspace{width:100%;padding:0;gap:0}
+ .wf-sidebar{border:0;border-inline-end:1px solid var(--line);border-radius:0;padding:12px 10px;align-self:stretch}
+ .wf-main{padding:16px clamp(16px,2.5vw,36px) 0}
+ .wf-toolbar,.wf-inline-feedback,.wf-page{width:100%;max-width:1280px;margin-inline:auto}
+ .wf-page{padding-inline-end:6px}
+}
