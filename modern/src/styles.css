@@ -782,3 +782,7 @@ body{min-width:0}
 @media(hover:hover) and (pointer:fine){.wf-undo-expand{opacity:0}.wf-undo-stack:hover .wf-undo-expand,.wf-undo-expand:focus-visible{opacity:1}}
 @media(pointer:coarse){.wf-undo-stack .wf-undo-stack-card{height:54px;min-height:54px}.wf-undo-stack[data-expanded=false] .wf-undo-stack-card:not(:first-child){margin-top:calc(var(--undo-peek) - 54px)}}
 @media(prefers-reduced-motion:reduce){.wf-undo-stack .wf-undo-stack-card,.wf-undo-ring-fg{transition:none}}
+
+/* Independent copy confirmation and theme-aware learned action. */
+.wf-library-panel .wf-entry-copy[data-copied=true],.wf-library-panel .wf-entry-check:hover:not(:disabled){color:var(--accent)}
+.wf-entry-copy>span{display:grid;place-items:center}
