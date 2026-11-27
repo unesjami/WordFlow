@@ -735,3 +735,7 @@ body{min-width:0}
  .wf-sidebar .wf-nav-button[aria-current=page]:focus-visible .wf-nav-active::before{right:0;border-bottom:2px solid var(--accent);border-right:0;box-sizing:border-box}
  .wf-sidebar .wf-nav-button[aria-current=page]:focus-visible .wf-nav-active::after{right:0;border-top:2px solid var(--accent);border-right:0;box-sizing:border-box}
 }
+
+/* Keep the translation controls without a redundant surrounding card. */
+.wf-panel.wf-translator{background:transparent;border:0;box-shadow:none;padding:0;border-radius:0;min-height:0}
+.wf-translator .wf-translate-form textarea{background:var(--surface)}
