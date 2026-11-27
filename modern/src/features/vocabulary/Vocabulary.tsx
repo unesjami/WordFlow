@@ -34,8 +34,17 @@ export function Vocabulary({userId,user,theme,setTheme,signOut}:{userId:string;u
  const [cardIndex,setCardIndex]=useState(0);
  const [cardReveal,setCardReveal]=useState(false);
 
- const [undo,setUndo]=useState<{word:Word;index:number;expires:number}|null>(null);
- const [undoSeconds,setUndoSeconds]=useState(5);
+ const [undos,setUndos]=useState<{id:string;word:Word;index:number;expires:number}[]>([]);
+ const [undoNow,setUndoNow]=useState(()=>Date.now());
+ const [undoHover,setUndoHover]=useState(false);
+ const [undoKeyboard,setUndoKeyboard]=useState(false);
+ const [undoExpanded,setUndoExpanded]=useState(false);
+ const undoPaused=undoHover||undoKeyboard||undoExpanded;
+ const undoPauseRef=useRef(false);
+ const undoTick=useRef(Date.now());
+ const undoOpen=undos.length>1&&undoPaused;
+ useEffect(()=>{undoPauseRef.current=undoPaused;},[undoPaused]);
+ useEffect(()=>{if(undos.length<2)setUndoExpanded(false);if(!undos.length){setUndoHover(false);setUndoKeyboard(false);}},[undos.length]);
  const [busy,setBusy]=useState(false);
  const [blocked,setBlocked]=useState(false);
  const [error,setError]=useState('');
@@ -73,7 +82,7 @@ export function Vocabulary({userId,user,theme,setTheme,signOut}:{userId:string;u
 
  useEffect(()=>{
    const current=++generation.current;
-   setWords(null);setLoadFailed(false);snapshot.current=null;setError('');setBlocked(false);setBusy(false);locked.current=false;setUndo(null);setCloudBusy(false);syncing.current=false;
+   setWords(null);setLoadFailed(false);snapshot.current=null;setError('');setBlocked(false);setBusy(false);locked.current=false;setUndos([]);setCloudBusy(false);syncing.current=false;
    openWorkspace(userId).then(result=>{if(generation.current===current){snapshot.current=result;setWords(result.words);setSyncStatus(result.dirty?'Pending sync':'Saved locally');}}).catch(()=>{if(generation.current===current){setLoadFailed(true);setError('Could not load vocabulary. Your data was not changed.');}});
    return ()=>{generation.current++;};
  },[userId,reload]);
@@ -110,9 +119,17 @@ export function Vocabulary({userId,user,theme,setTheme,signOut}:{userId:string;u
  window.addEventListener('online',flush);void flush();
  return()=>{active=false;window.clearInterval(timer);window.removeEventListener('online',flush);};
  },[userId,reload]);
- useEffect(()=>{if(!undo)return;const tick=()=>{const remaining=Math.max(0,Math.ceil((undo.expires-Date.now())/1000));setUndoSeconds(remaining);if(!remaining)setUndo(current=>current===undo?null:current);};tick();const timer=window.setInterval(tick,100);return()=>window.clearInterval(timer);},[undo]);
- async function deleteEntry(index:number){const local=snapshot.current;if(!local||locked.current||blocked||translationRequest.current)return;const word=local.words[index];if(!word)return;stopSpeech();if(await persist(removeWord(local.words,index),'Deleted.')){setUndoSeconds(5);setUndo({word,index,expires:Date.now()+5000});}}
- async function restoreEntry(){const local=snapshot.current;if(!undo||!local||locked.current||blocked||translationRequest.current||Date.now()>=undo.expires)return;const next=[...local.words];next.splice(Math.min(undo.index,next.length),0,undo.word);if(await persist(next,'Restored.'))setUndo(null);}
+
+ useEffect(()=>{
+  if(!undos.length)return;
+  undoTick.current=Date.now();
+  const tick=()=>{const now=Date.now();const elapsed=Math.max(0,now-undoTick.current);undoTick.current=now;setUndoNow(now);setUndos(items=>{if(undoPauseRef.current)return items.map(item=>({...item,expires:item.expires+elapsed}));const remaining=items.filter(item=>item.expires>now);return remaining.length===items.length?items:remaining;});};
+  const timer=window.setInterval(tick,100);
+  return()=>window.clearInterval(timer);
+ },[undos.length>0]);
+ async function deleteEntry(index:number){const local=snapshot.current;if(!local||locked.current||blocked||translationRequest.current)return;const word=local.words[index];if(!word)return;stopSpeech();if(await persist(removeWord(local.words,index),'Deleted.')){const now=Date.now();setUndoNow(now);setUndos(items=>[...items.filter(item=>item.expires>now),{id:crypto.randomUUID(),word,index,expires:now+5000}]);}}
+ async function restoreEntry(id:string){const local=snapshot.current;const item=undos.find(entry=>entry.id===id);if(!item||!local||locked.current||blocked||translationRequest.current||(!undoPaused&&Date.now()>=item.expires))return;const next=[...local.words];next.splice(Math.min(item.index,next.length),0,item.word);if(await persist(next,'Restored.'))setUndos(items=>items.filter(entry=>entry.id!==id));}
+
  function exportLocal(){const local=snapshot.current;if(!local)return;const url=URL.createObjectURL(new Blob([JSON.stringify({words:local.words,revision:local.revision},null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='wordflow-local-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
  const nav=[{id:'vocabulary',label:'Word Studio',Icon:BookOpen},{id:'learn',label:'Learn',Icon:Brain},{id:'profile',label:'Profile',Icon:UserRound},{id:'settings',label:'Settings',Icon:Settings}] as const;
  const studyWords=learningWords(words??[]);
@@ -156,5 +173,13 @@ export function Vocabulary({userId,user,theme,setTheme,signOut}:{userId:string;u
  <div className="wf-entry-actions" role="group" aria-label={"Actions for "+word.en}>{entryKind(word)==='word'&&<button type="button" className="wf-entry-icon wf-entry-check" title={word.kept?'Return to practice':'Mark as learned'} aria-label={word.kept?'Return to practice':'Mark as learned'} disabled={busy||blocked||translating} onClick={()=>void persist((words??[]).map((w,i)=>i===index?{...w,kept:!w.kept}:w),word.kept?'Word returned.':'Word kept.')}>{word.kept?<ArrowRightLeft size={17}/>:<Check size={17}/>}</button>}<button type="button" className="wf-entry-icon wf-entry-delete" title="Delete" aria-label={"Delete: "+word.en} disabled={busy||blocked||translating} onClick={()=>void deleteEntry(index)}><Trash2 size={17}/></button></div>
  </motion.li>)}</AnimatePresence></ul>}
  </motion.section></>}
- </motion.div></section><AnimatePresence>{undo&&<motion.div key={undo.expires} className="wf-undo-toast" initial={{opacity:0,y:12,scale:.96}} animate={{opacity:1,y:0,scale:1}} exit={{opacity:0,y:6,scale:.98}} transition={{type:"spring",stiffness:480,damping:36,mass:.65}}><span role="status">{entryKind(undo.word)==='sentence'?'Sentence deleted':'Word deleted'}</span><button type="button" disabled={busy||blocked||translating} onClick={()=>void restoreEntry()}>Undo</button><span className="wf-undo-count" aria-hidden="true"><motion.span key={undoSeconds} initial={{opacity:0,y:3}} animate={{opacity:1,y:0}} transition={{duration:.12}}>{undoSeconds}</motion.span></span><div className="wf-undo-track" aria-hidden="true"><motion.div initial={{scaleX:1}} animate={{scaleX:0}} transition={{duration:5,ease:'linear'}}/></div></motion.div>}</AnimatePresence></div>;
+ </motion.div></section><AnimatePresence>{undos.length>0&&<motion.div key="undo-stack" className="wf-undo-stack" data-expanded={undoOpen} data-stacked={undos.length>1} initial={{opacity:0,y:12,scale:.96}} animate={{opacity:1,y:0,scale:1}} exit={{opacity:0,y:6,scale:.98}} transition={{type:"spring",stiffness:480,damping:36,mass:.65}} onPointerEnter={e=>{if(e.pointerType==='mouse')setUndoHover(true);}} onPointerLeave={()=>setUndoHover(false)} onFocusCapture={e=>{if(e.target.matches(':focus-visible'))setUndoKeyboard(true);}} onBlurCapture={e=>{if(!e.currentTarget.contains(e.relatedTarget as Node|null))setUndoKeyboard(false);}} aria-label="Recently deleted items">
+ <div className="wf-undo-stack-list"><AnimatePresence initial={false} mode="popLayout">{(undoOpen?undos:undos.slice(-1)).map(item=>{const remaining=Math.max(0,Math.min(5000,item.expires-undoNow));return <motion.div layout="position" key={item.id} className="wf-undo-toast wf-undo-stack-card" initial={{opacity:0,y:8,scale:.97}} animate={{opacity:1,y:0,scale:1}} exit={{opacity:0,y:5,scale:.98}} transition={{duration:.18,layout:{duration:.22,ease:[.22,.8,.25,1]}}}>
+ <div className="wf-undo-description"><span role="status">{entryKind(item.word)==='sentence'?'Sentence deleted':'Word deleted'}</span>{undos.length>1&&<span className="wf-undo-word" dir="auto" title={item.word.en}>{item.word.en}</span>}</div>
+ <button type="button" disabled={busy||blocked||translating} aria-label={"Undo deletion of "+item.word.en} onClick={()=>void restoreEntry(item.id)}>Undo</button>
+ <span className="wf-undo-count" aria-hidden="true">{Math.ceil(remaining/1000)}</span>
+ <div className="wf-undo-track" aria-hidden="true"><div style={{transform:'scaleX('+remaining/5000+')'}}/></div>
+ </motion.div>;})}</AnimatePresence></div>
+ {undos.length>1&&<button type="button" className="wf-undo-expand" aria-label={undoExpanded?"Collapse undo cards":"Show all undo cards"} aria-expanded={undoOpen} onClick={()=>setUndoExpanded(value=>!value)}><span>{undos.length}</span><ChevronRight size={12}/></button>}
+ </motion.div>}</AnimatePresence></div>;
 }
