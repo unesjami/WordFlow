@@ -519,3 +519,41 @@ body{min-width:0}
 /* Center undo feedback above the bottom edge without interfering with motion transforms. */
 .wf-undo-toast{left:0;right:0;margin-inline:auto;width:max-content;max-width:calc(100% - 32px);bottom:max(24px,env(safe-area-inset-bottom));}
 @media(max-width:760px){.wf-undo-toast{left:0;right:0;bottom:calc(88px + env(safe-area-inset-bottom));}}
+
+/* Headerless workspace; brand and navigation share one continuous rail. */
+.wf-shell>.wf-app-body{flex:1;min-height:0;width:100%}
+.wf-sidebar-brand{display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden;color:#fff;font-family:"Pilcrow Rounded","Nunito",sans-serif;font-size:19px;font-weight:700;white-space:nowrap}
+.wf-sidebar-brand img{width:34px;height:34px;flex:none;border-radius:9px}
+.wf-sidebar-brand span{overflow:hidden;text-overflow:clip}
+@media(min-width:761px){
+ .wf-sidebar{grid-template-rows:60px repeat(3,48px) minmax(48px,1fr);align-items:start}
+ .wf-sidebar .wf-sidebar-top{height:54px;padding:0 0 8px;margin:0 10px 6px 0;gap:2px}
+ .wf-sidebar .wf-sidebar-toggle{width:26px;min-width:26px;height:32px}
+ .wf-sidebar .wf-nav-settings{align-self:end;margin-bottom:16px}
+ .wf-workspace[data-sidebar-collapsed=true] .wf-sidebar-top{height:54px;position:relative;justify-content:center}
+ .wf-workspace[data-sidebar-collapsed=true] .wf-sidebar-brand{justify-content:center}
+ .wf-workspace[data-sidebar-collapsed=true] .wf-sidebar-brand span{display:none}
+ .wf-workspace[data-sidebar-collapsed=true] .wf-sidebar-toggle{position:absolute;inset:0;margin:auto;opacity:0;background:var(--rail-bg)}
+ .wf-workspace[data-sidebar-collapsed=true] .wf-sidebar-top:hover .wf-sidebar-toggle,.wf-workspace[data-sidebar-collapsed=true] .wf-sidebar-toggle:focus-visible{opacity:1}
+}
+@media(max-width:760px){.wf-sidebar-brand{display:none}}
+/* Accessible accent palettes: distinct light/dark foreground and stable primary colors. */
+:root{--wf-primary-color:#146464;--wf-primary-hover:#115451;--wf-rail-dark:#103e3d}
+:root[data-accent=blue]{--wf-primary-color:#2557a7;--wf-primary-hover:#1e4586;--wf-rail-dark:#183a6c;--accent:light-dark(#2557a7,#a9caff);--soft:light-dark(#e8effb,#253b57)}
+:root[data-accent=violet]{--wf-primary-color:#6847a5;--wf-primary-hover:#503480;--wf-rail-dark:#402c68;--accent:light-dark(#6847a5,#d2baff);--soft:light-dark(#f0eafb,#3c3053)}
+:root[data-accent=green]{--wf-primary-color:#286b46;--wf-primary-hover:#205637;--wf-rail-dark:#19472e;--accent:light-dark(#286b46,#9cdeb6);--soft:light-dark(#e6f3eb,#263e30)}
+:root[data-accent=rose]{--wf-primary-color:#a33f68;--wf-primary-hover:#803052;--wf-rail-dark:#692842;--accent:light-dark(#a33f68,#ffb2ce);--soft:light-dark(#f9eaf0,#4b2d3a)}
+:root[data-accent=slate]{--wf-primary-color:#475569;--wf-primary-hover:#374151;--wf-rail-dark:#2d3848;--accent:light-dark(#475569,#c7d6ec);--soft:light-dark(#eaf0f6,#303c4c)}
+.wf-sidebar{--rail-bg:light-dark(var(--wf-primary-color),var(--wf-rail-dark))}
+.wf-primary,.wf-email-submit,.wf-auth-toggle:before{background:var(--wf-primary-color)}
+.wf-primary:hover:not(:disabled),.wf-email-submit:hover:not(:disabled){background:var(--wf-primary-hover)}
+.wf-translator .wf-translate-button:disabled:not([aria-busy=true]){background:var(--soft);color:var(--muted)}
+.wf-setting-switch[aria-checked=true]{background:var(--wf-primary-color)}
+.wf-color-options{display:grid;grid-template-columns:repeat(3,28px);gap:6px;justify-content:end}
+.wf-color-option{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--swatch);color:white;position:relative;transition:transform .14s ease}
+.wf-color-option[aria-pressed=true]{outline:2px solid var(--accent);outline-offset:2px}
+.wf-color-option:hover{transform:scale(1.08)}
+.wf-color-option:active{transform:scale(.95)}
+@media(pointer:coarse){.wf-color-options{grid-template-columns:repeat(3,44px);gap:4px}.wf-color-option{width:44px;height:44px;background:transparent}.wf-color-option:before{content:"";position:absolute;inset:8px;border-radius:50%;background:var(--swatch)}.wf-color-option svg{position:relative}}
+@media(max-width:400px){.wf-color-row .wf-color-options{grid-column:2/-1;justify-content:start;margin-top:4px}}
+@media(prefers-reduced-motion:reduce){.wf-color-option{transition:none!important}}
