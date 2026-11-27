@@ -630,3 +630,17 @@ body{min-width:0}
 }
 /* All settings section icons use the exact same active theme tokens. */
 .wf-setting-head .wf-setting-mark{background:var(--soft);color:var(--accent)}
+
+/* Clip text independently of the fixed icon columns; no label slides across an icon. */
+@media(min-width:761px){
+ .wf-sidebar .wf-nav-button,.wf-workspace[data-sidebar-collapsed=true] .wf-nav-button{padding-inline:14px 0;gap:10px}
+ .wf-sidebar .wf-nav-button>svg{flex:0 0 20px}
+ .wf-sidebar .wf-nav-label,.wf-workspace[data-sidebar-collapsed=true] .wf-nav-label{display:block;flex:0 0 auto;max-width:calc(var(--wf-rail-width) - 62px);white-space:nowrap;overflow:hidden;transform:none;opacity:1;transition:max-width .24s cubic-bezier(.22,.8,.25,1),opacity .14s ease;pointer-events:none}
+ .wf-workspace[data-sidebar-collapsed=true] .wf-nav-label{max-width:0;opacity:0}
+ .wf-sidebar .wf-sidebar-brand,.wf-workspace[data-sidebar-collapsed=true] .wf-sidebar-brand{gap:10px}
+ .wf-sidebar .wf-sidebar-brand span,.wf-workspace[data-sidebar-collapsed=true] .wf-sidebar-brand span{display:block;visibility:visible;opacity:1;max-width:108px;overflow:hidden;white-space:nowrap;transition:max-width .24s cubic-bezier(.22,.8,.25,1),opacity .14s ease}
+ .wf-workspace[data-sidebar-collapsed=true] .wf-sidebar-brand span{max-width:0;opacity:0;pointer-events:none}
+}
+.wf-setting-action.wf-setting-danger:hover:not(:disabled){color:var(--wf-danger);border-color:var(--wf-danger);background:color-mix(in srgb,var(--wf-danger) 7%,var(--surface))}
+.wf-setting-action.wf-setting-danger:focus-visible{outline-color:var(--wf-danger)}
+@media(prefers-reduced-motion:reduce){.wf-sidebar .wf-nav-label,.wf-sidebar .wf-sidebar-brand span{transition:none!important}}
