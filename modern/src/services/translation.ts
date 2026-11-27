@@ -17,5 +17,5 @@ export async function translate(text:string,source:Language,target:Language,sign
   catch{if(signal?.aborted)throw new DOMException('Aborted','AbortError');}
   finally{clearTimeout(timer);signal?.removeEventListener('abort',abort);}
  }
- throw new Error('Translation unavailable. Try again or enter the meaning manually.');
+ throw new Error('Translation unavailable. Try again.');
 }
