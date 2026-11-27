@@ -5,7 +5,7 @@ let state: {phase:SpeechPhase;owner:string|null}={phase,owner};
 export function getSpeechState(){return state;}
 export function subscribeSpeech(fn:()=>void){listeners.add(fn);return ()=>{listeners.delete(fn);};}
 function publish(next:SpeechPhase,key:string|null){phase=next;owner=key;state={phase,owner};listeners.forEach(fn=>fn());}
-let audio:HTMLAudioElement|null=null;let lookup:AbortController|null=null;const urls=new Map<string,string[]>();const successfulAudio=new Map<string,string>();
+let audio:HTMLAudioElement|null=null;let lookup:AbortController|null=null;const urls=new Map<string,string[]>();const successfulAudio=new Map<string,string>();const successfulVoice=new Map<string,string>();
 let request=0;let timer:ReturnType<typeof setTimeout>|undefined;let active:SpeechSynthesisUtterance|null=null;
 const quality=/natural|neural|premium|enhanced|google.*english/i;
 const unwanted=/compact|espeak|robot|microsoft david|microsoft mark|google uk english male/i;
@@ -31,37 +31,40 @@ export function speakEnglish(text:string,onError:(message:string)=>void=()=>{},k
  stopSpeech();const id=request;publish('loading',key);
  const synth=window.speechSynthesis;
  const fail=()=>{if(id!==request)return;stopSpeech();onError('Audio temporarily unavailable');};
+ const fastFallback=!!synth&&preferredVoices(synth.getVoices()).length>0;
+ const deadline=Date.now()+(fastFallback?1500:3500);
  const recorded=async()=>{
   if(id!==request)return;
   publish('loading',key);const controller=new AbortController();lookup=controller;
-  const timeout=setTimeout(()=>controller.abort(),5000);
+  const timeout=setTimeout(()=>controller.abort(),fastFallback?650:1500);
   let candidates:string[]=[];
-  try{candidates=await dictionaryAudio(value,controller.signal);}catch{}finally{clearTimeout(timeout);if(lookup===controller)lookup=null;}
+  const known=successfulAudio.get(value.toLowerCase());
+  try{candidates=known?[known,...(urls.get(value.toLowerCase())??[]).filter(u=>u!==known)]:await dictionaryAudio(value,controller.signal);}catch{}finally{clearTimeout(timeout);if(lookup===controller)lookup=null;}
   if(id!==request)return;
   const remembered=successfulAudio.get(value.toLowerCase());if(remembered)candidates=[remembered,...candidates.filter(u=>u!==remembered)];
   const playNext=()=>{
    if(id!==request)return;
-   const url=candidates.shift();if(!url){browser();return;}
+   const url=candidates.shift();if(!url||Date.now()>=deadline){browser();return;}
    const player=new Audio(url);audio=player;
    const current=()=>id===request&&audio===player;
    const fallback=()=>{if(!current())return;clearTimeout(timer);audio=null;player.pause();player.removeAttribute('src');player.load();playNext();};
-   player.onplaying=()=>{if(current()){if(successfulAudio.size>=200)successfulAudio.delete(successfulAudio.keys().next().value!);successfulAudio.set(value.toLowerCase(),url);clearTimeout(timer);publish('playing',key);timer=setTimeout(fallback,30000);}};
+   player.onplaying=()=>{if(current()){if(successfulAudio.size>=200)successfulAudio.delete(successfulAudio.keys().next().value!);successfulAudio.set(value.toLowerCase(),url);clearTimeout(timer);publish('playing',key);timer=setTimeout(()=>{if(current())stopSpeech();},30000);}};
    player.onended=()=>{if(current()){clearTimeout(timer);audio=null;publish('idle',null);}};
-   player.onerror=fallback;timer=setTimeout(fallback,5000);
+   player.onerror=fallback;timer=setTimeout(fallback,Math.max(1,Math.min(1200,deadline-Date.now())));
    void player.play().catch(fallback);
   };playNext();
  };
  const browser=()=>{
  if(!synth||typeof SpeechSynthesisUtterance==='undefined'){fail();return;}
  if(synth.paused)synth.resume();
- const start=()=>{if(id!==request)return;const voices=preferredVoices(synth.getVoices());let index=0;
+ const start=()=>{if(id!==request)return;const voices=preferredVoices(synth.getVoices());const remembered=successfulVoice.get(value);if(remembered)voices.sort((a,b)=>Number(b.voiceURI===remembered)-Number(a.voiceURI===remembered));let index=0;
  function play(){if(id!==request)return;const voice=voices[index++];if(!voice){fail();return;}const utterance=new SpeechSynthesisUtterance(value);utterance.lang=voice.lang;utterance.voice=voice;utterance.rate=.96;utterance.pitch=1;active=utterance;
  const current=()=>id===request&&active===utterance;
  const fallback=()=>{if(!current())return;clearTimeout(timer);active=null;publish('loading',key);synth.cancel();play();};
- utterance.onstart=()=>{if(current()){clearTimeout(timer);publish('playing',key);timer=setTimeout(()=>{if(current())fallback();},Math.min(90000,Math.max(12000,value.length*180)));}};utterance.onend=()=>{if(current()){clearTimeout(timer);active=null;publish('idle',null);}};utterance.onerror=fallback;timer=setTimeout(fallback,3500);
+ utterance.onstart=()=>{if(current()){if(successfulVoice.size>=200)successfulVoice.delete(successfulVoice.keys().next().value!);successfulVoice.set(value,voice.voiceURI);clearTimeout(timer);publish('playing',key);timer=setTimeout(()=>{if(current())stopSpeech();},Math.min(90000,Math.max(12000,value.length*180)));}};utterance.onend=()=>{if(current()){clearTimeout(timer);active=null;publish('idle',null);}};utterance.onerror=fallback;timer=setTimeout(fallback,1200);
  try{synth.speak(utterance);}catch{fallback();}
  }play();};
- if(synth.getVoices().length)start();else timer=setTimeout(start,500);
+ if(synth.getVoices().length)start();else timer=setTimeout(start,200);
  };
- void recorded();
+ if(successfulVoice.has(value)&&!successfulAudio.has(value.toLowerCase()))browser();else void recorded();
 }
