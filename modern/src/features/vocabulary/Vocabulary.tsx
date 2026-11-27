@@ -1,8 +1,8 @@
 import {useEffect,useRef,useState} from 'react';
 import {motion,AnimatePresence} from 'motion/react';
-import {BookOpen,RefreshCw,Brain,UserRound,Download,Cloud,LoaderCircle,ArrowRightLeft,Trash2,Settings,Check,ChevronLeft,ChevronRight,Copy,Sun,Moon,Monitor,LogOut,ShieldCheck,X,Pin,PanelLeft} from 'lucide-react';
+import {BookOpen,RefreshCw,Brain,UserRound,Download,Cloud,LoaderCircle,ArrowRightLeft,Trash2,Settings,Check,ChevronLeft,ChevronRight,Copy,Sun,Moon,Monitor,LogOut,ShieldCheck,X,Pin,PanelLeft,Palette} from 'lucide-react';
 import {metrics} from '../profile/analytics';
-import type {FormEvent} from 'react';
+import type {FormEvent,CSSProperties} from 'react';
 import type {Word} from '../../domain';
 import {classifyText,entryKind,learningWords} from '../../domain';
 import type {User} from '@supabase/supabase-js';
@@ -20,6 +20,9 @@ import {PracticePanel} from '../learning/PracticePanel';
 export function Vocabulary({userId,user,theme,setTheme,signOut}:{userId:string;user:User;theme:'system'|'light'|'dark';setTheme:(theme:'system'|'light'|'dark')=>void;signOut:()=>Promise<void>}){
  const [view,setView]=useState<'vocabulary'|'learn'|'profile'|'settings'>('vocabulary');
  const [railHover,setRailHover]=useState(false);
+ const palettes=[{id:'teal',name:'Teal',color:'#146464'},{id:'blue',name:'Blue',color:'#2557a7'},{id:'violet',name:'Violet',color:'#6847a5'},{id:'green',name:'Green',color:'#286b46'},{id:'rose',name:'Rose',color:'#a33f68'},{id:'slate',name:'Slate',color:'#475569'}] as const;
+ const [accent,setAccent]=useState(()=>{try{return localStorage.getItem('wf-color-theme')||'teal';}catch{return 'teal';}});
+ useEffect(()=>{const value=palettes.some(p=>p.id===accent)?accent:'teal';document.documentElement.dataset.accent=value;try{localStorage.setItem('wf-color-theme',value);}catch{}},[accent]);
  const [collapsed,setCollapsed]=useState(()=>{try{return localStorage.getItem('wf-sidebar-collapsed')==='1';}catch{return false;}});
  useEffect(()=>{try{localStorage.setItem('wf-sidebar-collapsed',collapsed?'1':'0');}catch{}},[collapsed]);
  const [learnMode,setLearnMode]=useState<'review'|'practice'|'cards'>('review');
@@ -95,7 +98,7 @@ export function Vocabulary({userId,user,theme,setTheme,signOut}:{userId:string;u
  useEffect(()=>{if(!translating&&refocusSource.current){refocusSource.current=false;if(view==='vocabulary')sourceRef.current?.focus({preventScroll:true});}},[translating,view]);
  useEffect(()=>{pageRef.current?.scrollTo({top:0});},[view]);
  return <div className="wf-workspace" data-sidebar-collapsed={collapsed&&!railHover} data-sidebar-pinned={ !collapsed }>
- <nav aria-label="Learning views" className="wf-sidebar" id="wf-navigation" onPointerEnter={e=>{if(e.pointerType==='mouse'&&window.matchMedia('(hover:hover) and (min-width:761px)').matches)setRailHover(true);}} onPointerLeave={()=>setRailHover(false)}><div className="wf-sidebar-top"><span className="wf-sidebar-title">Workspace</span><button type="button" className="wf-sidebar-toggle" aria-label={collapsed?"Pin navigation":"Unpin navigation"} aria-pressed={!collapsed} aria-controls="wf-navigation" title={collapsed?"Pin navigation":"Unpin navigation"} onClick={()=>{setCollapsed(v=>!v);}}>{collapsed&&!railHover?<PanelLeft size={17}/>:<Pin size={17} fill={collapsed?"none":"currentColor"}/>}</button></div>{nav.map(({id,label,Icon})=><button key={id} type="button" aria-label={label} title={label} aria-current={view===id?'page':undefined} onClick={()=>{stopSpeech();setView(id);}} className="wf-nav-button">{view===id&&<motion.span layoutId="wf-active-tab" className="wf-nav-active" transition={{type:'spring',stiffness:400,damping:35}}/>}<Icon size={20}/><span className="wf-nav-label">{label}</span></button>)}</nav>
+ <nav aria-label="Learning views" className="wf-sidebar" id="wf-navigation" onPointerEnter={e=>{if(e.pointerType==='mouse'&&window.matchMedia('(hover:hover) and (min-width:761px)').matches)setRailHover(true);}} onPointerLeave={()=>setRailHover(false)}><div className="wf-sidebar-top"><div className="wf-sidebar-brand"><img src="./icon.svg" alt="" width="34" height="34"/><span>WordFlow</span></div><button type="button" className="wf-sidebar-toggle" aria-label={collapsed?"Pin navigation":"Unpin navigation"} aria-pressed={!collapsed} aria-controls="wf-navigation" title={collapsed?"Pin navigation":"Unpin navigation"} onClick={()=>{setCollapsed(v=>!v);}}>{collapsed&&!railHover?<PanelLeft size={17}/>:<Pin size={17} fill={collapsed?"none":"currentColor"}/>}</button></div>{nav.map(({id,label,Icon})=><button key={id} type="button" aria-label={label} title={label} aria-current={view===id?'page':undefined} onClick={()=>{stopSpeech();setView(id);}} className={"wf-nav-button"+(id==='settings'?' wf-nav-settings':'')}>{view===id&&<motion.span layoutId="wf-active-tab" className="wf-nav-active" transition={{type:'spring',stiffness:400,damping:35}}/>}<Icon size={20}/><span className="wf-nav-label">{label}</span></button>)}</nav>
  <section className="wf-main" aria-labelledby="workspace-title">
  <div className="wf-toolbar"><div><h2 id="workspace-title">{nav.find(n=>n.id===view)?.label}</h2></div></div>
  <div className="wf-inline-feedback" aria-live="polite">{error&&<div role="alert" className="wf-inline-error"><span>{error}</span><button type="button" aria-label="Dismiss error" title="Dismiss" onClick={()=>setError('')}><X size={16}/></button></div>}</div>
@@ -104,6 +107,7 @@ export function Vocabulary({userId,user,theme,setTheme,signOut}:{userId:string;u
  <motion.section className="wf-setting-card" initial={{opacity:0,y:5}} animate={{opacity:1,y:0}} transition={{duration:.18}}>
  <header className="wf-setting-head"><span className="wf-setting-mark" data-tone="amber"><Sun size={25}/></span><div><h3>App preferences</h3></div></header>
  <div className="wf-setting-row"><span className="wf-setting-symbol"><Monitor size={21}/></span><div className="wf-setting-copy"><strong>Appearance</strong></div><div className="wf-theme-compact" role="group" aria-label="Appearance">{([{value:"light",Icon:Sun,label:"Light"},{value:"dark",Icon:Moon,label:"Dark"},{value:"system",Icon:Monitor,label:"Device"}] as const).map(({value,Icon,label})=><button key={value} type="button" title={label} aria-label={label} aria-pressed={theme===value} onClick={()=>setTheme(value)}>{theme===value&&<motion.span layoutId="wf-settings-theme-thumb" className="wf-theme-thumb" transition={{type:'spring',stiffness:450,damping:38}}/>}<Icon size={17}/></button>)}</div></div>
+ <div className="wf-setting-row wf-color-row"><span className="wf-setting-symbol"><Palette size={21}/></span><div className="wf-setting-copy"><strong>Color theme</strong></div><div className="wf-color-options" role="group" aria-label="Color theme">{palettes.map(p=><button key={p.id} type="button" className="wf-color-option" style={{'--swatch':p.color} as CSSProperties} aria-label={p.name} title={p.name} aria-pressed={accent===p.id} onClick={()=>setAccent(p.id)}>{accent===p.id&&<Check size={14}/>}</button>)}</div></div>
  <div className="wf-setting-row"><span className="wf-setting-symbol"><Settings size={21}/></span><div className="wf-setting-copy"><strong>Compact navigation</strong></div><button type="button" role="switch" aria-checked={collapsed} aria-label="Compact navigation" className="wf-setting-switch" onClick={()=>{setRailHover(false);setCollapsed(v=>!v);}}><span/></button></div>
  </motion.section>
  <motion.section className="wf-setting-card" initial={{opacity:0,y:5}} animate={{opacity:1,y:0}} transition={{duration:.18,delay:.03}}>
