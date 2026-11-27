@@ -351,3 +351,14 @@ body{min-width:0}
  .wf-theme-compact button{min-width:32px}
 }
 @media(prefers-reduced-motion:reduce){.wf-entry-icon,.wf-primary,.wf-action,.wf-setting-action,.wf-email-submit,.wf-google{transition:none!important}}
+
+/* Keep copy controls adjacent to their own language and avoid overlay feedback. */
+.wf-entry-line{display:flex;align-items:center;justify-content:flex-start;gap:4px;min-width:0}
+.wf-entry-line>span{flex:0 1 auto;min-width:0;overflow-wrap:anywhere}
+.wf-entry-line>.wf-entry-icon{flex:none}
+.wf-entry-line[lang=fa]{justify-content:flex-end}
+.wf-entry-actions{grid-auto-flow:column;grid-auto-columns:32px}
+.wf-inline-feedback:empty{display:none}
+.wf-inline-error{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 12px;margin-bottom:12px;color:var(--wf-danger);font-size:13px;overflow-wrap:anywhere}
+.wf-inline-error button{display:grid;place-items:center;min-width:32px;min-height:32px;flex:none}
+@media(pointer:coarse){.wf-entry-actions{grid-auto-columns:var(--wf-touch)}.wf-inline-error button{min-width:44px;min-height:44px}}
