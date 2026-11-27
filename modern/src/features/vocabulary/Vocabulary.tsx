@@ -34,7 +34,7 @@ export function Vocabulary({userId,user,theme,setTheme,signOut}:{userId:string;u
  const [busy,setBusy]=useState(false);
  const [blocked,setBlocked]=useState(false);
  const [error,setError]=useState('');
- const [notice,setNotice]=useState('');
+
  const generation=useRef(0);
  const locked=useRef(false);
  const [reload,setReload]=useState(0);
@@ -44,7 +44,7 @@ export function Vocabulary({userId,user,theme,setTheme,signOut}:{userId:string;u
  useEffect(()=>()=>{translationRequest.current?.abort();stopSpeech();},[]);
  async function translateInput(event:FormEvent<HTMLFormElement>){
   event.preventDefault();if(translationRequest.current||locked.current||blocked||!snapshot.current||!source.trim())return;
-  const controller=new AbortController();translationRequest.current=controller;setTranslating(true);setError('');setNotice('');
+  const controller=new AbortController();translationRequest.current=controller;setTranslating(true);setError('');
   const text=source.trim(),language=detectLanguage(text),current=generation.current;
   try{
    const result=await translate(text,language,language==='en'?'fa':'en',controller.signal);
@@ -63,17 +63,17 @@ export function Vocabulary({userId,user,theme,setTheme,signOut}:{userId:string;u
 
  useEffect(()=>{
    const current=++generation.current;
-   setWords(null);snapshot.current=null;setError('');setBlocked(false);setBusy(false);locked.current=false;setDeleting(null);setNotice('');
+   setWords(null);snapshot.current=null;setError('');setBlocked(false);setBusy(false);locked.current=false;setDeleting(null);
    openWorkspace(userId).then(result=>{if(generation.current===current){snapshot.current=result;setWords(result.words);setSyncStatus(result.dirty?'Pending sync':'Saved locally');}}).catch(()=>{if(generation.current===current)setError('Could not load vocabulary. Your data was not changed.');});
    return ()=>{generation.current++;};
  },[userId,reload]);
- async function copy(text:string){try{await navigator.clipboard.writeText(text);setNotice('Copied.');}catch{setError('Could not copy.');}}
- useEffect(()=>{if(!notice)return;const t=window.setTimeout(()=>setNotice(''),2200);return()=>window.clearTimeout(t);},[notice]);
- async function persist(next:Word[],success:string):Promise<boolean>{
+ async function copy(text:string){try{await navigator.clipboard.writeText(text);}catch{setError('Could not copy.');}}
+
+ async function persist(next:Word[],_success:string):Promise<boolean>{
    if(locked.current||blocked||!snapshot.current)return false;
-   locked.current=true;setBusy(true);setError('');setNotice('');
+   locked.current=true;setBusy(true);setError('');
    const current=generation.current;
-   try{const previous=snapshot.current;if(!previous)throw Error('Workspace unavailable');const local=makeSnapshot(userId,next,previous.revision,true);await storeLocal(local,previous.version);if(generation.current!==current)return false;snapshot.current=local;setWords(next);setSyncStatus('Pending sync');setDeleting(null);setNotice(success);return true;}
+   try{const previous=snapshot.current;if(!previous)throw Error('Workspace unavailable');const local=makeSnapshot(userId,next,previous.revision,true);await storeLocal(local,previous.version);if(generation.current!==current)return false;snapshot.current=local;setWords(next);setSyncStatus('Pending sync');setDeleting(null);return true;}
    catch(e){if(generation.current===current){setBlocked(true);setError(e instanceof Error?e.message:'Save failed. Reload before retrying.');}return false;}
    finally{if(generation.current===current){locked.current=false;setBusy(false);}}
  }
@@ -90,7 +90,7 @@ export function Vocabulary({userId,user,theme,setTheme,signOut}:{userId:string;u
  <nav aria-label="Learning views" className="wf-sidebar" id="wf-navigation" onPointerEnter={e=>{if(e.pointerType==='mouse'&&window.matchMedia('(hover:hover) and (min-width:761px)').matches)setRailHover(true);}} onPointerLeave={()=>setRailHover(false)}><div className="wf-sidebar-top"><span className="wf-sidebar-title">Workspace</span><button type="button" className="wf-sidebar-toggle" aria-label={collapsed?"Expand navigation":"Collapse navigation"} aria-expanded={!collapsed} title={collapsed?"Expand navigation":"Collapse navigation"} onClick={()=>{setRailHover(false);setCollapsed(v=>!v);}}>{collapsed?<ChevronRight size={16}/>:<ChevronLeft size={16}/>}</button></div>{nav.map(({id,label,Icon})=><button key={id} type="button" aria-label={label} title={label} aria-current={view===id?'page':undefined} onClick={()=>{stopSpeech();setView(id);}} className="wf-nav-button">{view===id&&<motion.span layoutId="wf-active-tab" className="wf-nav-active" transition={{type:'spring',stiffness:400,damping:35}}/>}<Icon size={20}/><span className="wf-nav-label">{label}</span></button>)}</nav>
  <section className="wf-main" aria-labelledby="workspace-title">
  <div className="wf-toolbar"><div><h2 id="workspace-title">{nav.find(n=>n.id===view)?.label}</h2></div></div>
- <div className="wf-workspace-feedback" aria-live="polite">{(error||notice)&&<motion.div initial={{opacity:0,y:-4}} animate={{opacity:1,y:0}}><div className="flex items-start gap-3"><p className={error?"text-red-600":"text-[var(--accent)]"}>{error||notice}</p><button type="button" aria-label="Dismiss message" className="ml-auto" onClick={()=>{setError('');setNotice('');}}><X size={16}/></button></div></motion.div>}</div>
+ <div className="wf-inline-feedback" aria-live="polite">{error&&<div role="alert" className="wf-inline-error"><span>{error}</span><button type="button" aria-label="Dismiss error" title="Dismiss" onClick={()=>setError('')}><X size={16}/></button></div>}</div>
  <motion.div ref={pageRef} key={view} className="wf-page" initial={{opacity:0,y:6}} animate={{opacity:1,y:0}} transition={{duration:.18}}>
  {words===null&&(view==='learn'||view==='profile')?<p role="status">{error?'Vocabulary unavailable':'Loading vocabulary…'}</p>:view==='learn'?<><div className="wf-learn-overview"><div><strong>{stats.due}</strong><span>Due for review</span></div><div><strong>{stats.words}</strong><span>Saved words</span></div><div><strong>{stats.reviewed}</strong><span>Reviewed</span></div></div><div className="wf-segments" aria-label="Learning mode">{(['review','practice','cards'] as const).map(mode=><button key={mode} aria-pressed={learnMode===mode} onClick={()=>{stopSpeech();setLearnMode(mode);setCardIndex(0);setCardReveal(false);}}>{mode==='review'?'Review':mode==='practice'?'Practice':'Flashcards'}</button>)}</div><motion.div key={learnMode} initial={{opacity:0,y:4}} animate={{opacity:1,y:0}} transition={{duration:.15}}>{learnMode==='review'?<ReviewPanel key={reload} words={words??[]} disabled={busy||blocked||translating} save={async next=>{if(translationRequest.current)return false;const changed=next.find((w,i)=>w.review!==words?.[i]?.review);const ok=await persist(next,'Review saved.');if(ok&&changed?.review)recordActivity(userId,'review',changed.review.interval>0);return ok;}}/>:learnMode==='practice'?<PracticePanel key={reload} words={studyWords} onActivity={correct=>recordActivity(userId,'practice',correct)}/>:<div className="wf-panel"><div className="grid gap-3">{currentCard?<><p className="text-center text-sm">{Math.min(cardIndex+1,cards.length)} / {cards.length}</p><motion.button key={currentCard.timestamp+String(cardReveal)} type="button" className="wf-study-card" initial={{opacity:0,scale:.98}} animate={{opacity:1,scale:1}} onClick={()=>setCardReveal(v=>!v)}><strong className="text-3xl" dir="auto">{cardReveal?currentCard.fa:currentCard.en}</strong><span className="text-xs opacity-70">{cardReveal?"Tap to hide":"Tap to reveal"}</span></motion.button><div className="flex justify-center gap-2"><button className="wf-action" aria-label="Previous card" disabled={cardIndex===0} onClick={()=>{setCardIndex(i=>Math.max(0,i-1));setCardReveal(false);}}><ChevronLeft size={18}/></button><PronounceButton text={currentCard.en} onError={setError} label="Pronounce card"/><button className="wf-action" aria-label="Next card" disabled={cardIndex>=cards.length-1} onClick={()=>{setCardIndex(i=>i+1);setCardReveal(false);}}><ChevronRight size={18}/></button></div></>:<p className="wf-empty">No active cards.</p>}</div></div>}</motion.div></>: view==='profile'?<Profile user={user} words={studyWords}/>:view==='settings'?<div className="wf-settings-grid">
  <motion.section className="wf-setting-card" initial={{opacity:0,y:5}} animate={{opacity:1,y:0}} transition={{duration:.18}}>
