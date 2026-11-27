@@ -786,3 +786,18 @@ body{min-width:0}
 /* Independent copy confirmation and theme-aware learned action. */
 .wf-library-panel .wf-entry-copy[data-copied=true],.wf-library-panel .wf-entry-check:hover:not(:disabled){color:var(--accent)}
 .wf-entry-copy>span{display:grid;place-items:center}
+
+/* Word Studio: fixed capture and collection heading, independent scroll region. */
+.wf-page.wf-vocabulary-page{display:flex;flex-direction:column;align-items:stretch;overflow:hidden;min-height:0;scrollbar-gutter:auto}
+.wf-vocabulary-page>.wf-translator{flex:none}
+.wf-vocabulary-page>.wf-library-panel{display:flex;flex-direction:column;flex:0 1 auto;min-height:0;max-height:100%;overflow:hidden}
+.wf-vocabulary-page .wf-library-heading{flex:none}
+.wf-library-scroll{flex:0 1 auto;min-height:0;min-width:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--accent) 45%,var(--line)) transparent;padding-inline-end:6px;scrollbar-gutter:stable}
+.wf-library-scroll::-webkit-scrollbar{width:6px}
+.wf-library-scroll::-webkit-scrollbar-track{background:transparent}
+.wf-library-scroll::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--accent) 45%,var(--line));border-radius:999px}
+.wf-library-scroll::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+.wf-library-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:8px}
+.wf-library-panel .wf-entry-list{min-width:0}
+.wf-library-panel .wf-entry-list:not(:empty)~.wf-collection-empty{display:none}
+@media(max-height:420px){.wf-page.wf-vocabulary-page{overflow:visible}.wf-vocabulary-page>.wf-library-panel{max-height:60dvh;min-height:120px}}
