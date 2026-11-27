@@ -882,3 +882,10 @@ body{min-width:0}
 .wf-auth-form .wf-field-shake{animation:wf-field-shake 340ms ease-in-out both}
 @keyframes wf-field-shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-2px)}80%{transform:translateX(2px)}}
 @media(prefers-reduced-motion:reduce){.wf-auth-form .wf-field-shake{animation:none}}
+
+/* Keep the speaker silhouette stable while animating only the sound waves. */
+.wf-pronounce[data-phase="playing"] svg.wf-pronounce-wave{animation:none;transform:none}
+.wf-pronounce[data-phase="playing"] svg.wf-pronounce-wave path:nth-child(n+2){animation:wf-speaker-wave .9s ease-in-out infinite}
+.wf-pronounce[data-phase="playing"] svg.wf-pronounce-wave path:nth-child(3){animation-delay:.18s}
+@keyframes wf-speaker-wave{0%,100%{opacity:.3}50%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.wf-pronounce[data-phase="playing"] svg.wf-pronounce-wave path{animation:none}}
