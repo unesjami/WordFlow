@@ -515,3 +515,7 @@ body{min-width:0}
  .wf-sidebar .wf-nav-button{border-radius:10px}
 }
 @media(prefers-reduced-motion:reduce){.wf-sidebar .wf-nav-button>svg{transition:none!important}}
+
+/* Center undo feedback above the bottom edge without interfering with motion transforms. */
+.wf-undo-toast{left:0;right:0;margin-inline:auto;width:max-content;max-width:calc(100% - 32px);bottom:max(24px,env(safe-area-inset-bottom));}
+@media(max-width:760px){.wf-undo-toast{left:0;right:0;bottom:calc(88px + env(safe-area-inset-bottom));}}
