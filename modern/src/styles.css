@@ -278,3 +278,76 @@
 .wf-example-form{grid-column:1/-1;display:flex;align-items:center;gap:6px}
 .wf-example-form input{flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;padding:8px}
 @media(max-width:600px){.wf-entry{grid-template-columns:minmax(0,1fr);gap:6px}.wf-entry-actions{justify-content:flex-end}.wf-translate-button{min-width:100px}.wf-translate-form textarea{font-size:16px}.wf-library-heading .wf-segments button{padding:7px 9px}}
+
+
+/* Shared design system: semantic tokens and consistent interaction geometry. */
+:root{
+ --wf-space-1:4px;--wf-space-2:8px;--wf-space-3:12px;--wf-space-4:16px;--wf-space-5:20px;--wf-space-6:24px;
+ --wf-radius-control:10px;--wf-radius-panel:14px;--wf-control:40px;--wf-touch:44px;
+ --wf-duration:160ms;--wf-ease:cubic-bezier(.22,.8,.25,1);
+ --wf-danger:light-dark(#ae3030,#f49b98);--wf-success:light-dark(#126e48,#80d6ad);
+ --muted:light-dark(#52665f,#b1c3bb);
+ font-size:16px;line-height:1.5;
+}
+body{min-width:0}
+.wf-workspace{gap:var(--wf-space-5)}
+.wf-page,.wf-profile-grid,.wf-settings-grid{gap:var(--wf-space-4)}
+.wf-panel,.wf-setting-card,.wf-learning-panel,.wf-sidebar{border-radius:var(--wf-radius-panel)}
+.wf-panel,.wf-learning-panel{padding:var(--wf-space-5)}
+.wf-setting-card{padding-inline:var(--wf-space-4)}
+.wf-primary,.wf-action,.wf-setting-action,.wf-email-submit,.wf-google{border-radius:var(--wf-radius-control);transition:background var(--wf-duration) var(--wf-ease),color var(--wf-duration) var(--wf-ease),border-color var(--wf-duration) var(--wf-ease),transform var(--wf-duration) var(--wf-ease)}
+.wf-action,.wf-setting-action{min-height:var(--wf-control)}
+.wf-entry-icon,.wf-entry-actions .wf-pronounce{width:32px;height:32px;min-width:32px;min-height:32px;border-radius:var(--wf-radius-control)}
+.wf-entry-delete:hover:not(:disabled){color:var(--wf-danger)}
+.wf-entry-check:hover:not(:disabled){color:var(--wf-success)}
+.wf-entry-line{grid-template-columns:minmax(0,1fr) 32px}
+.wf-entry-actions{min-width:0;display:grid;grid-auto-flow:column;grid-auto-columns:32px;justify-content:end;gap:var(--wf-space-1)}
+.wf-entry{gap:var(--wf-space-4)}
+.wf-entry-text{gap:var(--wf-space-2)}
+.wf-entry-line>span{font-size:15px;line-height:1.65}
+.wf-translate-button{min-width:148px}
+.wf-translate-form textarea{border-radius:var(--wf-radius-control);line-height:1.5}
+.wf-primary[aria-busy=true],.wf-email-submit[aria-busy=true]{opacity:1}
+.wf-profile-metric,.wf-learn-overview>div{min-width:0;overflow-wrap:anywhere}
+.wf-profile-chart{min-width:0;width:100%}
+.wf-setting-head{gap:var(--wf-space-3)}
+.wf-setting-row{gap:var(--wf-space-2);min-width:0}
+.wf-setting-status{max-width:100%;overflow-wrap:anywhere}
+.wf-setting-action:focus-visible,.wf-entry-icon:focus-visible,.wf-pronounce:focus-visible,.wf-nav-button:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wf-nav-button>svg{flex:none}
+.wf-page :is(h2,h3,p){overflow-wrap:anywhere}
+.wf-page input,.wf-page textarea{max-width:100%}
+.wf-study-card{min-width:0;width:100%;overflow-wrap:anywhere}
+@media(max-width:760px){
+ .wf-workspace{gap:var(--wf-space-2)}
+ .wf-panel,.wf-learning-panel{padding:var(--wf-space-4)}
+ .wf-page,.wf-profile-grid,.wf-settings-grid{gap:var(--wf-space-3)}
+ .wf-sidebar .wf-nav-button{min-height:var(--wf-touch)}
+ .wf-translate-button{min-width:112px}
+ .wf-setting-row{grid-template-columns:26px minmax(0,1fr) auto}
+ .wf-entry{gap:var(--wf-space-2)}
+}
+@media(max-width:480px){
+ .wf-translate-form{grid-template-columns:minmax(0,1fr)}
+ .wf-translate-button{width:100%;min-height:var(--wf-touch)}
+ .wf-library-heading{align-items:flex-start;gap:var(--wf-space-2)}
+ .wf-library-heading .wf-segments{width:100%}
+ .wf-library-heading .wf-segments button{padding-inline:var(--wf-space-2);min-width:0;font-size:12px}
+ .wf-learn-overview{gap:var(--wf-space-1)}
+ .wf-learn-overview>div{padding:var(--wf-space-2)}
+ .wf-learn-overview strong{font-size:21px}
+ .wf-learn-overview span{font-size:11px}
+ .wf-setting-card{padding-inline:var(--wf-space-3)}
+ .wf-profile-metric{padding:var(--wf-space-2);gap:var(--wf-space-2)}
+ .wf-profile-metric strong{font-size:20px}
+ .wf-profile-symbol{width:34px;height:34px}
+ .wf-auth-main{padding:var(--wf-space-5)}
+}
+@media(pointer:coarse){
+ .wf-entry-icon,.wf-entry-actions .wf-pronounce{width:var(--wf-touch);height:var(--wf-touch);min-width:var(--wf-touch);min-height:var(--wf-touch)}
+ .wf-entry-line{grid-template-columns:minmax(0,1fr) var(--wf-touch)}
+ .wf-entry-actions{grid-auto-columns:var(--wf-touch)}
+ .wf-action,.wf-setting-action,.wf-segments button,.wf-theme-compact button{min-height:var(--wf-touch)}
+ .wf-theme-compact button{min-width:32px}
+}
+@media(prefers-reduced-motion:reduce){.wf-entry-icon,.wf-primary,.wf-action,.wf-setting-action,.wf-email-submit,.wf-google{transition:none!important}}
