@@ -6,5 +6,21 @@ export async function loadLocal(userId:string):Promise<Snapshot|undefined>{const
 export async function storeLocal(next:Snapshot,expected?:string):Promise<void>{const db=await database();try{await new Promise<void>((resolve,reject)=>{const tx=db.transaction('workspaces','readwrite');const store=tx.objectStore('workspaces');const req=store.get(next.userId);req.onsuccess=()=>{if(expected!==undefined&&(req.result?.version??'')!==expected){tx.abort();return;}store.put(next);};tx.oncomplete=()=>resolve();tx.onabort=()=>reject(Error('Local workspace changed in another tab. Reload before saving.'));tx.onerror=()=>reject(tx.error);});}finally{db.close();}}
 export function makeSnapshot(userId:string,words:Word[],revision:number|null,dirty:boolean):Snapshot{return {userId,words,revision,dirty,version:crypto.randomUUID()};}
 export function canSync(local:Snapshot,remoteRevision:number|null){return local.revision===remoteRevision;}
-export async function syncLocal(local:Snapshot):Promise<Snapshot>{if(!local.dirty)return local;const remote=await readWorkspace(local.userId);if(!canSync(local,remote?.revision??null))throw Error('Cloud workspace changed. Local changes are preserved; export a backup before resolving the conflict.');const revision=await writeWorkspace(local.userId,local.words,local.revision);const clean=makeSnapshot(local.userId,local.words,revision,false);await storeLocal(clean,local.version);return clean;}
+// Network upload is independent of local editing. The caller serializes the local acknowledgement.
+export async function uploadSnapshot(local:Snapshot):Promise<number>{
+ const remote=await readWorkspace(local.userId);
+ if(!canSync(local,remote?.revision??null))throw Error('Cloud workspace changed. Local changes are preserved; export a backup before resolving the conflict.');
+ return writeWorkspace(local.userId,local.words,local.revision);
+}
+export function acknowledgeSnapshot(uploaded:Snapshot,latest:Snapshot,revision:number):Snapshot{
+ if(uploaded.userId!==latest.userId||uploaded.revision!==latest.revision)throw Error('Workspace changed during sync. Local changes are preserved.');
+ return makeSnapshot(latest.userId,latest.words,revision,latest.version!==uploaded.version);
+}
+export async function syncLocal(local:Snapshot):Promise<Snapshot>{
+ if(!local.dirty)return local;
+ const revision=await uploadSnapshot(local);
+ const clean=acknowledgeSnapshot(local,local,revision);
+ await storeLocal(clean,local.version);
+ return clean;
+}
 export async function openWorkspace(userId:string):Promise<Snapshot>{const local=await loadLocal(userId);if(local?.dirty)return local;try{const remote=await readWorkspace(userId);const next=makeSnapshot(userId,remote?.words??[],remote?.revision??null,false);await storeLocal(next,local?.version??'');return next;}catch(e){if(local)return local;throw e;}}
