@@ -8,7 +8,7 @@ import {classifyText,entryKind,learningWords} from '../../domain';
 import type {User} from '@supabase/supabase-js';
 import {Profile} from '../profile/Profile';
 import {recordActivity} from '../profile/analytics';
-import {openWorkspace,storeLocal,makeSnapshot,syncLocal} from '../../services/offline';
+import {openWorkspace,storeLocal,makeSnapshot,uploadSnapshot,acknowledgeSnapshot} from '../../services/offline';
 import type {Snapshot} from '../../services/offline';
 import {saveWord,removeWord} from './model';
 import {translate,detectLanguage} from '../../services/translation';
@@ -42,6 +42,11 @@ export function Vocabulary({userId,user,theme,setTheme,signOut}:{userId:string;u
 
  const generation=useRef(0);
  const locked=useRef(false);
+ const localTail=useRef<Promise<unknown>>(Promise.resolve());
+ const syncing=useRef(false);
+ const [cloudBusy,setCloudBusy]=useState(false);
+ function serializeLocal<T>(task:()=>Promise<T>):Promise<T>{const next=localTail.current.then(task,task);localTail.current=next.catch(()=>{});return next;}
+
  const [reload,setReload]=useState(0);
  const [source,setSource]=useState('');
  const [translating,setTranslating]=useState(false);
@@ -68,7 +73,7 @@ export function Vocabulary({userId,user,theme,setTheme,signOut}:{userId:string;u
 
  useEffect(()=>{
    const current=++generation.current;
-   setWords(null);setLoadFailed(false);snapshot.current=null;setError('');setBlocked(false);setBusy(false);locked.current=false;setUndo(null);
+   setWords(null);setLoadFailed(false);snapshot.current=null;setError('');setBlocked(false);setBusy(false);locked.current=false;setUndo(null);setCloudBusy(false);syncing.current=false;
    openWorkspace(userId).then(result=>{if(generation.current===current){snapshot.current=result;setWords(result.words);setSyncStatus(result.dirty?'Pending sync':'Saved locally');}}).catch(()=>{if(generation.current===current){setLoadFailed(true);setError('Could not load vocabulary. Your data was not changed.');}});
    return ()=>{generation.current++;};
  },[userId,reload]);
@@ -78,11 +83,33 @@ export function Vocabulary({userId,user,theme,setTheme,signOut}:{userId:string;u
    if(locked.current||blocked||!snapshot.current)return false;
    locked.current=true;setBusy(true);setError('');
    const current=generation.current;
-   try{const previous=snapshot.current;if(!previous)throw Error('Workspace unavailable');const local=makeSnapshot(userId,next,previous.revision,true);await storeLocal(local,previous.version);if(generation.current!==current)return false;snapshot.current=local;setWords(next);setSyncStatus('Pending sync');return true;}
+   try{return await serializeLocal(async()=>{if(generation.current!==current)return false;const previous=snapshot.current;if(!previous)throw Error('Workspace unavailable');const local=makeSnapshot(userId,next,previous.revision,true);await storeLocal(local,previous.version);if(generation.current!==current)return false;snapshot.current=local;setWords(next);setSyncStatus('Pending sync');return true;});}
    catch(e){if(generation.current===current){setBlocked(true);setError(e instanceof Error?e.message:'Save failed. Reload before retrying.');}return false;}
    finally{if(generation.current===current){locked.current=false;setBusy(false);}}
  }
- useEffect(()=>{let active=true;async function flush(){const local=snapshot.current;if(!active||!local?.dirty||locked.current||translationRequest.current||!navigator.onLine)return;locked.current=true;setBusy(true);setSyncStatus('Syncing');try{const clean=await syncLocal(local);if(active&&snapshot.current?.version===local.version){snapshot.current=clean;setSyncStatus('Synced');}}catch(e){if(active){setSyncStatus('Pending sync');setError(e instanceof Error?e.message:'Cloud sync unavailable. Local changes preserved.');}}finally{if(active){locked.current=false;setBusy(false);}}}const timer=window.setInterval(()=>void flush(),15000);window.addEventListener('online',flush);void flush();return()=>{active=false;window.clearInterval(timer);window.removeEventListener('online',flush);};},[userId,reload]);
+ useEffect(()=>{
+ let active=true;
+ async function flush(){
+  const local=snapshot.current;
+  if(!active||!local?.dirty||locked.current||syncing.current||!navigator.onLine)return;
+  syncing.current=true;setCloudBusy(true);setSyncStatus('Syncing');
+  try{
+   const revision=await uploadSnapshot(local);
+   await serializeLocal(async()=>{
+    if(!active)return;
+    const latest=snapshot.current;if(!latest)return;
+    const updated=acknowledgeSnapshot(local,latest,revision);
+    await storeLocal(updated,latest.version);
+    if(!active)return;
+    snapshot.current=updated;setSyncStatus(updated.dirty?'Pending sync':'Synced');
+   });
+  }catch(e){if(active){const message=e instanceof Error?e.message:'Cloud sync unavailable';setSyncStatus(message.includes('changed')?'Sync conflict · local data saved':'Pending sync');}}
+  finally{if(active){syncing.current=false;setCloudBusy(false);}}
+ }
+ const timer=window.setInterval(()=>void flush(),15000);
+ window.addEventListener('online',flush);void flush();
+ return()=>{active=false;window.clearInterval(timer);window.removeEventListener('online',flush);};
+ },[userId,reload]);
  useEffect(()=>{if(!undo)return;const tick=()=>{const remaining=Math.max(0,Math.ceil((undo.expires-Date.now())/1000));setUndoSeconds(remaining);if(!remaining)setUndo(current=>current===undo?null:current);};tick();const timer=window.setInterval(tick,100);return()=>window.clearInterval(timer);},[undo]);
  async function deleteEntry(index:number){const local=snapshot.current;if(!local||locked.current||blocked||translationRequest.current)return;const word=local.words[index];if(!word)return;stopSpeech();if(await persist(removeWord(local.words,index),'Deleted.')){setUndoSeconds(5);setUndo({word,index,expires:Date.now()+5000});}}
  async function restoreEntry(){const local=snapshot.current;if(!undo||!local||locked.current||blocked||translationRequest.current||Date.now()>=undo.expires)return;const next=[...local.words];next.splice(Math.min(undo.index,next.length),0,undo.word);if(await persist(next,'Restored.'))setUndo(null);}
@@ -114,12 +141,12 @@ export function Vocabulary({userId,user,theme,setTheme,signOut}:{userId:string;u
  <header className="wf-setting-head"><span className="wf-setting-mark" data-tone="teal"><BookOpen size={25}/></span><div><h3>Data & sync</h3></div></header>
  <div className="wf-setting-row"><span className="wf-setting-symbol"><Cloud size={21}/></span><div className="wf-setting-copy"><strong>Sync status</strong></div><span className="wf-setting-status" role="status">{syncStatus}</span></div>
  <div className="wf-setting-row"><span className="wf-setting-symbol"><Download size={21}/></span><div className="wf-setting-copy"><strong>Export vocabulary</strong></div><button type="button" className="wf-setting-action" disabled={words===null} onClick={exportLocal}><Download size={16}/>Export</button></div>
- <div className="wf-setting-row"><span className="wf-setting-symbol"><RefreshCw size={21}/></span><div className="wf-setting-copy"><strong>Reload workspace</strong></div><button type="button" className="wf-setting-action" disabled={busy||translating} onClick={()=>setReload(n=>n+1)}><RefreshCw size={16}/>Reload</button></div>
+ <div className="wf-setting-row"><span className="wf-setting-symbol"><RefreshCw size={21}/></span><div className="wf-setting-copy"><strong>Reload workspace</strong></div><button type="button" className="wf-setting-action" disabled={busy||translating||cloudBusy} onClick={()=>setReload(n=>n+1)}><RefreshCw size={16}/>Reload</button></div>
  <div className="wf-setting-row"><span className="wf-setting-symbol"><ShieldCheck size={21}/></span><div className="wf-setting-copy"><strong>Translation privacy</strong><small>Text is sent to external translation providers. Avoid entering private information.</small></div></div></motion.section>
  <motion.section className="wf-setting-card wf-setting-account" initial={{opacity:0,y:5}} animate={{opacity:1,y:0}} transition={{duration:.18,delay:.06}}>
  <header className="wf-setting-head"><span className="wf-setting-mark" data-tone="blue"><UserRound size={25}/></span><div><h3>Account</h3></div></header>
  <div className="wf-setting-row"><span className="wf-setting-symbol"><ShieldCheck size={21}/></span><div className="wf-setting-copy"><strong>Profile & security</strong></div><button type="button" className="wf-setting-action" onClick={()=>setView('profile')}>Manage<ChevronRight size={16}/></button></div>
- <div className="wf-setting-row"><span className="wf-setting-symbol wf-setting-danger"><LogOut size={21}/></span><div className="wf-setting-copy"><strong>Sign out</strong></div><button type="button" className="wf-setting-action wf-setting-danger" disabled={busy||translating} onClick={()=>void signOut()}>Sign out<LogOut size={16}/></button></div>
+ <div className="wf-setting-row"><span className="wf-setting-symbol wf-setting-danger"><LogOut size={21}/></span><div className="wf-setting-copy"><strong>Sign out</strong></div><button type="button" className="wf-setting-action wf-setting-danger" disabled={busy||translating||cloudBusy} onClick={()=>void signOut()}>Sign out<LogOut size={16}/></button></div>
  </motion.section>
  </div>:<>
  <section className="wf-panel wf-translator" aria-label="Translate and save"><form autoComplete="off" onSubmit={translateInput} className="wf-translate-form"><textarea ref={sourceRef} id="wf-source" rows={1} autoComplete="off" dir="auto" aria-label="Translate and save a word or sentence" value={source} onChange={e=>setSource(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();e.currentTarget.form?.requestSubmit();}}} maxLength={500} required placeholder="Type a word or sentence…" disabled={translating}/><button className="wf-primary wf-translate-button" aria-busy={translating} disabled={translating||busy||blocked||words===null||!source.trim()}>{translating?<><LoaderCircle size={18} className="wf-pronounce-spinner"/>Translating</>:'Type'}</button></form></section>
