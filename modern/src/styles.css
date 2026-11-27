@@ -651,3 +651,30 @@ body{min-width:0}
  .wf-sidebar:hover .wf-sidebar-toggle,.wf-sidebar .wf-sidebar-toggle:focus-visible{opacity:1;pointer-events:auto}
  .wf-workspace[data-sidebar-collapsed=true] .wf-sidebar .wf-sidebar-toggle:not(:focus-visible){opacity:0;pointer-events:none}
 }
+
+/* Settings: common control geometry and a shared trailing alignment axis. */
+.wf-settings-grid{--settings-control-height:40px;--settings-control-width:120px;--settings-icon-column:34px;--settings-row-gap:8px}
+.wf-settings-grid .wf-setting-row,.wf-settings-grid .wf-setting-row.wf-color-row{grid-template-columns:var(--settings-icon-column) minmax(0,1fr) auto;gap:var(--settings-row-gap);align-items:center;min-height:64px}
+.wf-settings-grid .wf-setting-row>:last-child{justify-self:end}
+.wf-settings-grid .wf-setting-action,.wf-settings-grid .wf-theme-compact{box-sizing:border-box;width:var(--settings-control-width);height:var(--settings-control-height);min-height:var(--settings-control-height);border-radius:var(--wf-radius-control);margin:0}
+.wf-settings-grid .wf-setting-action{display:grid;grid-auto-flow:column;grid-auto-columns:max-content;justify-content:center;align-items:center;gap:8px;padding:0 10px;font-size:12px}
+.wf-settings-grid .wf-setting-action>svg{width:16px;height:16px;flex:none}
+.wf-settings-grid .wf-theme-compact{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px;padding:3px}
+.wf-settings-grid .wf-theme-compact button{width:100%;min-width:0;height:100%;min-height:0;border-radius:7px}
+.wf-settings-grid .wf-setting-switch{justify-self:end;margin:0}
+.wf-settings-grid .wf-setting-status{box-sizing:border-box;min-width:var(--settings-control-width);max-width:180px;min-height:32px;display:grid;place-items:center;text-align:center}
+.wf-settings-grid .wf-color-options{min-height:var(--settings-control-height);align-items:center;justify-content:flex-end}
+@media(min-width:1101px){
+ .wf-settings-grid .wf-setting-card:not(.wf-setting-account) .wf-setting-row{flex:0 0 auto}
+ .wf-settings-grid .wf-setting-card:not(.wf-setting-account) .wf-setting-row:last-child{border-bottom:0}
+}
+@media(max-width:480px){
+ .wf-settings-grid{--settings-icon-column:26px;--settings-control-width:108px}
+ .wf-settings-grid .wf-color-row .wf-color-options{grid-column:2/-1;justify-self:end;justify-content:flex-end}
+}
+@media(pointer:coarse){
+ .wf-settings-grid{--settings-control-height:50px;--settings-control-width:146px}
+ .wf-settings-grid .wf-theme-compact button{min-height:44px}
+ .wf-settings-grid .wf-setting-switch{position:relative}
+ .wf-settings-grid .wf-setting-switch::after{content:"";position:absolute;inset:-11px -3px}
+}
