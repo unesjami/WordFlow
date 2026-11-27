@@ -557,3 +557,34 @@ body{min-width:0}
 @media(pointer:coarse){.wf-color-options{grid-template-columns:repeat(3,44px);gap:4px}.wf-color-option{width:44px;height:44px;background:transparent}.wf-color-option:before{content:"";position:absolute;inset:8px;border-radius:50%;background:var(--swatch)}.wf-color-option svg{position:relative}}
 @media(max-width:400px){.wf-color-row .wf-color-options{grid-column:2/-1;justify-content:start;margin-top:4px}}
 @media(prefers-reduced-motion:reduce){.wf-color-option{transition:none!important}}
+
+/* Shared navigation axis and named theme selector. */
+@media(min-width:761px){
+ .wf-sidebar .wf-sidebar-brand{padding-inline-start:7px;gap:10px}
+ .wf-sidebar-brand img{width:34px;height:34px}
+ .wf-sidebar .wf-sidebar-top{gap:0}
+ .wf-workspace[data-sidebar-collapsed=true] .wf-sidebar-brand{padding-inline-start:11px;justify-content:start}
+ .wf-sidebar .wf-sidebar-toggle{width:30px;min-width:30px}
+}
+.wf-color-row{grid-template-columns:32px minmax(0,1fr);align-content:center;row-gap:12px}
+.wf-color-row .wf-color-options{grid-column:2/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;width:100%;margin:0}
+.wf-color-options .wf-color-option{width:100%;height:auto;min-height:36px;display:flex;align-items:center;justify-content:flex-start;gap:7px;border:1px solid var(--line);border-radius:9px;padding:6px 8px;background:var(--surface);color:var(--muted);outline:none;transform:none;font-size:12px}
+.wf-color-options .wf-color-option:before{content:none}
+.wf-color-swatch{display:grid;place-items:center;background:var(--swatch);color:white;width:20px;height:20px;flex:none;border-radius:50%}
+.wf-color-name{min-width:0;overflow-wrap:anywhere}
+.wf-color-options .wf-color-option[aria-pressed=true]{border-color:var(--accent);background:var(--soft);color:var(--ink)}
+.wf-color-options .wf-color-option:hover{border-color:var(--accent)}
+.wf-color-options .wf-color-option:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media(max-width:400px){.wf-color-row .wf-color-options{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(pointer:coarse){.wf-color-options .wf-color-option{min-height:44px}}
+/* Full palette: surfaces, background, typography, borders and accents. */
+:root[data-accent=blue]{--wf-primary-color:#2563eb;--wf-primary-hover:#1d4ed8;--wf-rail-dark:#17366e;--accent:light-dark(#1d4ed8,#a9caff);--soft:light-dark(#e6efff,#23395b);--bg:light-dark(#f1f5fc,#111827);--surface:light-dark(#fbfdff,#192336);--ink:light-dark(#172b4d,#edf3ff);--muted:light-dark(#526481,#b2c4df);--line:light-dark(#d7e2f2,#31445f)}
+:root[data-accent=violet]{--wf-primary-color:#7c3aed;--wf-primary-hover:#6d28d9;--wf-rail-dark:#42236e;--accent:light-dark(#6d28d9,#d4baff);--soft:light-dark(#f0e8ff,#3b2b55);--bg:light-dark(#f6f2fc,#191425);--surface:light-dark(#fdfbff,#241c32);--ink:light-dark(#302047,#f4edff);--muted:light-dark(#67577f,#c3b3dc);--line:light-dark(#e3d9ef,#443653)}
+:root[data-accent=green]{--wf-primary-color:#16804a;--wf-primary-hover:#12683d;--wf-rail-dark:#19472e;--accent:light-dark(#12683d,#9cdeb6);--soft:light-dark(#e1f4e8,#253e30);--bg:light-dark(#f0f7f2,#111c15);--surface:light-dark(#fcfffc,#19291e);--ink:light-dark(#1b3425,#edf8ef);--muted:light-dark(#526c5b,#b0ccb9);--line:light-dark(#d5e6da,#344c3c)}
+:root[data-accent=rose]{--wf-primary-color:#be185d;--wf-primary-hover:#9d174d;--wf-rail-dark:#692842;--accent:light-dark(#a21650,#ffb2ce);--soft:light-dark(#fce7f0,#4b2d3a);--bg:light-dark(#fcf2f6,#21151b);--surface:light-dark(#fffafd,#30202a);--ink:light-dark(#422334,#ffedf5);--muted:light-dark(#79566a,#d5b5c7);--line:light-dark(#efd9e4,#513744)}
+:root[data-accent=slate]{--bg:light-dark(#f1f4f8,#121820);--surface:light-dark(#fcfdff,#1c2530);--ink:light-dark(#263342,#edf2f8);--muted:light-dark(#536579,#b8c7da);--line:light-dark(#dbe2eb,#364354)}
+.wf-page .bg-teal-700{background:var(--wf-primary-color)}
+.wf-page .bg-teal-700:hover:not(:disabled){background:var(--wf-primary-hover)}
+.wf-page progress,progress{accent-color:var(--accent)}
+.wf-page .text-teal-700,.wf-page .text-teal-600{color:var(--accent)}
+.wf-page .bg-teal-50,.wf-page .bg-teal-100{background:var(--soft)}
