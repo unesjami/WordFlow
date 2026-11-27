@@ -862,3 +862,9 @@ body{min-width:0}
 .wf-auth-form .wf-auth-toggle button{transition:background .18s ease,color .18s ease,border-color .18s ease!important}
 .wf-auth-form .wf-email-form{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){.wf-auth-form .wf-auth-toggle button{transition:none!important}}
+
+/* A subtle insertion caret in the currently focused empty verification cell. */
+.wf-otp-cell[data-active=true][data-filled=false]::after{content:"";display:block;width:2px;height:23px;border-radius:2px;background:var(--accent);animation:wf-otp-caret 1.15s ease-in-out infinite}
+.wf-otp:has(.wf-otp-native:disabled) .wf-otp-cell::after{display:none}
+@keyframes wf-otp-caret{0%,100%{opacity:1}50%{opacity:.12}}
+@media(prefers-reduced-motion:reduce){.wf-otp-cell[data-active=true][data-filled=false]::after{animation:none}}
