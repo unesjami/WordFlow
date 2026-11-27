@@ -852,3 +852,13 @@ body{min-width:0}
 .wf-page .wf-setting-action.wf-setting-danger:hover:not(:disabled){border-color:var(--wf-danger,#d15c57);color:var(--wf-danger,#d15c57);background:color-mix(in srgb,var(--wf-danger,#d15c57) 7%,var(--surface))}
 .wf-page .wf-primary:disabled:not([aria-busy=true]){background:var(--soft);color:var(--muted);opacity:1}
 @media(max-width:760px){.wf-auth-form{gap:14px}.wf-auth-form h1{font-size:30px}.wf-toolbar h2{font-size:21px}}
+
+/* Stable account form; editorial brand typography. */
+.wf-auth-story-content{max-width:100%;width:100%}
+.wf-auth-story .wf-auth-story-content h2{font-family:"Pilcrow Rounded","Nunito",sans-serif;font-size:clamp(46px,5.8vw,104px);font-weight:700;line-height:1.035;letter-spacing:-.035em;text-wrap:normal;margin:0}
+.wf-auth-story .wf-auth-story-content h2 span{color:#a7e5d5}
+.wf-auth-form h1{min-height:2.32em;display:flex;align-items:flex-end}
+@media(min-width:1100px){.wf-auth-form h1{min-height:1.16em}}
+.wf-auth-form .wf-auth-toggle button{transition:background .18s ease,color .18s ease,border-color .18s ease!important}
+.wf-auth-form .wf-email-form{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.wf-auth-form .wf-auth-toggle button{transition:none!important}}
