@@ -467,3 +467,16 @@ body{min-width:0}
  .wf-toolbar,.wf-inline-feedback,.wf-page{width:100%;max-width:1280px;margin-inline:auto}
  .wf-page{padding-inline-end:6px}
 }
+
+/* Minimal, useful application header and clear pin states. */
+.wf-shell>.wf-header{background:var(--surface);border-bottom:1px solid var(--line)}
+.wf-header-tools{display:flex;align-items:center;gap:12px}
+.wf-header-theme{display:grid;place-items:center;width:36px;height:36px;color:var(--muted);border-radius:10px;transition:color .16s,background .16s}
+.wf-header-theme:hover{color:var(--accent);background:var(--soft)}
+.wf-header-avatar{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--soft);color:var(--accent);font-size:14px;font-weight:800}
+.wf-sidebar-toggle[aria-pressed=true]{color:var(--accent)}
+.wf-workspace[data-sidebar-collapsed=true] .wf-sidebar-toggle{opacity:1}
+.wf-sidebar-toggle:hover{color:var(--accent);background:var(--soft)}
+.wf-header-theme:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media(max-width:760px){.wf-header-tools{gap:8px}.wf-header-theme{width:44px;height:44px}.wf-header-avatar{width:32px;height:32px}}
+@media(prefers-reduced-motion:reduce){.wf-header-theme{transition:none}}
