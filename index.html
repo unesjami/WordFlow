@@ -69,6 +69,7 @@ body.dark-mode .wf-setting-mark{color:#8cdbcb;background:#24443f}body.dark-mode 
 @media(max-width:760px){#view-analyze{gap:8px;grid-template-rows:auto auto minmax(165px,1fr) auto}.wf-analysis-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.wf-analysis-tile{padding:8px}.wf-analysis-bars{gap:2px}.wf-analysis-footer{flex-wrap:wrap}#view-analyze .wf-panel{padding:10px 12px}}
 @media(prefers-reduced-motion:reduce){.wf-analysis-fill{transition:none}}
 .wf-auth-toggle{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:0;padding:4px;border-radius:999px;border:1px solid var(--border);background:var(--bg);isolation:isolate}.wf-auth-toggle:before{content:'';position:absolute;inset:4px auto 4px 4px;width:calc((100% - 8px)/2);background:var(--accent);border-radius:999px;z-index:-1;transition:transform .24s cubic-bezier(.22,.8,.25,1)}.wf-auth-toggle[data-mode=signup]:before{transform:translateX(100%)}.wf-auth-toggle button{min-height:40px;border:0;background:transparent;color:var(--ink-soft);font:600 .85rem Inter,sans-serif;border-radius:999px;cursor:pointer}.wf-auth-toggle button[aria-pressed=true]{color:var(--on-accent,#fff)}.wf-auth-form{font-family:Inter,system-ui,sans-serif;gap:14px!important}.wf-auth-main{padding:32px!important;min-height:100dvh}.wf-auth-form .wf-email-form{gap:12px}.wf-auth-form .wf-email-form input{min-height:46px}.wf-auth-error:empty{display:none}.wf-auth-note{font-size:.75rem}@media(prefers-reduced-motion:reduce){.wf-auth-toggle:before{transition:none}}
+@keyframes wf-sound-wave{0%,100%{opacity:.3}50%{opacity:1}}.wf-speaking{color:var(--accent)!important}.wf-speaking svg path:nth-child(2),.wf-speaking svg path:nth-child(3){animation:wf-sound-wave .85s ease-in-out infinite}.wf-speaking svg path:nth-child(3){animation-delay:.18s}@media(prefers-reduced-motion:reduce){.wf-speaking svg path{animation:none!important}}
 </style>
   <script>(()=>{let mode='system';try{mode=localStorage.getItem('wf-appearance')||'system';}catch{}const dark=mode==='dark'||(mode!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.style.background=dark?'#111817':'#f7f8fa';document.documentElement.style.colorScheme=dark?'dark':'light';})();</script>
   <noscript><style>html.wf-booting body{visibility:visible}</style></noscript>
@@ -1185,12 +1186,13 @@ window.wfLucideGlyph=function(alias){const names={"user":"user-round","chart":"c
       refreshEnglishVoices();
       window.speechSynthesis.addEventListener('voiceschanged',refreshEnglishVoices);
     }
-    let speechRequest=0,speechWatchdog=0;
-    function speakEnglish(text){
+    let speechRequest=0,speechWatchdog=0, speechButton=null;
+    function markSpeech(button){if(speechButton){speechButton.classList.remove('wf-speaking');speechButton.removeAttribute('aria-busy');}speechButton=button||null;if(speechButton){speechButton.classList.add('wf-speaking');speechButton.setAttribute('aria-busy','true');}}
+    function speakEnglish(text,button){
       const synth=window.speechSynthesis;
       const spoken=String(text||'').trim();if(!spoken)return;
       if(!synth||typeof SpeechSynthesisUtterance==='undefined'){showToast('Pronunciation is unavailable in this browser.');return;}
-      const request=++speechRequest;
+      const request=++speechRequest;markSpeech(null);
       clearTimeout(speechWatchdog);
       // Invalidate old handlers before canceling; a stale callback must never cancel a new request.
       activeSpeech=null;
@@ -1209,14 +1211,14 @@ window.wfLucideGlyph=function(alias){const names={"user":"user-round","chart":"c
         function current(){return request===speechRequest&&activeSpeech===utterance;}
         function fallback(){
           if(!current())return;
-          clearTimeout(speechWatchdog);activeSpeech=null;
+          clearTimeout(speechWatchdog);activeSpeech=null;markSpeech(null);
           if(retried){showToast('Voice unavailable. Check your device speech settings.');return;}
           retried=true;
           synth.cancel();if(synth.paused)synth.resume();
           play(local&&local!==voice?local:null);
         }
-        utterance.onstart=()=>{if(current()){started=true;clearTimeout(speechWatchdog);}};
-        utterance.onend=()=>{if(current()){clearTimeout(speechWatchdog);activeSpeech=null;}};
+        utterance.onstart=()=>{if(current()){started=true;clearTimeout(speechWatchdog);markSpeech(button);}};
+        utterance.onend=()=>{if(current()){clearTimeout(speechWatchdog);activeSpeech=null;markSpeech(null);}};
         utterance.onerror=()=>{if(current())fallback();};
         speechWatchdog=setTimeout(()=>{if(current()&&!started)fallback();},1400);
         try{synth.speak(utterance);}catch{fallback();}
@@ -1269,7 +1271,7 @@ window.wfLucideGlyph=function(alias){const names={"user":"user-round","chart":"c
           const action = btn.getAttribute('data-action');
           if (isNaN(idx)) return;
           if (action === 'edit') editWord(idx);
-          else if (action === 'voice') wordPairs[idx] && speakEnglish(wordPairs[idx].en);
+          else if (action === 'voice') wordPairs[idx] && speakEnglish(wordPairs[idx].en,btn);
           else if (action === 'tick') toggleKept(idx);
           else if (action === 'delete') deleteWord(idx);
           else if (action === 'copy') copyWord(idx);
@@ -1329,7 +1331,7 @@ window.wfLucideGlyph=function(alias){const names={"user":"user-round","chart":"c
     document.getElementById('cardSpeak').addEventListener('click', (e) => {
       e.stopPropagation();
       const idx = parseInt(flipCard.dataset.globalIndex);
-      if (wordPairs[idx]) speakEnglish(wordPairs[idx].en);
+      if (wordPairs[idx]) speakEnglish(wordPairs[idx].en,e.currentTarget);
     });
     document.getElementById('cardKeep').addEventListener('click', (e) => {
       e.stopPropagation();
@@ -1590,7 +1592,7 @@ window.wfLucideGlyph=function(alias){const names={"user":"user-round","chart":"c
         const alternatives=shuffle([...new Set(wordPairs.map(x=>x.fa))].filter(x=>normalizeAnswer(x)!==normalizeAnswer(expected))).slice(0,3);
         for(const option of shuffle([expected,...alternatives])){const b=make('button',option);b.dir='auto';b.onclick=()=>submit(option);answers.append(b);}
       }else{
-        if(practiceMode==='listen'){const play=make('button','Play pronunciation');play.onclick=()=>speakEnglish(w.en);answers.append(play);}
+        if(practiceMode==='listen'){const play=make('button','Play pronunciation');play.insertAdjacentHTML('afterbegin',glyph('volume'));play.onclick=()=>speakEnglish(w.en,play);answers.append(play);}
         const input=document.createElement('input');input.placeholder='Type the English answer';input.setAttribute('aria-label','Practice answer');input.autocomplete='off';
         const check=make('button','Check');check.onclick=()=>submit(input.value);input.onkeydown=e=>{if(e.key==='Enter')check.click();};answers.append(input,check);
       }
@@ -1686,7 +1688,7 @@ window.wfLucideGlyph=function(alias){const names={"user":"user-round","chart":"c
       for(const w of rows.slice(recentPage*recentSize,(recentPage+1)*recentSize)){
         const row=make('div','');row.className='wf-recent-row';const en=make('strong',w.en);en.title=w.en;const fa=make('span',w.fa);fa.className='wf-recent-fa';fa.dir='rtl';fa.lang='fa';fa.title=w.fa;
         const actions=make('div','');actions.className='wf-recent-actions';
-        for(const [name,label,fn] of [['volume','Listen',()=>speakEnglish(w.en)],['copy','Copy',()=>copyWord(wordPairs.indexOf(w))]]){const b=make('button','');b.type='button';b.className='icon-btn';b.innerHTML=glyph(name);b.title=label;b.setAttribute('aria-label',label+' '+w.en);b.onclick=fn;actions.append(b);}
+        for(const [name,label,fn] of [['volume','Listen',e=>speakEnglish(w.en,e.currentTarget)],['copy','Copy',()=>copyWord(wordPairs.indexOf(w))]]){const b=make('button','');b.type='button';b.className='icon-btn';b.innerHTML=glyph(name);b.title=label;b.setAttribute('aria-label',label+' '+w.en);b.onclick=fn;actions.append(b);}
         row.append(en,fa,actions);recentList.append(row);
       }
       recentCount.textContent=(recentPage*recentSize+1)+'–'+Math.min((recentPage+1)*recentSize,rows.length)+' of '+rows.length;recentPrev.disabled=recentPage===0;recentNext.disabled=recentPage===pages-1;
@@ -2029,20 +2031,21 @@ window.wfLucideGlyph=function(alias){const names={"user":"user-round","chart":"c
       const switchMode=make('div','');switchMode.className='wf-auth-toggle';switchMode.setAttribute('role','group');switchMode.setAttribute('aria-label','Account access');
       const loginTab=make('button','Sign in'),signupTab=make('button','Sign up');loginTab.type=signupTab.type='button';switchMode.append(loginTab,signupTab);
       let signup=false;
-      function selectMode(value){signup=value;loginTab.setAttribute('aria-pressed',String(!signup));signupTab.setAttribute('aria-pressed',String(signup));switchMode.dataset.mode=signup?'signup':'login';title.textContent=signup?'Start your learning journey.':'Welcome back.';submit.textContent=signup?'Sign up':'Sign in';passwordInput.autocomplete=signup?'new-password':'current-password';passwordInput.minLength=signup?8:0;error.textContent='';}
+      function selectMode(value){signup=value;loginTab.setAttribute('aria-pressed',String(!signup));signupTab.setAttribute('aria-pressed',String(signup));switchMode.dataset.mode=signup?'signup':'login';title.textContent=signup?'Start your learning journey.':'Welcome back.';submit.textContent=signup?'Sign up':'Sign in';passwordInput.autocomplete=signup?'new-password':'current-password';passwordInput.minLength=signup?12:0;error.textContent='';}
       loginTab.onclick=()=>selectMode(false);signupTab.onclick=()=>selectMode(true);selectMode(false);
-      emailForm.append(emailLabel,passwordLabel,submit);
+      const reset=make('button','Forgot password?');reset.type='button';reset.className='wf-email-switch';reset.onclick=async()=>{if(!cloudClient||reset.disabled)return;if(!emailInput.reportValidity())return;reset.disabled=true;try{await cloudClient.auth.resetPasswordForEmail(emailInput.value.trim().toLowerCase(),{redirectTo});error.textContent='If an account exists, you will receive a password reset link.';}catch{error.textContent='Unable to send request. Try again later.';}finally{reset.disabled=false;}};
+      emailForm.append(emailLabel,passwordLabel,submit,reset);
       emailForm.onsubmit=async e=>{e.preventDefault();if(submit.disabled)return;if(!cloudClient){error.textContent='Sign-in is unavailable. Check your connection.';return;}
         submit.disabled=true;loginTab.disabled=signupTab.disabled=true;google.disabled=true;error.textContent='';submit.textContent=signup?'Creating account…':'Signing in…';
         try{
           sessionStorage.setItem('wf-import-guest','yes');
-          const credentials={email:emailInput.value.trim(),password:passwordInput.value};
+          const credentials={email:emailInput.value.trim().toLowerCase(),password:passwordInput.value};
           const result=signup?await cloudClient.auth.signUp({...credentials,options:{emailRedirectTo:redirectTo}}):await cloudClient.auth.signInWithPassword(credentials);
           if(result.error)throw result.error;
           passwordInput.value='';
           if(result.data.session){await activateAccount(result.data.session.user);authClose();}
-          else{error.textContent='Check your email for a confirmation link, then sign in.';}
-        }catch(e){try{sessionStorage.removeItem('wf-import-guest');}catch{}error.textContent=e.message||'Unable to sign in. Try again.';}
+          else{error.textContent='If registration is available for this email, a confirmation link will arrive. If you already have an account, sign in or reset your password.';}
+        }catch(e){try{sessionStorage.removeItem('wf-import-guest');}catch{}error.textContent=e.status===429?'Too many attempts. Please try again later.':signup?'Unable to complete registration. Check your details or try signing in.':'Unable to sign in. Check your credentials or reset your password.';}
         finally{submit.disabled=false;loginTab.disabled=signupTab.disabled=false;google.disabled=false;submit.textContent=signup?'Sign up':'Sign in';}
       };
       actions.append(switchMode,google,divider,emailForm);
@@ -2069,7 +2072,7 @@ window.wfLucideGlyph=function(alias){const names={"user":"user-round","chart":"c
       try{
         const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/+esm');
         cloudClient=createClient('https://wstxoeebgvkmlkpefcot.supabase.co','sb_publishable_97JMqvFbbwJgBMPmZgXMJw_pSV6nVtU',{auth:{flowType:'pkce',detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}});
-        cloudClient.auth.onAuthStateChange((event,session)=>{setTimeout(()=>activateAccount(session?.user||null).catch(e=>cloudLabel(e.message)),0);});
+        cloudClient.auth.onAuthStateChange((event,session)=>{setTimeout(async()=>{try{if(event==='PASSWORD_RECOVERY'){authClose();const d=document.createElement('dialog');const f=document.createElement('form');const h=document.createElement('h2');h.textContent='Set a new password';const p=document.createElement('input');p.type='password';p.autocomplete='new-password';p.minLength=12;p.required=true;p.setAttribute('aria-label','New password');const b=document.createElement('button');b.textContent='Update password';const m=document.createElement('p');m.setAttribute('role','status');f.className='wf-email-form';f.append(h,p,b,m);d.append(f);document.body.append(d);d.addEventListener('cancel',e=>e.preventDefault());d.showModal();f.onsubmit=async e=>{e.preventDefault();b.disabled=true;try{const {error}=await cloudClient.auth.updateUser({password:p.value});if(error)throw error;p.value='';await cloudClient.auth.signOut();d.close();d.remove();showSignIn();showToast('Password updated. Sign in again.');}catch{m.textContent='Unable to update password. Try a different password.';}finally{b.disabled=false;}};return;}await activateAccount(session?.user||null);}catch(e){cloudLabel('Account service unavailable');}},0);});
         const {data,error}=await cloudClient.auth.getSession();if(error){cloudLabel(error.message);showSignIn();}else await activateAccount(data.session?.user||null);
       }catch(e){cloudLabel('Account service unavailable offline');if(!cloudUser){showSignIn();}}
     })();
