@@ -811,3 +811,44 @@ body{min-width:0}
 /* Show at most three visible layers while collapsed; retain every undo in the expanded list. */
 .wf-undo-stack[data-expanded=false] .wf-undo-stack-card:nth-last-child(n+4){display:none}
 .wf-undo-stack[data-expanded=false] .wf-undo-stack-card:nth-last-child(3){margin-top:0}
+
+/* Intentional action hierarchy: solid primary, outlined secondary, quiet tertiary.
+   Explicit opaque colors avoid inherited or missing palette values at sign-out. */
+:root{--wf-action-fill:var(--wf-primary-color,#146464);--wf-action-hover:var(--wf-primary-hover,#115451);--wf-action-text:#fff}
+.wf-auth-shell{--wf-action-fill:#146464;--wf-action-hover:#115451;--wf-action-text:#fff}
+.wf-auth-form{gap:16px;max-width:400px}
+.wf-auth-form h1{display:block;min-height:0;margin:0 0 6px;font-size:clamp(30px,3vw,40px);line-height:1.16;letter-spacing:-.035em;color:var(--ink)}
+.wf-auth-form .wf-auth-toggle{border-radius:12px;padding:4px;gap:4px;background:var(--bg);border:1px solid var(--line)}
+.wf-auth-form .wf-auth-toggle::before{content:none}
+.wf-auth-form .wf-auth-toggle button{min-height:40px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--muted);font-weight:650}
+.wf-auth-form .wf-auth-toggle button[aria-pressed=true]{background:var(--soft);border-color:color-mix(in srgb,var(--accent) 35%,var(--line));color:var(--accent)}
+.wf-auth-form .wf-auth-toggle button:hover:not(:disabled):not([aria-pressed=true]){background:var(--surface);color:var(--ink)}
+.wf-auth-form .wf-auth-toggle button:focus-visible{outline:2px solid var(--accent);outline-offset:-3px}
+.wf-auth-form .wf-google{min-height:48px;background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:none;font-weight:650}
+.wf-auth-form .wf-google:hover:not(:disabled){background:var(--bg);border-color:var(--accent);box-shadow:none}
+.wf-auth-form .wf-email-submit,.wf-primary{background:var(--wf-action-fill,#146464);color:var(--wf-action-text,#fff);font-weight:750;border:1px solid transparent;box-shadow:none}
+.wf-auth-form .wf-email-submit{min-height:48px;font-size:14px}
+.wf-auth-form .wf-email-submit:hover:not(:disabled),.wf-primary:hover:not(:disabled){background:var(--wf-action-hover,#115451);color:#fff}
+.wf-auth-form .wf-email-submit:disabled:not([aria-busy=true]){background:var(--soft);color:var(--muted);opacity:1}
+.wf-auth-form .wf-email-submit[aria-busy=true]{opacity:1;cursor:wait}
+.wf-auth-form .wf-email-form{gap:14px}
+.wf-auth-form .wf-email-form label{font-size:13px;color:var(--ink);font-weight:650}
+.wf-auth-form .wf-email-form input:not(.wf-otp-native){min-height:48px;border-radius:var(--wf-radius-control,10px);background:var(--bg);color:var(--ink)}
+.wf-auth-form .wf-email-form input:not(.wf-otp-native):focus{outline:none;border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.wf-auth-form .wf-auth-password button{background:transparent;color:var(--muted);border:0}
+.wf-auth-form .wf-auth-password button:hover{background:var(--soft);color:var(--accent)}
+.wf-auth-form .wf-auth-divider{margin-block:2px;font-size:12px}
+.wf-auth-form .wf-auth-links{min-height:24px}
+.wf-auth-feedback{min-width:0;min-height:44px;max-height:120px;overflow:auto}
+.wf-auth-feedback:empty{min-height:0}
+.wf-auth-form button:focus-visible:not(.wf-auth-toggle button){outline:2px solid var(--accent);outline-offset:2px}
+/* Consistent hierarchy across workspace pages. */
+.wf-toolbar h2{font-size:clamp(21px,2vw,26px);line-height:1.2;color:var(--ink)}
+.wf-library-heading h3,.wf-setting-head h3,.wf-profile-section-heading h2{font-size:16px;line-height:1.3;color:var(--ink)}
+.wf-library-panel .wf-segments button[aria-pressed=true],.wf-page .wf-segments button[aria-pressed=true]{background:var(--soft);color:var(--accent);box-shadow:none}
+.wf-page .wf-setting-action{color:var(--ink);background:transparent}
+.wf-page .wf-setting-action:hover:not(:disabled){border-color:var(--accent);background:var(--soft);color:var(--accent)}
+.wf-page .wf-setting-action.wf-setting-danger{color:var(--wf-danger,#d15c57)}
+.wf-page .wf-setting-action.wf-setting-danger:hover:not(:disabled){border-color:var(--wf-danger,#d15c57);color:var(--wf-danger,#d15c57);background:color-mix(in srgb,var(--wf-danger,#d15c57) 7%,var(--surface))}
+.wf-page .wf-primary:disabled:not([aria-busy=true]){background:var(--soft);color:var(--muted);opacity:1}
+@media(max-width:760px){.wf-auth-form{gap:14px}.wf-auth-form h1{font-size:30px}.wf-toolbar h2{font-size:21px}}
