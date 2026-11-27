@@ -876,3 +876,9 @@ body{min-width:0}
 .wf-verification-form .wf-auth-links>.wf-resend-code{justify-content:flex-end;justify-self:stretch;font-variant-numeric:tabular-nums}
 .wf-resend-code svg{flex:none}
 @media(pointer:coarse){.wf-verification-form .wf-auth-links,.wf-verification-form .wf-auth-links>button{min-height:44px}}
+
+/* Inline validation: no native tooltip, no layout changes. */
+.wf-auth-form .wf-email-form input[aria-invalid="true"]:not(.wf-otp-native),.wf-auth-form .wf-email-form input[aria-invalid="true"]:not(.wf-otp-native):focus{border-color:#dc6262;outline:none;box-shadow:inset 0 0 0 1px #dc6262}
+.wf-auth-form .wf-field-shake{animation:wf-field-shake 340ms ease-in-out both}
+@keyframes wf-field-shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-2px)}80%{transform:translateX(2px)}}
+@media(prefers-reduced-motion:reduce){.wf-auth-form .wf-field-shake{animation:none}}
