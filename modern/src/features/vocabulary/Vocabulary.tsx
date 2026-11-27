@@ -41,11 +41,7 @@ export function Vocabulary({userId,user,theme,setTheme,signOut}:{userId:string;u
  const [undoHover,setUndoHover]=useState(false);
  const [undoKeyboard,setUndoKeyboard]=useState(false);
  const [undoExpanded,setUndoExpanded]=useState(false);
- const undoPaused=undoHover||undoKeyboard||undoExpanded;
- const undoPauseRef=useRef(false);
- const undoTick=useRef(Date.now());
- const undoOpen=undos.length>1&&undoPaused;
- useEffect(()=>{undoPauseRef.current=undoPaused;},[undoPaused]);
+ const undoOpen=undos.length>1&&(undoHover||undoKeyboard||undoExpanded);
  useEffect(()=>{if(undos.length<2)setUndoExpanded(false);if(!undos.length){setUndoHover(false);setUndoKeyboard(false);}},[undos.length]);
  const [busy,setBusy]=useState(false);
  const [blocked,setBlocked]=useState(false);
@@ -124,13 +120,12 @@ export function Vocabulary({userId,user,theme,setTheme,signOut}:{userId:string;u
 
  useEffect(()=>{
   if(!undos.length)return;
-  undoTick.current=Date.now();
-  const tick=()=>{const now=Date.now();const elapsed=Math.max(0,now-undoTick.current);undoTick.current=now;setUndoNow(now);setUndos(items=>{if(undoPauseRef.current)return items.map(item=>({...item,expires:item.expires+elapsed}));const remaining=items.filter(item=>item.expires>now);return remaining.length===items.length?items:remaining;});};
+  const tick=()=>{const now=Date.now();setUndoNow(now);setUndos(items=>{const remaining=items.filter(item=>item.expires>now);return remaining.length===items.length?items:remaining;});};
   const timer=window.setInterval(tick,100);
   return()=>window.clearInterval(timer);
  },[undos.length>0]);
  async function deleteEntry(index:number,row?:HTMLElement|null){const local=snapshot.current;if(!local||locked.current||blocked||translationRequest.current)return;const word=local.words[index];if(!word)return;const bounds=row?.getBoundingClientRect();stopSpeech();if(await persist(removeWord(local.words,index),'Deleted.')){if(bounds&&!reduceMotion)setDeletedEffects(items=>[...items,{id:crypto.randomUUID(),x:bounds.left,y:bounds.top,width:bounds.width,height:bounds.height}]);const now=Date.now();setUndoNow(now);setUndos(items=>[...items.filter(item=>item.expires>now),{id:crypto.randomUUID(),word,index,expires:now+5000}]);}}
- async function restoreEntry(id:string){const local=snapshot.current;const item=undos.find(entry=>entry.id===id);if(!item||!local||locked.current||blocked||translationRequest.current||(!undoPaused&&Date.now()>=item.expires))return;const next=[...local.words];next.splice(Math.min(item.index,next.length),0,item.word);if(await persist(next,'Restored.'))setUndos(items=>items.filter(entry=>entry.id!==id));}
+ async function restoreEntry(id:string){const local=snapshot.current;const item=undos.find(entry=>entry.id===id);if(!item||!local||locked.current||blocked||translationRequest.current||Date.now()>=item.expires)return;const next=[...local.words];next.splice(Math.min(item.index,next.length),0,item.word);if(await persist(next,'Restored.'))setUndos(items=>items.filter(entry=>entry.id!==id));}
 
  function exportLocal(){const local=snapshot.current;if(!local)return;const url=URL.createObjectURL(new Blob([JSON.stringify({words:local.words,revision:local.revision},null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='wordflow-local-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
  const nav=[{id:'vocabulary',label:'Word Studio',Icon:BookOpen},{id:'learn',label:'Learn',Icon:Brain},{id:'profile',label:'Profile',Icon:UserRound},{id:'settings',label:'Settings',Icon:Settings}] as const;
@@ -176,12 +171,12 @@ export function Vocabulary({userId,user,theme,setTheme,signOut}:{userId:string;u
  </motion.li>)}</AnimatePresence></ul>}
  </motion.section></>}
  </motion.div></section>{!reduceMotion&&deletedEffects.map(effect=><div key={effect.id} aria-hidden="true" className="wf-delete-dust" style={{left:effect.x,top:effect.y,width:effect.width,height:effect.height}}>{Array.from({length:24},(_,i)=>{const x=7+(i*37%87),y=24+(i*19%53),dx=(i%2===0?1:-1)*(8+i%7*4),dy=-8-i%6*5;return <motion.i key={i} style={{left:x+"%",top:y+"%",width:2+i%3,height:2+i%3}} initial={{opacity:.48,scale:1,x:0,y:0}} animate={{opacity:0,scale:.15,x:dx,y:dy}} transition={{duration:.32+i%4*.045,delay:i%3*.018,ease:"easeOut"}}/>;})}<motion.span initial={{opacity:1}} animate={{opacity:0}} transition={{duration:.6}} onAnimationComplete={()=>setDeletedEffects(items=>items.filter(item=>item.id!==effect.id))}/></div>)}<AnimatePresence>{undos.length>0&&<motion.div key="undo-stack" className="wf-undo-stack" data-expanded={undoOpen} data-stacked={undos.length>1} initial={{opacity:0,y:12,scale:.96}} animate={{opacity:1,y:0,scale:1}} exit={{opacity:0,y:6,scale:.98}} transition={{type:"spring",stiffness:480,damping:36,mass:.65}} onPointerEnter={e=>{if(e.pointerType==='mouse')setUndoHover(true);}} onPointerLeave={()=>setUndoHover(false)} onFocusCapture={e=>{if(e.target.matches(':focus-visible'))setUndoKeyboard(true);}} onBlurCapture={e=>{if(!e.currentTarget.contains(e.relatedTarget as Node|null))setUndoKeyboard(false);}} aria-label="Recently deleted items">
- <div className="wf-undo-stack-list"><AnimatePresence initial={false} mode="popLayout">{(undoOpen?undos:undos.slice(-1)).map(item=>{const remaining=Math.max(0,Math.min(5000,item.expires-undoNow));return <motion.div layout="position" key={item.id} className="wf-undo-toast wf-undo-stack-card" initial={{opacity:0,y:8,scale:.97}} animate={{opacity:1,y:0,scale:1}} exit={{opacity:0,y:5,scale:.98}} transition={{duration:.18,layout:{duration:.22,ease:[.22,.8,.25,1]}}}>
- <div className="wf-undo-description"><span role="status">{entryKind(item.word)==='sentence'?'Sentence deleted':'Word deleted'}</span>{undos.length>1&&<span className="wf-undo-word" dir="auto" title={item.word.en}>{item.word.en}</span>}</div>
- <button type="button" disabled={busy||blocked||translating} aria-label={"Undo deletion of "+item.word.en} onClick={()=>void restoreEntry(item.id)}>Undo</button>
- <span className="wf-undo-count" aria-hidden="true">{Math.ceil(remaining/1000)}</span>
+ <motion.div layout className="wf-undo-stack-list" style={{'--undo-count':undos.length} as CSSProperties} transition={{layout:{duration:reduceMotion?0:.28,ease:[.22,1,.36,1]}}}><AnimatePresence initial={false} mode="popLayout">{undos.map((item,i)=>{const remaining=Math.max(0,Math.min(5000,item.expires-undoNow)),depth=undos.length-1-i,hidden=!undoOpen&&depth>0;return <motion.div layout="position" key={item.id} className="wf-undo-toast wf-undo-stack-card" data-covered={hidden} style={{'--undo-depth':depth,zIndex:i+1} as CSSProperties} initial={{opacity:0,y:reduceMotion?0:8}} animate={{opacity:1,y:0}} exit={{opacity:0,y:reduceMotion?0:5}} transition={{duration:reduceMotion?0:.18,layout:{duration:reduceMotion?0:.28,ease:[.22,1,.36,1]}}}>
+ <div className="wf-undo-description"><span role="status">{entryKind(item.word)==='sentence'?'Sentence deleted':'Word deleted'}</span></div>
+ <button type="button" tabIndex={hidden?-1:0} disabled={hidden||busy||blocked||translating} aria-label={"Undo deletion of "+item.word.en} onClick={()=>void restoreEntry(item.id)}>Undo</button>
+ <span className="wf-undo-count" aria-hidden="true"><svg viewBox="0 0 28 28" className="wf-undo-ring"><circle cx="14" cy="14" r="11" className="wf-undo-ring-bg"/><circle cx="14" cy="14" r="11" pathLength="1" strokeDasharray="1" strokeDashoffset={1-remaining/5000} className="wf-undo-ring-fg"/></svg><span>{Math.ceil(remaining/1000)}</span></span>
  <div className="wf-undo-track" aria-hidden="true"><div style={{transform:'scaleX('+remaining/5000+')'}}/></div>
- </motion.div>;})}</AnimatePresence></div>
- {undos.length>1&&<button type="button" className="wf-undo-expand" aria-label={undoExpanded?"Collapse undo cards":"Show all undo cards"} aria-expanded={undoOpen} onClick={()=>setUndoExpanded(value=>!value)}><span>{undos.length}</span><ChevronRight size={12}/></button>}
+ </motion.div>;})}</AnimatePresence></motion.div>
+ {undos.length>1&&<button type="button" className="wf-undo-expand" aria-label={undoExpanded?"Collapse undo cards":"Show all undo cards"} aria-expanded={undoOpen} onClick={()=>setUndoExpanded(value=>!value)}><ChevronRight size={14}/></button>}
  </motion.div>}</AnimatePresence></div>;
 }
