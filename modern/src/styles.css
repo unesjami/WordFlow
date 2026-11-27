@@ -257,3 +257,24 @@
 .wf-learning-choice svg{color:var(--accent);flex:none}
 .wf-learning-choice:hover{background:var(--soft);border-color:var(--accent)}
 .wf-auth-story-content{margin-block:auto}
+
+/* Translation capture and readable bilingual entries */
+.wf-translate-form textarea{width:100%;min-width:0;min-height:52px;max-height:none;field-sizing:content;resize:vertical;border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:16px;line-height:1.5}
+.wf-translate-button{min-width:132px;align-self:start;min-height:52px;display:flex;align-items:center;justify-content:center;gap:8px}
+.wf-entry-list{list-style:none;padding:0;margin:0}
+.wf-entry{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}
+.wf-entry:last-child{border-bottom:0}
+.wf-entry-text{display:grid;gap:7px;min-width:0}
+.wf-entry-line{display:grid;grid-template-columns:minmax(0,1fr) 28px;align-items:start;gap:6px}
+.wf-entry-line>span{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6;min-width:0}
+.wf-entry-line:first-child>span{font-weight:600}
+.wf-entry-line[lang=fa]>span{text-align:start;color:var(--muted)}
+.wf-entry-actions{display:flex;align-items:center;justify-content:flex-end;gap:4px;min-width:120px}
+.wf-entry-icon,.wf-entry-actions .wf-pronounce{width:28px;height:28px;min-width:28px;min-height:28px;padding:0;display:grid;place-items:center;border:0!important;background:transparent!important;color:var(--muted);transition:color .15s}
+.wf-entry-icon:hover:not(:disabled),.wf-entry-actions .wf-pronounce:hover,.wf-entry-actions .wf-pronounce[data-phase=playing],.wf-entry-actions .wf-pronounce[data-phase=loading]{color:var(--accent)}
+.wf-entry-delete:hover:not(:disabled){color:#d34c4c}
+.wf-entry-check:hover:not(:disabled){color:#16875c}
+.wf-entry-example{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.wf-example-form{grid-column:1/-1;display:flex;align-items:center;gap:6px}
+.wf-example-form input{flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;padding:8px}
+@media(max-width:600px){.wf-entry{grid-template-columns:minmax(0,1fr);gap:6px}.wf-entry-actions{justify-content:flex-end}.wf-translate-button{min-width:100px}.wf-translate-form textarea{font-size:16px}.wf-library-heading .wf-segments button{padding:7px 9px}}
