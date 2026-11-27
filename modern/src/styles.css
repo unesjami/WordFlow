@@ -727,3 +727,11 @@ body{min-width:0}
 @media(max-width:760px){.wf-undo-stack{bottom:calc(88px + env(safe-area-inset-bottom))}}
 @media(pointer:coarse){.wf-undo-expand{min-height:44px;min-width:44px;justify-content:center}}
 @media(prefers-reduced-motion:reduce){.wf-undo-stack-card .wf-undo-track>div,.wf-undo-expand svg{transition:none}}
+
+/* Desktop focus follows the open-ended active navigation silhouette. */
+@media(min-width:761px){
+ .wf-sidebar .wf-nav-button[aria-current=page]:focus-visible{outline:none}
+ .wf-sidebar .wf-nav-button[aria-current=page]:focus-visible .wf-nav-active{border:2px solid var(--accent);border-right:0;border-radius:24px 0 0 24px}
+ .wf-sidebar .wf-nav-button[aria-current=page]:focus-visible .wf-nav-active::before{right:0;border-bottom:2px solid var(--accent);border-right:0;box-sizing:border-box}
+ .wf-sidebar .wf-nav-button[aria-current=page]:focus-visible .wf-nav-active::after{right:0;border-top:2px solid var(--accent);border-right:0;box-sizing:border-box}
+}
