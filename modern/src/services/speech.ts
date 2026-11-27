@@ -1,7 +1,7 @@
 export type SpeechPhase='idle'|'loading'|'playing';
 let phase:SpeechPhase='idle',owner:string|null=null;
 const listeners=new Set<()=>void>();
-let state={phase,owner};
+let state: {phase:SpeechPhase;owner:string|null}={phase,owner};
 export function getSpeechState(){return state;}
 export function subscribeSpeech(fn:()=>void){listeners.add(fn);return ()=>{listeners.delete(fn);};}
 function publish(next:SpeechPhase,key:string|null){phase=next;owner=key;state={phase,owner};listeners.forEach(fn=>fn());}
