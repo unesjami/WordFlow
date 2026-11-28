@@ -870,6 +870,9 @@ body.dark-mode{--wf-accent-end:#36a99f;--wf-hero-end:#192522}
 #view-profile{display:grid;grid-template-columns:1fr;gap:12px;align-content:start}#view-profile[hidden]{display:none!important}#view-profile .wf-panel{min-width:0;padding:18px;border:1px solid var(--border);border-radius:16px;background:var(--card-bg)}#view-profile .wf-profile-hero{display:flex;align-items:center;gap:16px;background:linear-gradient(125deg,var(--accent-soft),var(--card-bg))}.wf-profile-avatar{width:76px;height:76px;flex:0 0 76px;display:grid;place-items:center;border-radius:50%;overflow:hidden;background:var(--accent);color:var(--on-accent,#fff);font:700 1.6rem Inter,sans-serif}.wf-profile-avatar img{width:100%;height:100%;object-fit:cover}.wf-profile-identity{flex:1;min-width:0}.wf-profile-identity h2{font-size:1.35rem;line-height:1.2;margin:0;overflow-wrap:anywhere}.wf-profile-identity p{font-size:.8rem;color:var(--ink-soft);margin:6px 0 0;overflow-wrap:anywhere}.wf-profile-status{display:flex;align-items:center;gap:5px;font-size:.72rem;color:var(--accent);white-space:nowrap}.wf-profile-status svg{width:15px;height:15px}.wf-profile-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}.wf-profile-field{display:grid;gap:6px;padding:10px 0;border-bottom:1px solid var(--border);min-width:0}.wf-profile-field small{font-size:.74rem;color:var(--ink-soft)}.wf-profile-field strong{font-size:.86rem;overflow-wrap:anywhere}.wf-profile-metrics{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:12px}@media(max-width:760px){#view-profile .wf-panel{padding:12px}.wf-profile-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.wf-profile-avatar{width:56px;height:56px;flex-basis:56px}.wf-profile-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.wf-profile-metrics .wf-analysis-tile{flex-direction:column;align-items:flex-start}.wf-nav-label{font-size:.61rem!important}.wf-nav-btn{min-width:0!important}.wf-profile-status{display:none}}
 .wf-heading p:empty,.wf-setting-copy p:empty,.wf-setting-copy small:empty,.wf-setting-row small:empty,.wf-setting-row p:empty{display:none!important}.wf-analysis-tile strong{font-size:clamp(1.25rem,2.4vw,1.9rem);font-weight:750;line-height:1.15}.wf-analysis-tile small{font-weight:600}.wf-analysis-hero h3{font-weight:750}
 </style>
+<style>
+#wordInput[aria-invalid=true]{outline:1px solid #dc6262!important;outline-offset:2px;border-radius:6px}
+</style>
 </head>
 <body>
 <script>(()=>{let mode='system';try{mode=localStorage.getItem('wf-appearance')||'system';}catch{}const dark=mode==='dark'||(mode!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);document.body.classList.toggle('dark-mode',dark);document.documentElement.style.colorScheme=dark?'dark':'light';document.documentElement.style.background=dark?'#111817':'#f7f8fa';})();</script>
@@ -982,6 +985,10 @@ window.wfLucideGlyph=function(alias){const names={"user":"user-round","chart":"c
     const STORAGE_KEY = 'word_update_fix_v6';
 
     const inputEl = document.getElementById('wordInput');
+    // Never display browser-native constraint validation bubbles.
+    document.addEventListener('invalid',event=>{event.preventDefault();},true);
+    document.addEventListener('input',event=>{if(event.target===inputEl){inputEl.removeAttribute('aria-invalid');inputEl.closest('.wf-input-wrap, .input-panel-bottom')?.classList.remove('wf-entry-invalid');}},true);
+
     const mainList = document.getElementById('listInner');
     const keptList = document.getElementById('keptListInner');
     const loadingIndicator = document.getElementById('loadingIndicator');
@@ -1078,7 +1085,9 @@ window.wfLucideGlyph=function(alias){const names={"user":"user-round","chart":"c
 
     async function addFromInput() {
       const raw = inputEl.value.trim();
-      if (!raw || translateBtn.disabled) return;
+      if (translateBtn.disabled) return;
+      if (!raw) { inputEl.setAttribute('aria-invalid','true');inputEl.focus({preventScroll:true});return; }
+      inputEl.removeAttribute('aria-invalid');
 
       loadingIndicator.classList.add('show');
       captureStatus.textContent='Translating…';
